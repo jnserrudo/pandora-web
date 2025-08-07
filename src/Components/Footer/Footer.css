@@ -1,0 +1,44 @@
+/* src/components/Footer/Footer.css */
+.footer-container {
+    width: 100%;
+    padding: 2rem;
+    margin-top: 4rem; /* Empuja el footer hacia abajo */
+    background-color: rgba(13, 2, 24, 0.3); /* Un poco más sutil que el navbar */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Para que se adapte en móviles */
+    gap: 1rem;
+  }
+  
+  .footer-content p {
+    color: rgba(240, 232, 255, 0.7);
+  }
+  
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .footer-links a {
+    color: rgba(240, 232, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .footer-links a:hover {
+    color: var(--color-accent);
+  }
+  
+  @media (max-width: 768px) {
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+    }
+  }

@@ -1,28 +1,39 @@
 /* src/App.css */
-.app-container {
+
+/* Contenedor principal que ocupa toda la ventana */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+
+/* El contenido principal que ahora es flexible */
+main.app-container {
+  flex-grow: 1; /* Hace que ocupe el espacio disponible entre navbar y footer */
   width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 2rem 2rem 2rem; /* AÑADIDO: 8rem de padding-top para dejar espacio al Navbar */
+  gap: 4rem;
 }
 
 .app-layout {
-  flex-grow: 1;
-  display: grid;
-  grid-template-columns: 1fr 0.8fr; /* La columna izq es un poco más ancha */
-  gap: 2rem;
-  padding: 4rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 4rem;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 1200px;
 }
 
-/* --- Responsive para móviles --- */
-@media (max-width: 900px) {
-  .app-layout {
-    grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
-    padding: 2rem;
-    text-align: center;
+/* Responsive */
+@media (max-width: 768px) {
+  main.app-container, .app-layout {
+    gap: 2rem;
+    padding-top: 6rem; /* Menos padding en móviles */
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }

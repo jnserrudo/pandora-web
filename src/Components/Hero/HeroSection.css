@@ -1,12 +1,13 @@
 /* src/components/Hero/HeroSection.css */
 .hero-section-container {
+    text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   
   .hero-section-container h1 {
-    font-size: clamp(3rem, 10vw, 6rem); /* Súper grande y adaptable */
+    font-size: clamp(3rem, 10vw, 6rem);
     font-weight: 800;
     line-height: 1.1;
     text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
@@ -19,6 +20,7 @@
     -webkit-text-fill-color: transparent;
     animation: shimmer 5s infinite linear;
     background-size: 200% 100%;
+    padding: 0 0.5rem; /* Pequeño espacio para que el gradiente no se corte */
   }
   
   @keyframes shimmer {
@@ -28,47 +30,8 @@
   
   .subtitle {
     font-size: 1.2rem;
-    max-width: 500px;
+    max-width: 600px;
+    margin: 0 auto; /* Centra el subtítulo */
     color: rgba(240, 232, 255, 0.8);
     line-height: 1.6;
-  }
-  
-  .search-bar-wrapper {
-    display: flex;
-    margin-top: 1rem;
-    max-width: 500px;
-  }
-  
-  .search-bar-wrapper input {
-    flex-grow: 1;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    border: 1px solid var(--color-primary);
-    background-color: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(5px);
-    color: var(--color-text);
-    border-radius: 50px 0 0 50px;
-    transition: all 0.3s;
-  }
-  
-  .search-bar-wrapper input:focus {
-    outline: none;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-color: var(--color-accent);
-  }
-  
-  .search-button {
-    padding: 0 1.5rem;
-    border: 1px solid var(--color-primary);
-    border-left: none;
-    border-radius: 0 50px 50px 0;
-    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  
-  .search-button:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 15px var(--color-secondary);
   }

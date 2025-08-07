@@ -1,58 +1,63 @@
 /* src/components/Search/Search.css */
 .search-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2rem;
-    padding: 4rem 2rem;
-  }
-  
-  .search-column,
-  .find-event-column {
-    flex: 1;
-    min-width: 300px;
-    text-align: center;
-  }
-  
-  .search-column h2,
-  .find-event-column h2 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .search-bar {
-    position: relative;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .search-bar input {
-    width: 100%;
-    padding: 1rem 3.5rem 1rem 1.5rem; /* Espacio para el icono a la derecha */
-    font-size: 1rem;
-    border-radius: 50px;
-    border: 2px solid var(--color-primary);
-    background-color: rgba(0, 0, 0, 0.3);
-    color: var(--color-text);
-    transition: border-color 0.3s;
-  }
-  
-  .search-bar input::placeholder {
-    color: rgba(240, 232, 255, 0.5);
-  }
-  
-  .search-bar input:focus {
-    outline: none;
-    border-color: var(--color-accent);
-  }
-  
-  .search-icon {
-    position: absolute;
-    right: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    color: var(--color-text);
-  }
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2rem;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.03); /* Fondo sutil para delimitar la sección */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* El resto del CSS de Search se mantiene igual */
+.search-column,
+.find-event-column {
+  flex: 1;
+  min-width: 300px;
+  text-align: center;
+}
+
+.search-column h2,
+.find-event-column h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-bar {
+  position: relative;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 1rem 3.5rem 1rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 50px;
+  border: 2px solid var(--color-primary);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--color-text);
+  transition: border-color 0.3s;
+}
+
+.search-bar input::placeholder {
+  color: rgba(240, 232, 255, 0.5);
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.search-icon {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  color: var(--color-text);
+}
