@@ -7,6 +7,9 @@
     --color-accent: #ff00c8;
     --font-main: 'Poppins', 'Helvetica Neue', sans-serif;
   }
+  html, body, #root {
+    height: 100%;
+  }
   
   * {
     box-sizing: border-box;
@@ -18,7 +21,7 @@
     font-family: var(--font-main);
     background-color: var(--color-background);
     color: var(--color-text);
-    overflow: hidden; /* Clave para que el fondo no cause scrollbars */
+    /* overflow: hidden; */ /* Clave para que el fondo no cause scrollbars */
     position: relative;
   }
   

@@ -1,39 +1,6 @@
 /* src/App.css */
-
-/* Contenedor principal que ocupa toda la ventana */
 .app-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* El contenido principal que ahora es flexible */
-main.app-container {
-  flex-grow: 1; /* Hace que ocupe el espacio disponible entre navbar y footer */
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8rem 2rem 2rem 2rem; /* AÑADIDO: 8rem de padding-top para dejar espacio al Navbar */
-  gap: 4rem;
-}
-
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4rem;
-  width: 100%;
-  max-width: 1200px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  main.app-container, .app-layout {
-    gap: 2rem;
-    padding-top: 6rem; /* Menos padding en móviles */
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
+  display: grid; /* <-- CAMBIO A GRID */
+  grid-template-rows: auto 1fr auto; /* <-- LA MAGIA: Header(auto), Main(todo el resto), Footer(auto) */
+  min-height: 100vh; /* La base para que el grid tenga espacio para distribuir */
 }
