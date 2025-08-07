@@ -1,0 +1,28 @@
+/* src/App.css */
+.app-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: 1fr 0.8fr; /* La columna izq es un poco más ancha */
+  gap: 2rem;
+  padding: 4rem;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* --- Responsive para móviles --- */
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+    padding: 2rem;
+    text-align: center;
+  }
+}

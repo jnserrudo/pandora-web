@@ -1,0 +1,59 @@
+/* src/index.css */
+:root {
+    --color-background: #0d0218;
+    --color-text: #f0e8ff;
+    --color-primary: #8a2be2;
+    --color-secondary: #c738dd;
+    --color-accent: #ff00c8;
+    --font-main: 'Poppins', 'Helvetica Neue', sans-serif;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: var(--font-main);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    overflow: hidden; /* Clave para que el fondo no cause scrollbars */
+    position: relative;
+  }
+  
+  /* El fondo animado de la aurora */
+  body::before {
+    content: '';
+    position: fixed; /* Fijo para que no se mueva con el scroll */
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 10% 20%, var(--color-primary), transparent 40%),
+                radial-gradient(circle at 80% 90%, var(--color-accent), transparent 40%);
+    filter: blur(100px);
+    opacity: 0.4;
+    z-index: -1;
+    animation: aurora-glow 20s infinite alternate;
+  }
+  
+  /* Textura sutil de ruido */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWYmJilpaW8vLzHx8fNzc3U1NTY2Njb29vMzMybm5uenp6pqamGhoZLS0tFSUlABKVeAAAANElEQVR42u3TQQJAQADEQDcW5D2f/58JMAIk9hIQIOhfgkrwXwI0wABNgABNNgAPALwAPge+Xh4AAAAASUVORK5CYII=');
+    opacity: 0.03;
+    z-index: -1;
+  }
+  
+  @keyframes aurora-glow {
+    from {
+      transform: rotate(0deg) scale(1.2);
+    }
+    to {
+      transform: rotate(360deg) scale(1.5);
+    }
+  }

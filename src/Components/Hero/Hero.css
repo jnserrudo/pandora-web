@@ -1,0 +1,61 @@
+/* src/components/Hero/Hero.css */
+.hero-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh; /* Altura de la sección */
+    padding: 2rem;
+    position: relative;
+    overflow: hidden; /* Clave para que las formas no se salgan */
+    text-align: center;
+    background-image: 
+      radial-gradient(rgba(138, 43, 226, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* Forma 1 (Morada) */
+  .hero-container::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -20%;
+    width: 40%;
+    height: 120%;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    border-radius: 100rem; /* Crea una forma de píldora gigante */
+    transform: rotate(-30deg);
+    filter: blur(50px); /* Desenfoque para un efecto suave */
+    opacity: 0.6;
+  }
+  
+  /* Forma 2 (Magenta) */
+  .hero-container::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    right: 5%;
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--color-secondary), var(--color-accent));
+    border-radius: 100rem;
+    transform: rotate(20deg);
+    filter: blur(60px);
+    opacity: 0.5;
+  }
+  
+  .hero-content {
+    position: relative; /* Para que esté por encima de las formas */
+    z-index: 1;
+  }
+  
+  .hero-content h1 {
+    font-size: clamp(2.5rem, 8vw, 5rem); /* Tamaño de fuente adaptable */
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  }
+  
+  .hero-content .highlight {
+    color: var(--color-accent);
+    font-style: italic;
+  }

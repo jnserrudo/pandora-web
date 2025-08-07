@@ -1,0 +1,72 @@
+/* src/components/Categories/Categories.css */
+.categories-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.category-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: slide-in 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Animación escalonada para cada tarjeta */
+.category-card:nth-child(1) { animation-delay: 0.2s; }
+.category-card:nth-child(2) { animation-delay: 0.3s; }
+.category-card:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes slide-in {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.category-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* El brillo que sigue al mouse */
+.category-card::before {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, var(--color-accent), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  /* La posición se actualizará con JS en el futuro, por ahora es estático */
+  top: -50px;
+  left: -50px;
+  filter: blur(20px);
+}
+
+.category-card:hover::before {
+  opacity: 0.2;
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.card-content h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #fff;
+}
