@@ -108,6 +108,16 @@
   animation: spin 1s linear infinite;
 }
 
+/* --- MENÚ DE ESCRITORIO --- */
+.desktop-menu {
+  display: flex;
+}
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -118,5 +128,87 @@
 @media (max-width: 900px) {
   .navbar-actions {
     display: none;
+  }
+}
+
+
+
+
+/* --- BOTÓN DE HAMBURGUESA Y MENÚ MÓVIL (NUEVO) --- */
+.hamburger-button {
+  display: none; /* Oculto por defecto */
+  flex-direction: column;
+  justify-content: space-around;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.hamburger-line {
+  width: 2.25rem;
+  height: 0.25rem;
+  background-color: white;
+  border-radius: 10px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px;
+}
+
+/* Animación de la hamburguesa a una "X" */
+.hamburger-line.line-1-open { transform: rotate(45deg); }
+.hamburger-line.line-2-open { opacity: 0; transform: translateX(20px); }
+.hamburger-line.line-3-open { transform: rotate(-45deg); }
+
+
+.mobile-menu {
+  display: none; /* Oculto por defecto */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background-color: var(--color-background);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(100%); /* Empieza fuera de la pantalla a la derecha */
+}
+
+.mobile-menu.menu-open {
+  transform: translateX(0); /* Se desliza a la vista */
+}
+
+/* Hacemos que los botones en el menú móvil ocupen más espacio */
+.mobile-menu .login-button,
+.mobile-menu .register-button,
+.mobile-menu .logout-button {
+  width: 80%;
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.2rem;
+}
+
+.welcome-message-mobile {
+  font-size: 1.5rem;
+  color: white;
+  font-weight: bold;
+}
+
+/* --- MEDIA QUERY PARA EL CAMBIO --- */
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none; /* Oculta el menú de escritorio */
+  }
+  .hamburger-button {
+    display: flex; /* Muestra el botón de hamburguesa */
+  }
+  .mobile-menu {
+    display: flex; /* Permite que el menú móvil sea visible cuando se active */
   }
 }
