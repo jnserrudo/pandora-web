@@ -1,0 +1,87 @@
+/* src/components/CallToAction/CallToAction.css */
+
+.cta-section {
+  padding: 6rem 2rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    radial-gradient(
+      circle at 50% 50%,
+      var(--color-primary),
+      var(--color-background) 70%
+    );
+  text-align: center;
+  border-radius: 20px; /* Le damos bordes redondeados a la sección */
+  margin: 4rem 0; /* Espacio vertical para separarla de otras secciones */
+}
+
+.cta-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.cta-content p {
+  font-size: 1.2rem;
+  color: var(--color-text-light, #d1c4e9);
+  margin-bottom: 2.5rem;
+  max-width: 500px; /* Evita que el texto sea demasiado ancho */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.store-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.store-button {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  background-color: #000;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, background-color 0.3s;
+}
+
+.store-button:hover {
+  background-color: #1a1a1a;
+  transform: translateY(-3px); /* Efecto de levantamiento */
+}
+
+/* --- ESTILOS CLAVE PARA LOS LOGOS --- */
+
+.store-button .store-logo {
+  width: 30px; /* Un ancho fijo */
+  height: 30px; /* Una altura fija */
+  margin-right: 1rem;
+  display: flex; /* Usamos flex para centrar la imagen dentro */
+  align-items: center;
+  justify-content: center;
+}
+
+.store-button .store-logo img {
+  max-width: 100%; /* La imagen nunca será más ancha que el contenedor */
+  max-height: 100%; /* La imagen nunca será más alta que el contenedor */
+  object-fit: contain; /* Asegura que toda la imagen sea visible sin deformarse */
+  border-radius: 5px;
+}
+
+/* ------------------------------------ */
+
+.button-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left; /* Alineamos el texto a la izquierda */
+}
+
+.button-text span {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.button-text strong {
+  font-size: 1.2rem;
+}

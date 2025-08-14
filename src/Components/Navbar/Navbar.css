@@ -1,115 +1,122 @@
 /* src/components/Navbar/Navbar.css */
 .navbar-container {
-    width: 100%;
-    padding: 1rem 2rem;
-    position: fixed; /* Fijo en la parte superior */
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    
-    /* Efecto de vidrio */
-    background-color: rgba(13, 2, 24, 0.5); /* Fondo oscuro con transparencia */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: rgba(13, 2, 24, 0.7); /* Un poco más de opacidad */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.navbar-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.navbar-logo:hover {
+  text-shadow: 0 0 15px var(--color-accent);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center; /* Alinea verticalmente los items */
+  gap: 1.5rem;
+}
+
+/* Estilos para los botones/links genéricos de acciones */
+.login-button,
+.register-button,
+.logout-button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-block; /* Asegura que se comporte como un bloque */
+}
+
+/* Botón de Ingresar */
+.login-button {
+  background-color: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.login-button:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+/* Botón de Registrarse */
+.register-button {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  color: #fff;
+}
+
+.register-button:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 10px var(--color-secondary);
+}
+
+/* --- ESTILOS NUEVOS AÑADIDOS --- */
+
+/* Mensaje de Bienvenida */
+.welcome-message {
+  color: var(--color-text-light, #d1c4e9);
+  font-weight: 500;
+}
+
+/* Botón de Cerrar Sesión */
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-light, #d1c4e9);
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Pequeño spinner de carga */
+.loader-sm {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .navbar-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  
-  .navbar-logo a {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #fff;
-    text-decoration: none;
-    letter-spacing: 1px;
-  }
-  
-  .navbar-logo a:hover {
-    text-shadow: 0 0 15px var(--color-accent);
-  }
-  
-  .navbar-links {
-    display: flex;
-    list-style: none;
-    gap: 2.5rem;
-  }
-  
-  .navbar-links a {
-    color: var(--color-text);
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: 500;
-    position: relative;
-    transition: color 0.3s;
-  }
-  
-  .navbar-links a:hover {
-    color: #fff;
-  }
-  
-  /* Línea animada debajo de los links */
-  .navbar-links a::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    background: var(--color-accent);
-    bottom: -5px;
-    left: 0;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .navbar-links a:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-  
+}
+
+/* Ocultar elementos en móviles */
+@media (max-width: 900px) {
   .navbar-actions {
-    display: flex;
-    gap: 1rem;
+    display: none;
   }
-  
-  .action-button {
-    padding: 0.6rem 1.2rem;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-  
-  .login-button {
-    background-color: transparent;
-    border: 1px solid var(--color-primary);
-    color: var(--color-text);
-  }
-  
-  .login-button:hover {
-    background-color: var(--color-primary);
-    color: #fff;
-  }
-  
-  .register-button {
-    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
-    border: 1px solid transparent;
-    color: #fff;
-  }
-  
-  .register-button:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 10px var(--color-secondary);
-  }
-  
-  /* Ocultar elementos en móviles (simplificado, se puede mejorar con un menú hamburguesa) */
-  @media (max-width: 900px) {
-    .navbar-links, .navbar-actions {
-      display: none;
-    }
-  }
+}

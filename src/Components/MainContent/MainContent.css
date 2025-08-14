@@ -1,31 +1,40 @@
 /* src/components/MainContent/MainContent.css */
-main.app-container {
-    /* Ya NO necesita 'flex: 1 0 auto' porque el grid en App.css hace el trabajo */
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* Esto centra el contenido si es poco */
-    padding: 8rem 2rem 4rem 2rem;
-    gap: 4rem;
-  }
-  
-  .app-layout {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4rem;
-    width: 100%;
-    max-width: 1200px;
-  }
-  
-  /* Responsive (sin cambios) */
-  @media (max-width: 768px) {
-    main.app-container {
-      gap: 3rem;
-      padding-top: 7rem;
-      padding-bottom: 3rem;
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-  }
+.app-container {
+  /* Este contenedor ahora solo se preocupa del padding vertical */
+  padding: 6rem 0; /* Espacio para el Navbar fijo y el Footer */
+}
+
+.app-layout {
+  /* Este es nuestro contenedor principal centrado */
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem; /* Espacio entre secciones */
+}
+
+.section-divider {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.section-divider h2 {
+  font-size: 2.2rem;
+  color: var(--color-text);
+  position: relative;
+  display: inline-block;
+}
+
+/* Línea decorativa debajo del título del separador */
+.section-divider h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: 2px;
+}

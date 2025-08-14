@@ -1,63 +1,67 @@
-/* src/components/Search/Search.css */
-.search-container {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 2rem;
-  padding: 2rem;
-  width: 100%;
-  background-color: rgba(255, 255, 255, 0.03); /* Fondo sutil para delimitar la sección */
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.search-section {
+  padding: 4rem 0;
 }
-
-/* El resto del CSS de Search se mantiene igual */
-.search-column,
-.find-event-column {
-  flex: 1;
-  min-width: 300px;
+.search-header {
   text-align: center;
+  margin-bottom: 2rem;
 }
-
-.search-column h2,
-.find-event-column h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-}
+.search-header h2 { font-size: 2.2rem; }
+.search-header p { color: var(--color-text-light, #d1c4e9); font-size: 1.1rem; }
 
 .search-bar {
-  position: relative;
-  max-width: 400px;
+  display: flex;
+  max-width: 600px;
   margin: 0 auto;
 }
-
 .search-bar input {
-  width: 100%;
-  padding: 1rem 3.5rem 1rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 50px;
+  flex-grow: 1;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 50px 0 0 50px;
   border: 2px solid var(--color-primary);
-  background-color: rgba(0, 0, 0, 0.3);
-  color: var(--color-text);
-  transition: border-color 0.3s;
-}
-
-.search-bar input::placeholder {
-  color: rgba(240, 232, 255, 0.5);
-}
-
-.search-bar input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.search-icon {
-  position: absolute;
-  right: 1.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  background-color: rgba(0,0,0,0.3);
   color: var(--color-text);
 }
+.search-bar input:focus { outline: none; border-color: var(--color-accent); }
+
+.search-bar button {
+  padding: 0 2rem;
+  border: none;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 0 50px 50px 0;
+  cursor: pointer;
+  transition: filter 0.3s;
+}
+.search-bar button:hover { filter: brightness(1.2); }
+.search-bar button:disabled { background: #555; cursor: not-allowed; }
+
+.search-results {
+  margin-top: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.result-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.item-type {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.item-type.commerce { background-color: var(--color-primary); }
+.item-type.event { background-color: var(--color-accent); }
+.item-name { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.item-description { color: var(--color-text-light, #d1c4e9); }
+.no-results { text-align: center; font-size: 1.2rem; padding: 2rem; }

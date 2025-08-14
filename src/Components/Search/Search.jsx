@@ -1,26 +1,62 @@
+import React, { useState } from 'react';
+import { searchGlobal } from '../../services/api';
 import './Search.css';
 
-export const Search = () => {
+const Search = () => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false); // Para saber si ya se buscó algo
+
+  const handleSearch = async (e) => {
+    e.preventDefault(); // Evita que el formulario recargue la página
+    if (!query.trim()) return;
+
+    setLoading(true);
+    setSearched(true);
+    const data = await searchGlobal(query);
+    setResults(data);
+    setLoading(false);
+  };
+
   return (
-    <section className="search-container">
-      <div className="search-column">
+    <section id="search" className="search-section">
+      <div className="search-header">
         <h2>¿Buscás algo especial?</h2>
-        <div className="search-bar">
-          <input type="text" placeholder="Qué estás buscando..." />
-          {/* Un SVG simple para el icono de búsqueda */}
-          <svg
-            className="search-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z" />
-          </svg>
+        <p>Encontrá tu próximo evento o lugar favorito en Salta.</p>
+      </div>
+      <form onSubmit={handleSearch} className="search-bar">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Ej: Rock, Casona, Teatro..."
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? '...' : 'Buscar'}
+        </button>
+      </form>
+
+      {/* --- SECCIÓN DE RESULTADOS --- */}
+      {searched && (
+        <div className="search-results">
+          {loading ? (
+            <div className="loader">Buscando...</div>
+          ) : results.length > 0 ? (
+            results.map((item) => (
+              <div key={`${item.type}-${item.id}`} className="result-item">
+                <span className={`item-type ${item.type}`}>{item.type}</span>
+                <h4 className="item-name">{item.name}</h4>
+                <p className="item-description">{item.description.substring(0, 100)}...</p>
+              </div>
+            ))
+          ) : (
+            <p className="no-results">No se encontraron resultados para "{query}"</p>
+          )}
         </div>
-      </div>
-      <div className="find-event-column">
-        <h2>Encontrá tu evento</h2>
-      </div>
+      )}
     </section>
   );
 };
+
+export default Search;

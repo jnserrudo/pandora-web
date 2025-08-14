@@ -1,0 +1,32 @@
+.featured-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  .commerce-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .commerce-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  .commerce-info {
+    padding: 1.5rem;
+  }
+  .commerce-info h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .commerce-info p {
+    color: var(--color-primary);
+    text-transform: capitalize;
+  }
+  .loader {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 2rem;
+  }

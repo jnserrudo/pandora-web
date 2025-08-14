@@ -1,0 +1,68 @@
+/* src/pages/AuthForm.css */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+.auth-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3rem;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+.auth-form h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.auth-form p {
+  color: var(--color-text-light, #d1c4e9);
+  margin-bottom: 2rem;
+}
+.input-group {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+.input-group input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+}
+.auth-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  color: white;
+  cursor: pointer;
+}
+.error-message {
+  background-color: rgba(255, 0, 0, 0.2);
+  color: #ff8a8a;
+  padding: 1rem;
+  border-radius: 10px;
+}
+.auth-switch {
+  margin-top: 1.5rem;
+}
+.auth-switch a {
+  color: var(--color-accent);
+  font-weight: 600;
+}

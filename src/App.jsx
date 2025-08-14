@@ -1,15 +1,21 @@
 // src/App.jsx
-import Navbar from './Components/Navbar/Navbar';
-import MainContent from './Components/MainContent/MainContent'; // Haremos este nuevo componente
-import Footer from './Components/Footer/Footer';
-import './App.css';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import HomePage from "./Components/pages/HomePage";
+import LoginPage from "./Components/pages/LoginPage";
+import RegisterPage from "./Components/pages/RegisterPage";
+import "./App.css";
 
 function App() {
   return (
     <div className="app-wrapper">
-      <Navbar />
-      <MainContent /> {/* Simplificamos para mayor claridad */}
-      <Footer />
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
+      </main>
     </div>
   );
 }
