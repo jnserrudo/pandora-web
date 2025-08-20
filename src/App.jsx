@@ -9,6 +9,7 @@ import ArticleDetailPage from "./Components/pages/ArticleDetailPage";
 import EventsListPage from './Components/pages/EventsListPage';         // <-- IMPORTAR
 import CommerceDetailPage from './Components/pages/CommerceDetailPage'; // <-- IMPORTAR
 import EventDetailPage from './Components/pages/EventDetailPage';       // <-- IMPORTAR
+import AboutPage from './Components/pages/AboutPage'; 
 import "./App.css";
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
           <Route path="/events" element={<EventsListPage />} />
         <Route path="/commerce/:id" element={<CommerceDetailPage />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
+        <Route path="/about" element={<AboutPage />} />
+
         </Routes>
       </main>
     </div>
