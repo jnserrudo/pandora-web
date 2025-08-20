@@ -38,3 +38,85 @@
   background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
   border-radius: 2px;
 }
+
+
+
+/* --- NUEVOS ESTILOS PARA LAS TARJETAS DESTACADAS --- */
+
+.featured-links-section {
+  display: grid;
+  grid-template-columns: 1fr; /* Una columna en móviles */
+  gap: 30px;
+  margin: 60px 0;
+}
+
+/* En pantallas más grandes, dos columnas */
+@media (min-width: 768px) {
+  .featured-links-section {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.featured-link-card {
+  display: block;
+  text-decoration: none;
+  color: white;
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  min-height: 250px;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.3s ease;
+}
+
+.featured-link-card:hover {
+  transform: scale(1.03);
+}
+
+.featured-link-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 10%, rgba(0, 0, 0, 0) 60%);
+}
+
+/* Imagen de fondo para la tarjeta de eventos */
+.events-card {
+  background-image: url('https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?q=80&w=1974&auto=format&fit=crop');
+}
+
+/* Imagen de fondo para la tarjeta de magazine */
+.magazine-card {
+  background-image: url('https://images.unsplash.com/photo-1457369804613-52c61a468e7d?q=80&w=2070&auto=format&fit=crop');
+}
+
+.featured-link-card .card-content {
+  position: relative;
+  z-index: 2;
+  padding: 25px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Alinea el contenido abajo */
+}
+
+.card-content h3 {
+  font-size: 2rem;
+  margin: 0 0 10px;
+}
+
+.card-content p {
+  font-size: 1rem;
+  color: #d0d0e0;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.card-content span {
+  font-weight: bold;
+  color: #ff00c8;
+}

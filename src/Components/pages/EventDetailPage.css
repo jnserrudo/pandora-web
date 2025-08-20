@@ -1,0 +1,38 @@
+.event-meta-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    margin-bottom: 30px;
+  }
+
+
+
+  
+/* Hacemos que la cabecera sea el ancla para nuestro botón posicionado absolutamente */
+.detail-header {
+  position: relative; /* ¡Muy importante! */
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10; /* Para que esté por encima del overlay */
+  
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%; /* Lo hace circular */
+  width: 44px;
+  height: 44px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-size: 24px; /* Tamaño del ícono/flecha */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}

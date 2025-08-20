@@ -1,32 +1,63 @@
-.featured-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-  }
-  .commerce-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .commerce-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-  }
-  .commerce-info {
-    padding: 1.5rem;
-  }
-  .commerce-info h4 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-  }
-  .commerce-info p {
-    color: var(--color-primary);
-    text-transform: capitalize;
-  }
-  .loader {
-    text-align: center;
-    font-size: 1.2rem;
-    padding: 2rem;
-  }
+/* src/Components/FeaturedCommerces/FeaturedCommerces.css */
+
+.featured-commerces-section {
+  width: 100%;
+}
+
+.featured-commerces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.commerce-card-link {
+  text-decoration: none;
+}
+
+.commerce-card {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  height: 250px;
+  display: block;
+  transition: transform 0.3s ease-in-out;
+}
+
+.commerce-card:hover {
+  transform: scale(1.05);
+}
+
+.commerce-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra todo el espacio sin deformarse */
+  background-color: #2a2a3a; /* Un color de fondo mientras carga la imagen */
+}
+
+.commerce-card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Alinea el texto abajo */
+  padding: 20px;
+}
+
+.commerce-card-name {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.commerce-card-category {
+  color: #c738dd;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

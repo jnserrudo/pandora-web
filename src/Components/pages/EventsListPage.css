@@ -1,0 +1,90 @@
+/* src/pages/EventsListPage.css */
+
+.page-loader, .page-error-message, .no-results-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  font-size: 1.2rem;
+  color: #b0b0c0;
+}
+.events-list-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+.events-list-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.events-list-header h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.event-item-link {
+  text-decoration: none;
+  color: inherit;
+}
+.event-item {
+  display: flex;
+  align-items: center;
+  background-color: #2a2a3a;
+  border-radius: 10px;
+  padding: 15px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  overflow: hidden;
+}
+.event-item:hover {
+  transform: scale(1.02);
+  background-color: #3a3a4a;
+}
+.event-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px; /* Ancho mínimo */
+  height: 70px;
+  border: 2px solid #c738dd;
+  border-radius: 8px;
+  margin-right: 20px;
+  text-align: center;
+}
+.event-day {
+  font-size: 1.8rem;
+  font-weight: bold;
+  line-height: 1;
+}
+.event-month {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.event-info {
+  flex-grow: 1; /* Ocupa el espacio disponible */
+  display: flex;
+  flex-direction: column;
+}
+.event-title {
+  font-size: 1.3rem;
+  margin: 0 0 5px;
+  color: #fff;
+}
+.event-location {
+  color: #b0b0c0;
+  font-size: 0.9rem;
+}
+.event-cover-image {
+  margin-left: 20px;
+}
+.event-cover-image img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+}
