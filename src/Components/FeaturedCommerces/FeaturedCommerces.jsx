@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getCommerces } from "../../services/api";
+import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 import "./FeaturedCommerces.css";
 
 const FeaturedCommerces = () => {
@@ -40,7 +41,7 @@ const FeaturedCommerces = () => {
   };
 
   if (loading) {
-    return <div className="loader">Cargando comercios destacados...</div>;
+    return <LoadingSpinner message="Cargando comercios destacados..." />;
   }
 
   return (

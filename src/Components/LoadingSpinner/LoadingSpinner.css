@@ -1,0 +1,288 @@
+/* src/Components/LoadingSpinner/LoadingSpinner.css */
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  position: relative;
+  z-index: 10;
+}
+
+.loading-spinner-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0d0218 0%, #1a0d2e 50%, #0d0218 100%);
+  z-index: 9999;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loading-spinner-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+/* Animated Background Circles - usando colores de marca */
+.spinner-circles {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.circle-1 {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--color-primary, #8a2be2) 0%, transparent 65%);
+  animation-delay: 0s;
+  filter: blur(40px);
+}
+
+.circle-2 {
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+  background: radial-gradient(circle, var(--color-secondary, #c738dd) 0%, transparent 65%);
+  animation-delay: 1.3s;
+  filter: blur(35px);
+}
+
+.circle-3 {
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background: radial-gradient(circle, var(--color-accent, #ff00c8) 0%, transparent 65%);
+  animation-delay: 2.6s;
+  filter: blur(30px);
+}
+
+/* Main Spinner Logo Wrapper */
+.spinner-logo-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+/* Rotating Rings - colores de marca */
+.spinner-ring,
+.spinner-ring-secondary {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  animation: rotate 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.spinner-ring {
+  border-top-color: var(--color-primary, #8a2be2);
+  border-right-color: var(--color-primary, #8a2be2);
+  filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.6));
+}
+
+.spinner-ring-secondary {
+  border-bottom-color: var(--color-accent, #ff00c8);
+  border-left-color: var(--color-accent, #ff00c8);
+  animation-direction: reverse;
+  animation-duration: 2s;
+  filter: drop-shadow(0 0 15px rgba(255, 0, 200, 0.6));
+}
+
+/* Logo Container */
+.pandora-logo-spin {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: rgba(13, 2, 24, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+.logo-image {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.4));
+}
+
+/* Loading Dots - usando colores de marca */
+.loading-dots {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary, #8a2be2), var(--color-secondary, #c738dd));
+  animation: bounce 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+  background: linear-gradient(135deg, var(--color-secondary, #c738dd), var(--color-accent, #ff00c8));
+  box-shadow: 0 0 15px rgba(199, 56, 221, 0.6);
+}
+
+.dot:nth-child(3) {
+  background: linear-gradient(135deg, var(--color-accent, #ff00c8), var(--color-primary, #8a2be2));
+  box-shadow: 0 0 15px rgba(255, 0, 200, 0.6);
+}
+
+/* Loading Message */
+.loading-message {
+  color: var(--color-text, #f0e8ff);
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  text-align: center;
+  opacity: 0.9;
+  animation: fadeInOut 2.5s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.25;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.05);
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.7) translateY(0);
+    opacity: 0.6;
+  }
+  40% {
+    transform: scale(1.3) translateY(-10px);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .spinner-circles {
+    width: 240px;
+    height: 240px;
+  }
+
+  .spinner-logo-wrapper {
+    width: 130px;
+    height: 130px;
+  }
+
+  .pandora-logo-spin {
+    width: 75px;
+    height: 75px;
+  }
+
+  .loading-message {
+    font-size: 0.9rem;
+    padding: 0 1rem;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .spinner-circles {
+    width: 200px;
+    height: 200px;
+  }
+
+  .spinner-logo-wrapper {
+    width: 110px;
+    height: 110px;
+  }
+
+  .pandora-logo-spin {
+    width: 65px;
+    height: 65px;
+  }
+
+  .loading-message {
+    font-size: 0.85rem;
+  }
+}

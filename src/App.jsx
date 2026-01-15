@@ -7,9 +7,11 @@ import RegisterPage from "./Components/pages/RegisterPage";
 import ArticlesListPage from "./Components/pages/ArticlesListPage";
 import ArticleDetailPage from "./Components/pages/ArticleDetailPage";
 import EventsListPage from './Components/pages/EventsListPage';         // <-- IMPORTAR
+import CommercesListPage from './Components/pages/CommercesListPage'; // <-- IMPORTAR NUEVA PÁGINA
 import CommerceDetailPage from './Components/pages/CommerceDetailPage'; // <-- IMPORTAR
 import EventDetailPage from './Components/pages/EventDetailPage';       // <-- IMPORTAR
-import AboutPage from './Components/pages/AboutPage'; 
+import AboutPage from './Components/pages/AboutPage';
+import ContactPage from './Components/pages/ContactPage'; // <-- IMPORTAR
 import "./App.css";
 
 function App() {
@@ -24,9 +26,11 @@ function App() {
           <Route path="/magazine" element={<ArticlesListPage />} />
           <Route path="/article/:slug" element={<ArticleDetailPage />} />
           <Route path="/events" element={<EventsListPage />} />
+          <Route path="/commerces" element={<CommercesListPage />} /> {/* Nueva ruta agregada */}
         <Route path="/commerce/:id" element={<CommerceDetailPage />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
 
         </Routes>
       </main>

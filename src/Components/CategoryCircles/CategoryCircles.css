@@ -1,0 +1,215 @@
+/* src/Components/CategoryCircles/CategoryCircles.css */
+
+.category-circles-section {
+  padding: 4rem 1rem;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  /* Fondo sutil para separar (opcional, ya el layout tiene fondo) */
+}
+
+.category-circles-title {
+  font-size: 3rem;
+  color: var(--color-text, #fff);
+  margin-bottom: 3rem;
+  font-weight: 700;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-main, sans-serif); 
+}
+
+.category-circles-title span {
+  font-style: italic;
+  font-weight: 300; /* Estilo 'lugar' en la imagen */
+}
+
+.circles-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Wrapper para animaciones de entrada */
+.category-circle-wrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  flex-shrink: 0;
+  cursor: pointer;
+  animation: floatIn 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes floatIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* El círculo en sí */
+.category-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Imagen de fondo */
+.circle-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  /* DESKTOP DEFAULT: Blanco y negro */
+  filter: grayscale(100%) brightness(0.6); 
+  transition: all 0.5s ease;
+  transform: scale(1);
+}
+
+/* Overlay oscuro para legibilidad texto */
+.circle-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+  transition: opacity 0.3s ease;
+}
+
+/* Contenido (Texto) */
+.circle-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  z-index: 2;
+  padding: 0 1rem;
+}
+
+.circle-title {
+  font-size: 1.8rem;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  transition: transform 0.3s ease;
+  line-height: 1.2;
+}
+
+.d-block {
+  display: block;
+}
+
+.circle-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid #fff;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  /* Inicialmente oculto o sutil en desktop */
+  opacity: 0; 
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+/* =========================================
+   HOVER INTERACTIONS (DESKTOP)
+   ========================================= */
+
+.category-circle-wrapper:hover .category-circle {
+  transform: scale(1.05); /* Círculo crece un poco */
+  border-color: var(--color-accent, #ff00c8); /* Borde de color */
+  box-shadow: 0 0 30px var(--color-primary, #8a2be2); /* Glow externo */
+}
+
+.category-circle-wrapper:hover .circle-bg {
+  filter: grayscale(0%) brightness(1); /* A COLOR */
+  transform: scale(1.1); /* Zoom interno imagen */
+}
+
+.category-circle-wrapper:hover .circle-title {
+  transform: translateY(-10px); /* Título sube un poco */
+}
+
+.category-circle-wrapper:hover .circle-cta {
+  opacity: 1; /* Aparece botón */
+  transform: translateY(0);
+}
+
+/* =========================================
+   MOBILE RESPONSIVE (MEDIA QUERIES)
+   ========================================= */
+
+@media (max-width: 1024px) {
+  .circles-container {
+    gap: 1.5rem;
+  }
+  
+  .category-circle-wrapper {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .category-circles-title {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .circles-container {
+    flex-direction: column; /* Apilar verticalmente en móviles */
+    align-items: center;
+    gap: 2rem;
+  }
+
+  /* MOBILE: SIEMPRE A COLOR (Comportamiento Hover Persistente) */
+  
+  .circle-bg {
+    filter: grayscale(0%) brightness(0.9) !important; /* Siempre color */
+  }
+
+  .category-circle {
+    border-color: rgba(138, 43, 226, 0.4); /* Borde sutil siempre */
+    /* box-shadow: 0 0 15px rgba(138, 43, 226, 0.3); */
+  }
+
+  .circle-cta {
+    opacity: 1; /* Botón siempre visible */
+    transform: translateY(0);
+    border-color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  .circle-title {
+    font-size: 1.5rem;
+    transform: translateY(-5px); /* Un poco arriba para dejar lugar al botón */
+  }
+  
+  /* Aún mantenemos un pequeño efecto al tocar */
+  .category-circle-wrapper:active .category-circle {
+    transform: scale(0.98);
+  }
+}

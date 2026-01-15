@@ -60,3 +60,92 @@
       transform: rotate(360deg) scale(1.5);
     }
   }
+
+  /* ========== SCROLL ANIMATIONS - "QUE SEA ARTE" ========== */
+  
+  .scroll-animate {
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .scroll-animate.animated {
+    opacity: 1;
+  }
+
+  /* Fade In */
+  .scroll-animate.fade-in {
+    opacity: 0;
+  }
+
+  .scroll-animate.fade-in.animated {
+    opacity: 1;
+  }
+
+  /* Slide Up */
+  .scroll-animate.slide-up {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  .scroll-animate.slide-up.animated {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Slide Left */
+  .scroll-animate.slide-left {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+
+  .scroll-animate.slide-left.animated {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Slide Right */
+  .scroll-animate.slide-right {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  .scroll-animate.slide-right.animated {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Zoom In */
+  .scroll-animate.zoom-in {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .scroll-animate.zoom-in.animated {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Rotate In */
+  .scroll-animate.rotate-in {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+
+  .scroll-animate.rotate-in.animated {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+
+  /* Glow Effect - artistico */
+  .scroll-animate.glow {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(0.95);
+  }
+
+  .scroll-animate.glow.animated {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }

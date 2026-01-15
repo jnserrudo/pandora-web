@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getEvents } from '../../services/api';
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import ScrollToTopButton from '../ScrollToTopButton/ScrollToTopButton';
 import './EventsListPage.css'; // Crearemos este archivo a continuación
 
 const EventsListPage = () => {
@@ -28,7 +30,7 @@ const EventsListPage = () => {
   }, []);
 
   if (loading) {
-    return <div className="page-loader">Cargando agenda...</div>;
+    return <LoadingSpinner fullscreen message="Cargando agenda..." />;
   }
 
   return (
@@ -68,6 +70,7 @@ const EventsListPage = () => {
           <p className="no-results-message">No hay eventos programados por el momento. ¡Vuelve pronto!</p>
         )}
       </div>
+      <ScrollToTopButton />
     </div>
   );
 };

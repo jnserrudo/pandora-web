@@ -1,0 +1,219 @@
+/* src/Components/Advertisement/AdvertisementCard.css */
+
+.advertisement-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #0d0218 0%, #1a0d2e 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.advertisement-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(138, 43, 226, 0.5);
+}
+
+/* Image Container */
+.ad-card-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.ad-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.advertisement-card:hover .ad-card-image {
+  transform: scale(1.1);
+}
+
+.ad-card-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(13, 2, 24, 0.7) 100%
+  );
+}
+
+/* Floating Badge */
+.ad-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.4rem 0.9rem;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: badge-float 3s ease-in-out infinite;
+}
+
+@keyframes badge-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Content */
+.ad-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ad-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #f0e8ff);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.ad-card-description {
+  font-size: 0.9rem;
+  color: rgba(240, 232, 255, 0.8);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+/* Footer */
+.ad-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.ad-card-cta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary, #8a2be2);
+  transition: color 0.3s ease;
+}
+
+.advertisement-card:hover .ad-card-cta {
+  color: var(--color-accent, #ff00c8);
+}
+
+.ad-card-arrow {
+  font-size: 1.2rem;
+  color: var(--color-primary, #8a2be2);
+  transition: all 0.3s ease;
+}
+
+.advertisement-card:hover .ad-card-arrow {
+  color: var(--color-accent, #ff00c8);
+  transform: translateX(6px);
+}
+
+/* Glow Effect */
+.ad-card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(138, 43, 226, 0.15) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.advertisement-card:hover .ad-card-glow {
+  opacity: 1;
+  animation: glow-rotate 6s linear infinite;
+}
+
+@keyframes glow-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Category-specific colors */
+.commerce-card .ad-card-badge {
+  background: linear-gradient(135deg, var(--color-primary, #8a2be2), rgba(0, 0, 0, 0.5));
+}
+
+.external-card .ad-card-badge {
+  background: linear-gradient(135deg, var(--color-secondary, #c738dd), rgba(0, 0, 0, 0.5));
+}
+
+.sponsor-card .ad-card-badge {
+  background: linear-gradient(135deg, var(--color-accent, #ff00c8), rgba(0, 0, 0, 0.5));
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ad-card-image-container {
+    height: 180px;
+  }
+
+  .ad-card-content {
+    padding: 1.25rem;
+  }
+
+  .ad-card-title {
+    font-size: 1rem;
+  }
+
+  .ad-card-description {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-card-image-container {
+    height: 160px;
+  }
+
+  .ad-card-content {
+    padding: 1rem;
+  }
+
+  .ad-card-title {
+    font-size: 0.95rem;
+  }
+
+  .ad-card-description {
+    font-size: 0.8rem;
+  }
+
+  .ad-card-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
+  }
+}

@@ -57,15 +57,22 @@ export const getEventById = async (id) => {
 
 // --- FUNCIONES PARA ARTÍCULOS ---
 
-// Obtiene todos los artículos publicados
-export const getArticles = async () => {
+// --- FUNCIONES PARA ARTÍCULOS ---
+
+// Obtiene artículos (ahora con soporte de paginación)
+export const getArticles = async (page = 1, limit = 10, sortBy = 'recent') => {
   try {
-    const url = `${API_URL}/articles`;
+    const url = `${API_URL}/articles?page=${page}&limit=${limit}&sortBy=${sortBy}`;
     const response = await axios.get(url);
+    // El backend ahora devuelve { articles: [], meta: {} }
+    // Si devuelve un array directo (backend viejo), lo manejamos
+    if (Array.isArray(response.data)) {
+      return { articles: response.data, meta: { total: response.data.length } };
+    }
     return response.data;
   } catch (error) {
     console.error("Error fetching articles:", error);
-    return [];
+    return { articles: [], meta: { total: 0 } };
   }
 };
 
@@ -90,7 +97,19 @@ export const searchGlobal = async (query) => {
     return response.data;
   } catch (error) {
     console.error("Error during search:", error);
-    return [];
+    // Retornamos estructura vacía para evitar errores en el frontend
+    return { commerces: [], events: [], articles: [] };
+  }
+};
+
+// --- FUNCIONES DE CONTACTO ---
+
+export const sendContactRequest = async (data) => {
+  try {
+    const response = await axios.post(`${API_URL}/contact`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al enviar la solicitud de contacto.");
   }
 };
 

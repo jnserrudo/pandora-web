@@ -1,57 +1,194 @@
-/* src/pages/ArticlesListPage.css */
+/* src/Components/pages/ArticlesListPage.css */
+
 .articles-list-container {
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.articles-list-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.articles-list-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.articles-list-header p {
+  font-size: 1.1rem;
+  color: rgba(240, 232, 255, 0.8);
+}
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.article-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.article-card {
+  background: linear-gradient(135deg, rgba(13, 2, 24, 0.8), rgba(26, 13, 46, 0.6));
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.article-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255, 0, 200, 0.5);
+  box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+}
+
+.article-card-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.article-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.article-card-category {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgba(138, 43, 226, 0.3);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 0.75rem;
+  width: fit-content;
+}
+
+.article-card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.article-card-subtitle {
+  font-size: 0.95rem;
+  color: rgba(240, 232, 255, 0.7);
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .articles-list-container {
+    padding: 1.5rem;
   }
-  .articles-list-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
+
   .articles-list-header h1 {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 2rem;
   }
+
   .articles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
-  .article-card-link {
-    text-decoration: none;
-    color: inherit;
-  }
-  .article-card {
-    background-color: #1e1e2c;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-  }
-  .article-card:hover {
-    transform: scale(1.03);
-  }
+
   .article-card-image {
-    width: 100%;
     height: 200px;
-    object-fit: cover;
   }
-  .article-card-content {
-    padding: 20px;
-  }
-  .article-card-category {
-    color: #c738dd;
-    font-weight: bold;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+
   .article-card-title {
-    font-size: 1.4rem;
-    margin: 10px 0;
-    color: #fff;
+    font-size: 1.1rem;
   }
+
   .article-card-subtitle {
-    color: #b0b0c0;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.85rem;
   }
+}
+
+@media (max-width: 480px) {
+  .articles-list-container {
+    padding: 1rem;
+  }
+
+  .articles-list-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .article-card-image {
+    height: 180px;
+  }
+
+  .article-card-content {
+    padding: 1.25rem;
+  }
+
+  .article-card-title {
+    font-size: 1rem;
+  }
+
+  .article-card-subtitle {
+    font-size: 0.8rem;
+  }
+}
+
+/* Wrapper for full page */
+.articles-list-page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Infinite Scroll Components */
+.scroll-trigger {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--color-text, #f0e8ff);
+  font-size: 0.95rem;
+}
+
+.spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(138, 43, 226, 0.3);
+  border-top-color: var(--color-primary, #8a2be2);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.end-of-results {
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.end-of-results p {
+  color: rgba(240, 232, 255, 0.6);
+  font-size: 1rem;
+  font-style: italic;
+}

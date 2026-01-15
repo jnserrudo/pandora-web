@@ -48,6 +48,11 @@ export const AuthProvider = ({ children }) => {
     await api.registerUser(name, username, email, password);
   };
 
+  // Helper para verificar si el usuario es administrador
+  const isAdmin = () => {
+    return user?.role === 'ADMIN' || user?.role === 'admin';
+  };
+
   const value = {
     isAuthenticated: !!token,
     user,
@@ -56,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    isAdmin, // Exportamos la función helper
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
