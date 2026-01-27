@@ -8,6 +8,7 @@ import FeaturedCommerces from "../FeaturedCommerces/FeaturedCommerces";
 import EnhancedSearch from "../Search/EnhancedSearch";
 import CategoryCircles from "../CategoryCircles/CategoryCircles";
 import AdvertisementBanner from "../Advertisement/AdvertisementBanner";
+import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar"; // Importamos el nuevo calendario
 import { getAdvertisements } from "../../services/AdvertisementService";
 import useScrollAnimation from "../../hooks/useScrollAnimation";
 import "./MainContent.css";
@@ -23,6 +24,7 @@ const MainContent = () => {
   const commercesAnimation = useScrollAnimation({ animationType: 'zoom-in', delay: 200 });
   const eventsCardAnimation = useScrollAnimation({ animationType: 'slide-left', delay: 100 });
   const magazineCardAnimation = useScrollAnimation({ animationType: 'slide-right', delay: 200 });
+  const calendarAnimation = useScrollAnimation({ animationType: 'fade-in', delay: 100 }); // Animación para el calendario
   const ctaAnimation = useScrollAnimation({ animationType: 'glow', delay: 150 });
 
   // Load advertisements
@@ -103,6 +105,17 @@ const MainContent = () => {
           </Link>
         </section>
         {/* --- FIN DE LA NUEVA SECCIÓN --- */}
+
+        {/* --- CALENDARIO ARTÍSTICO DE EVENTOS --- */}
+        <div ref={calendarAnimation.ref} className={calendarAnimation.className} style={{ marginTop: '4rem', marginBottom: '2rem' }}>
+          <div className="section-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+             <h2 style={{ fontSize: '2.5rem', color: '#fff', textTransform: 'uppercase' }}>
+               Calendario de <span style={{ color: 'var(--color-accent)' }}>Eventos</span>
+             </h2>
+             <p style={{ color: 'rgba(255,255,255,0.7)' }}>Planificá tu próxima salida con nosotros</p>
+          </div>
+          <ArtisticCalendar />
+        </div>
 
         <div ref={ctaAnimation.ref} className={ctaAnimation.className}>
           <CallToAction />
