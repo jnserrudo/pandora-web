@@ -1,113 +1,113 @@
 // src/components/MainContent/MainContent.jsx
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Importamos Link para la navegación
+import { Link } from "react-router-dom";
 import HeroSection from "../Hero/HeroSection";
 import CallToAction from "../CallToAction/CallToAction";
 import FeaturedCommerces from "../FeaturedCommerces/FeaturedCommerces";
 import EnhancedSearch from "../Search/EnhancedSearch";
 import CategoryCircles from "../CategoryCircles/CategoryCircles";
 import AdvertisementBanner from "../Advertisement/AdvertisementBanner";
-import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar"; // Importamos el nuevo calendario
+import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar";
+import TrendingMagazine from "../Magazine/TrendingMagazine";
 import { getAdvertisements } from "../../services/AdvertisementService";
+import { getArticles } from "../../services/api";
 import useScrollAnimation from "../../hooks/useScrollAnimation";
 import "./MainContent.css";
 
 const MainContent = () => {
-  // State for advertisements
-  const [bannerAd, setBannerAd] = useState(null);
+  // State for advertisements carousels
+  const [commerceAds, setCommerceAds] = useState([]);
+  const [currentCommerceAdIndex, setCurrentCommerceAdIndex] = useState(0);
+  
+  const [otherAds, setOtherAds] = useState([]);
+  const [currentOtherAdIndex, setCurrentOtherAdIndex] = useState(0);
 
-  // Hooks para animaciones artísticas de scroll
+  const [trendingArticles, setTrendingArticles] = useState([]);
+
+  // Hooks para animaciones
   const searchAnimation = useScrollAnimation({ animationType: 'fade-in', delay: 100 });
-  const dividerAnimation = useScrollAnimation({ animationType: 'slide-up', delay: 150 });
-  const adBannerAnimation = useScrollAnimation({ animationType: 'zoom-in', delay: 100 });
   const commercesAnimation = useScrollAnimation({ animationType: 'zoom-in', delay: 200 });
-  const eventsCardAnimation = useScrollAnimation({ animationType: 'slide-left', delay: 100 });
-  const magazineCardAnimation = useScrollAnimation({ animationType: 'slide-right', delay: 200 });
-  const calendarAnimation = useScrollAnimation({ animationType: 'fade-in', delay: 100 }); // Animación para el calendario
+  const calendarAnimation = useScrollAnimation({ animationType: 'fade-in', delay: 100 });
   const ctaAnimation = useScrollAnimation({ animationType: 'glow', delay: 150 });
 
-  // Load advertisements
+  // Load advertisements, articles, etc.
   useEffect(() => {
-    const loadAds = async () => {
+    const loadContent = async () => {
       try {
+        // Ads
         const ads = await getAdvertisements({ position: 'banner_home', isActive: true });
         if (ads.length > 0) {
-          // Random banner ad
-          const randomAd = ads[Math.floor(Math.random() * ads.length)];
-          setBannerAd(randomAd);
+          setCommerceAds(ads.filter(ad => ad.category === 'commerce'));
+          setOtherAds(ads.filter(ad => ad.category !== 'commerce'));
         }
+
+        // Trending Articles (Magazine)
+        const articlesData = await getArticles(1, 10, 'recent');
+        setTrendingArticles(articlesData.articles || []);
       } catch (error) {
-        console.error('Error loading advertisements:', error);
+        console.error('Error loading home content:', error);
       }
     };
-    loadAds();
+    loadContent();
   }, []);
 
+  // Timers for Ads
+  useEffect(() => {
+    if (commerceAds.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentCommerceAdIndex((prevIndex) => (prevIndex + 1) % commerceAds.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [commerceAds]);
+
+  useEffect(() => {
+    if (otherAds.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentOtherAdIndex((prevIndex) => (prevIndex + 1) % otherAds.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [otherAds]);
+
   return (
-    <main className="app-container">
+    <main className="app-container hub-layout">
       <div className="app-layout">
+        
+        {/* PRIORIDAD 1: Categorías y Búsqueda */}
+        <div className="top-discovery-section" style={{ paddingTop: '2rem', marginBottom: '4rem' }}>
+          <CategoryCircles />
+          <div ref={searchAnimation.ref} className={searchAnimation.className} style={{ marginTop: '1rem' }}>
+            <EnhancedSearch />
+          </div>
+        </div>
+
+        {/* Hero Section (Bajado una posición) */}
         <HeroSection />
 
-        {/* Sección de Categorías Interactiva (Simil captura) */}
-        <div style={{ marginTop: '-50px', position: 'relative', zIndex: 5 }}>
-           <CategoryCircles />
-        </div>
-
-        <div ref={searchAnimation.ref} className={searchAnimation.className}>
-          <EnhancedSearch />
-        </div>
-
-        <div ref={dividerAnimation.ref} className={`section-divider ${dividerAnimation.className}`}>
-          <h2>Descubrí un mundo de posibilidades</h2>
+        <div className="section-divider" style={{ marginTop: '4rem' }}>
+          <h2>Recomendado para vos</h2>
         </div>
 
         <div ref={commercesAnimation.ref} className={commercesAnimation.className}>
           <FeaturedCommerces />
         </div>
 
-        {/* --- PUBLICIDAD BANNER --- */}
-        {bannerAd && (
-          <div ref={adBannerAnimation.ref} className={adBannerAnimation.className} style={{ marginTop: '3rem', marginBottom: '3rem' }}>
-            <AdvertisementBanner advertisement={bannerAd} size="large" />
+        {/* --- NUEVA SECCIÓN: MAGAZINE LO MÁS VISTO (Según referencia) --- */}
+        <TrendingMagazine articles={trendingArticles} />
+
+        {/* --- CAROUSEL 1: PANDORA COMMERCE ADS --- */}
+        {commerceAds.length > 0 && (
+          <div style={{ marginTop: '4rem', marginBottom: '4rem' }}>
+             <AdvertisementBanner 
+                key={commerceAds[currentCommerceAdIndex].id}
+                advertisement={commerceAds[currentCommerceAdIndex]} 
+                size="large" 
+             />
           </div>
         )}
 
-        {/* --- NUEVA SECCIÓN PARA EVENTOS Y MAGAZINE --- */}
-        <section className="featured-links-section">
-          {/* Tarjeta para la Agenda de Eventos */}
-          <Link 
-            to="/events" 
-            className="featured-link-card events-card"
-            ref={eventsCardAnimation.ref}
-          >
-            <div className={`card-content ${eventsCardAnimation.className}`}>
-              <h3>Agenda de Eventos</h3>
-              <p>No te pierdas de nada. Mirá todos los eventos programados.</p>
-              <span>Ver Agenda →</span>
-            </div>
-          </Link>
-
-          {/* Tarjeta para el Magazine */}
-          <Link 
-            to="/magazine" 
-            className="featured-link-card magazine-card"
-            ref={magazineCardAnimation.ref}
-          >
-            <div className={`card-content ${magazineCardAnimation.className}`}>
-              <h3>Magazine</h3>
-              <p>
-                Lee las últimas noticias, entrevistas y artículos de la escena
-                local.
-              </p>
-              <span>Leer Ahora →</span>
-            </div>
-          </Link>
-        </section>
-        {/* --- FIN DE LA NUEVA SECCIÓN --- */}
-
         {/* --- CALENDARIO ARTÍSTICO DE EVENTOS --- */}
-        <div ref={calendarAnimation.ref} className={calendarAnimation.className} style={{ marginTop: '4rem', marginBottom: '2rem' }}>
+        <div ref={calendarAnimation.ref} className={calendarAnimation.className} style={{ marginTop: '4rem', marginBottom: '4rem' }}>
           <div className="section-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
              <h2 style={{ fontSize: '2.5rem', color: '#fff', textTransform: 'uppercase' }}>
                Calendario de <span style={{ color: 'var(--color-accent)' }}>Eventos</span>
@@ -117,7 +117,22 @@ const MainContent = () => {
           <ArtisticCalendar />
         </div>
 
-        <div ref={ctaAnimation.ref} className={ctaAnimation.className}>
+        {/* --- CAROUSEL 2: OTHER ADS --- */}
+        {otherAds.length > 0 && (
+           <div style={{ marginBottom: '4rem' }}>
+              <div className="section-divider" style={{ marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '0.9rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '2px' }}>Espacio Publicitario</span>
+              </div>
+              <AdvertisementBanner 
+                key={otherAds[currentOtherAdIndex].id}
+                advertisement={otherAds[currentOtherAdIndex]} 
+                size="medium"
+              />
+           </div>
+        )}
+
+        {/* PRIORIDAD FINAL: Descargar la Aplicación */}
+        <div ref={ctaAnimation.ref} className={ctaAnimation.className} style={{ marginBottom: '4rem' }}>
           <CallToAction />
         </div>
       </div>

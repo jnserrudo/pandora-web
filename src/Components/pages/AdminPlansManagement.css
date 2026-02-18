@@ -1,0 +1,269 @@
+/* src/Components/pages/AdminPlansManagement.css */
+
+.plans-management-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.admin-panel-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 28px;
+  padding: 2.5rem;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-panel-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  opacity: 0.3;
+}
+
+.panel-header-premium {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.panel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.panel-icon-box {
+  width: 50px;
+  height: 50px;
+  background: rgba(138, 43, 226, 0.1);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.panel-title-group h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.panel-title-group p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 4px 0 0 0;
+}
+
+/* Grillas y Listas */
+.plans-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.plan-premium-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plan-premium-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.plan-card-header {
+  margin-bottom: 1.5rem;
+}
+
+.plan-level-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.level-input-inline {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--color-primary);
+  width: 40px;
+  padding: 2px 5px;
+  font-weight: 800;
+  outline: none;
+}
+
+.plan-name-input {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  width: 100%;
+  margin-bottom: 4px;
+  outline: none;
+  border-bottom: 1px solid transparent;
+  transition: border 0.2s;
+}
+
+.plan-name-input:focus {
+  border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.plan-desc-input {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  height: 40px;
+  resize: none;
+  outline: none;
+}
+
+.plan-price-editor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plan-price-editor .symbol {
+  font-weight: 800;
+  color: #2ecc71;
+  font-size: 1.2rem;
+}
+
+.plan-price-editor input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 100%;
+  font-size: 1.1rem;
+  font-weight: 700;
+  outline: none;
+}
+
+.btn-plan-save {
+  background: var(--color-primary);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-plan-save:hover {
+  filter: brightness(1.2);
+  transform: scale(1.05);
+}
+
+/* Cupones */
+.coupon-management-area {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2.5rem;
+}
+
+.coupon-form-premium {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.input-group-premium {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group-premium label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  letter-spacing: 1px;
+}
+
+.input-group-premium input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.input-group-premium input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.15);
+}
+
+.btn-create-coupon-premium {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, var(--color-primary), #ff2093);
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(138, 43, 226, 0.2);
+  transition: all 0.3s;
+}
+
+.btn-create-coupon-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1100px) {
+  .coupon-management-area {
+    grid-template-columns: 1fr;
+  }
+}

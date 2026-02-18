@@ -1,6 +1,13 @@
 import React from 'react';
-import './HeroSection.css'; // Usaremos HeroSection.css
-import pandoraMockup from '../../assets/pandora_mockup.png'; // 1. Importa la imagen
+import './HeroSection.css';
+import { 
+  Star, 
+  MapPin, 
+  Calendar, 
+  Sparkles, 
+  Smartphone,
+  ShieldCheck
+} from 'lucide-react';
 
 const HeroSection = () => {
   return (
@@ -16,14 +23,55 @@ const HeroSection = () => {
           <a href="#download" className="cta-button primary">Descargar App</a>
         </div>
       </div>
-      <div className="hero-image">
-        {/* 2. Reemplazamos el div del placeholder por un tag <img> real. */}
-        {/* Usamos la variable importada en el atributo src. */}
-        <img 
-          src={pandoraMockup} 
-          alt="Aplicación Pandora Salta en un teléfono" 
-          className="mockup-image" 
-        />
+      
+      <div className="hero-image-abstract">
+        <div className="abstract-container">
+          {/* Elemento 1: Tarjeta Principal de Exploración (Vista previa de local) */}
+          <div className="floating-ui-card main-card">
+            <div className="card-header-premium">
+              <ShieldCheck size={16} className="verified-icon" />
+              <div className="header-line-premium"></div>
+            </div>
+            <div className="card-visual-skeleton">
+              <Sparkles size={40} className="skeleton-icon" />
+            </div>
+            <div className="card-details-premium">
+              <div className="detail-row">
+                <MapPin size={12} />
+                <div className="skeleton-title-premium"></div>
+              </div>
+              <div className="skeleton-text-premium"></div>
+            </div>
+          </div>
+
+          {/* Elemento 2: Mini Card de Evento */}
+          <div className="floating-ui-card event-mini-card">
+            <div className="event-icon-premium">
+              <Calendar size={18} />
+            </div>
+            <div className="event-info-premium">
+              <div className="event-line-premium"></div>
+              <div className="event-status-premium">PRÓXIMAMENTE</div>
+            </div>
+          </div>
+
+          {/* Elemento 3: Smartphone Badge (Sustituye al '!') */}
+          <div className="floating-ui-badge">
+            <div className="badge-pulse"></div>
+            <div className="badge-content">
+              <Smartphone size={24} />
+            </div>
+          </div>
+
+          {/* Elemento Decorativo: Estrella Brillante */}
+          <div className="decorative-star star-1">
+             <Star size={20} fill="currentColor" />
+          </div>
+
+          {/* Orbes de luz de fondo */}
+          <div className="hero-glow-orb orb-primary"></div>
+          <div className="hero-glow-orb orb-secondary"></div>
+        </div>
       </div>
     </section>
   );

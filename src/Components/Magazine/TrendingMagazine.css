@@ -1,0 +1,193 @@
+.trending-magazine-section {
+    padding: 3rem 0;
+    width: 100%;
+    max-width: 1400px;
+    margin: 4rem auto;
+    background: rgba(20, 10, 30, 0.4);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* border-radius: 20px; */ /* User said it's small, maybe removing the card look helps it feel larger */
+    overflow: visible; /* Allow arrows to pop out slightly if needed */
+    position: relative;
+}
+
+.trending-header {
+    text-align: left;
+    margin-bottom: 2rem;
+    padding-left: 2rem;
+    border-left: 4px solid var(--color-accent, #ff00c8);
+}
+
+.trending-header h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.trending-carousel-container {
+    position: relative;
+    padding: 0 4rem; /* More padding to leave space for arrows */
+    display: flex;
+    align-items: center;
+}
+
+.trending-cards-wrapper {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 1rem 0.5rem 2rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.trending-cards-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.trending-article-card {
+    flex: 0 0 320px; /* Larger cards */
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.trending-article-card:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--color-accent, #ff00c8);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.card-media {
+    height: 200px;
+    position: relative;
+}
+
+.card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-info {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.card-info h3 {
+    font-size: 1.25rem;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.card-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Nav buttons - fixed overlaps and visibility */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(20, 10, 30, 0.8);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50; /* High z-index */
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--color-primary, #8a2be2);
+    border-color: var(--color-accent, #ff00c8);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+}
+
+.nav-btn.prev { 
+    left: 1rem; 
+}
+.nav-btn.next { 
+    right: 1rem; 
+}
+
+@media (max-width: 1024px) {
+    .trending-article-card {
+        flex: 0 0 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .trending-magazine-section {
+        padding: 2rem 0;
+        margin: 2rem 0;
+    }
+
+    .trending-header {
+        padding-left: 1rem;
+    }
+
+    .trending-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .trending-carousel-container {
+        padding: 0 1rem;
+    }
+
+    .trending-article-card {
+        flex: 0 0 260px;
+    }
+
+    .nav-btn {
+        display: none; /* Mobile swipe is better */
+    }
+}
+
+@media (max-width: 768px) {
+    .trending-magazine-section {
+        padding: 2rem 1rem;
+        margin: 2rem 1rem;
+    }
+
+    .trending-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .trending-article-card {
+        flex: 0 0 200px;
+    }
+
+    .card-media {
+        height: 140px;
+    }
+
+    .nav-btn {
+        display: none;
+    }
+}

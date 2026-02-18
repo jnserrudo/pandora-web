@@ -74,6 +74,10 @@ const ArticlesListPage = () => {
     }
   };
 
+  const handleImageError = (e) => {
+    e.target.src = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=500&auto=format&fit=crop';
+  };
+
   if (loading) {
     return <LoadingSpinner fullscreen message="Cargando noticias..." />;
   }
@@ -93,7 +97,12 @@ const ArticlesListPage = () => {
             articles.map(article => (
               <Link to={`/article/${article.slug}`} key={article.id} className="article-card-link">
                 <div className="article-card">
-                  <img src={article.coverImage} alt={article.title} className="article-card-image" />
+                  <img 
+                    src={article.coverImage} 
+                    alt={article.title} 
+                    className="article-card-image" 
+                    onError={handleImageError}
+                  />
                   <div className="article-card-content">
                     <span className="article-card-category">{article.category.name}</span>
                     <h3 className="article-card-title">{article.title}</h3>
@@ -121,7 +130,7 @@ const ArticlesListPage = () => {
 
         {!hasMore && articles.length > 0 && (
           <div className="end-of-results">
-            <p>✨ Has visto todos los artículos disponibles</p>
+            <p>Has visto todos los artículos disponibles</p>
           </div>
         )}
       </div>

@@ -18,10 +18,16 @@ export const getAdvertisements = async (filters = {}) => {
 
     const url = `${API_URL}/advertisements${params.toString() ? `?${params.toString()}` : ''}`;
     const response = await axios.get(url);
+    console.log('Response:', response);
+    if (response.data.length === 0) {
+      return getMockAdvertisements(filters);
+    }
     return response.data;
   } catch (error) {
-    console.error('Error fetching advertisements:', error);
-    return [];
+    console.warn('Error fetching advertisements (using mock data):', error);
+    const mockData = getMockAdvertisements(filters);
+    console.log('Mock data:', mockData);
+    return mockData;
   }
 };
 
@@ -78,19 +84,20 @@ export const updateAdvertisement = async (id, data, token) => {
 };
 
 /**
- * Elimina una publicidad (solo administradores)
+ * Desactiva una publicidad (Borrado Lógico)
  * @param {number|string} id - ID de la publicidad
+ * @param {boolean} isActive - Nuevo estado
  * @param {string} token - Token de autenticación
- * @returns {Promise<void>}
  */
-export const deleteAdvertisement = async (id, token) => {
+export const toggleAdvertisementStatus = async (id, isActive, token) => {
   try {
-    await axios.delete(`${API_URL}/advertisements/${id}`, {
+    const response = await axios.put(`${API_URL}/advertisements/${id}`, { isActive }, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    return response.data;
   } catch (error) {
-    console.error(`Error deleting advertisement ${id}:`, error);
-    throw new Error(error.response?.data?.message || 'Error al eliminar la publicidad');
+    console.error(`Error toggling advertisement ${id}:`, error);
+    throw new Error(error.response?.data?.message || 'Error al actualizar la publicidad');
   }
 };
 
@@ -101,6 +108,12 @@ export const deleteAdvertisement = async (id, token) => {
  * @returns {Promise<void>}
  */
 export const trackAdvertisement = async (id, type = 'impression') => {
+  // Evitar seguimiento para IDs de prueba (Mocks)
+  if (id <= 10) {
+    console.log(`[Mock Tracking] Advertisement ${id} - ${type}`);
+    return;
+  }
+
   try {
     await axios.post(`${API_URL}/advertisements/${id}/track`, { type });
   } catch (error) {
@@ -117,8 +130,8 @@ const getMockAdvertisements = (filters = {}) => {
     {
       id: 1,
       title: 'Promoción Especial - Restaurant El Jardín',
-      description: '20% de descuento en cenas románticas',
-      imageUrl: 'https://via.placeholder.com/800x400/8a2be2/ffffff?text=Promo+Restaurant',
+      description: '20% de descuento en cenas románticas. Disfruta de una velada inolvidable con la mejor gastronomía local.',
+      imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000&auto=format&fit=crop',
       link: '/commerce/1',
       category: 'commerce', // Publicidad de comercio interno
       position: 'banner_home',
@@ -129,11 +142,11 @@ const getMockAdvertisements = (filters = {}) => {
     {
       id: 2,
       title: 'Gobierno Municipal - Cultura Para Todos',
-      description: 'Conocé las actividades municipales',
-      imageUrl: 'https://via.placeholder.com/800x400/c738dd/ffffff?text=Gobierno+Municipal',
-      link: 'https://ejemplo-gobierno.com',
+      description: 'Conocé las actividades municipales gratuitas para este fin de semana en tu barrio.',
+      imageUrl: 'https://images.unsplash.com/photo-1531058020387-3be344556be6?q=80&w=1000&auto=format&fit=crop',
+      link: 'https://www.cultura.gob.ar',
       category: 'external', // Publicidad externa
-      position: 'sidebar',
+      position: 'banner_home', // También puede aparecer en home
       isActive: true,
       startDate: '2026-01-01',
       endDate: '2026-12-31',
@@ -141,14 +154,38 @@ const getMockAdvertisements = (filters = {}) => {
     {
       id: 3,
       title: 'Sponsor: Pandora Música Fest',
-      description: 'Auspiciado por Pandora - El evento del año',
-      imageUrl: 'https://via.placeholder.com/800x400/ff00c8/ffffff?text=Music+Fest',
+      description: 'Auspiciado por Pandora - El evento del año. ¡Conseguí tus entradas anticipadas hoy!',
+      imageUrl: 'https://images.unsplash.com/photo-1459749411177-d4a428c389f5?q=80&w=1000&auto=format&fit=crop',
       link: '/events',
       category: 'sponsor', // Auspicio
-      position: 'banner_events',
+      position: 'banner_home',
       isActive: true,
       startDate: '2026-01-08',
       endDate: '2026-03-31',
+    },
+    {
+      id: 4,
+      title: 'Clínica de Guitarra - Facundo Saravia',
+      description: 'Este Sábado en el Centro Cultural. Entrada libre y gratuita.',
+      imageUrl: 'https://images.unsplash.com/photo-1510915361408-d5a270f249fe?q=80&w=1000&auto=format&fit=crop',
+      link: '/event/4',
+      category: 'commerce',
+      position: 'banner_home',
+      isActive: true,
+      startDate: '2026-01-20',
+      endDate: '2026-02-10',
+    },
+    {
+      id: 5,
+      title: 'Nueva Colección Otoño-Invierno',
+      description: 'Moda Urbana - Visitá nuestro showroom y renová tu estilo.',
+      imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop',
+      link: '/commerce/5',
+      category: 'sponsor',
+      position: 'banner_home',
+      isActive: true,
+      startDate: '2026-02-01',
+      endDate: '2026-05-01',
     },
   ];
 

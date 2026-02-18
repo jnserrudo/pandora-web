@@ -4,6 +4,13 @@
   padding: 6rem 0; /* Espacio para el Navbar fijo y el Footer */
 }
 
+@media (max-width: 768px) {
+  .app-container {
+    padding: 5rem 0 2rem 0; /* Menos padding arriba en móviles */
+    overflow-x: hidden; /* Prevenir scroll horizontal accidental */
+  }
+}
+
 .app-layout {
   /* Este es nuestro contenedor principal centrado */
   width: 90%;
@@ -117,6 +124,25 @@
 }
 
 .card-content span {
-  font-weight: bold;
   color: #ff00c8;
+}
+
+/* Hub Layout Styles */
+.hub-layout {
+  background: radial-gradient(circle at top, #1a0b2e 0%, var(--color-background) 100%);
+}
+
+.top-discovery-section {
+  width: 100%;
+  max-width: 1100px; /* Increased from 900px */
+  margin: 0 auto;
+  padding: 0 1rem;
+  z-index: 10;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .top-discovery-section {
+    padding-top: 1rem;
+  }
 }

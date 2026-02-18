@@ -1,19 +1,23 @@
-// src/Components/pages/ContactPage.jsx
 import React, { useState } from 'react';
 import Navbar from '../Navbar/Navbar';
-import Footer from '../Footer/Footer';
-import { sendContactRequest } from '../../services/api'; // Importamos el servicio
+import { useToast } from '../../context/ToastContext';
+import { createSubmission, uploadImage } from '../../services/api'; // Importamos el servicio unificado
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { Paperclip, Send, CheckCircle } from 'lucide-react';
 import './ContactPage.css';
 
 const ContactPage = () => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    interestType: 'GENERAL', // Valor por defecto en mayúsculas
-    message: ''
+    type: 'CONTACT', // Mapeado a los tipos del backend
+    message: '',
+    attachmentUrl: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
 
   const handleInputChange = (e) => {
@@ -24,16 +28,28 @@ const ContactPage = () => {
     }));
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const res = await uploadImage(file);
+      setFormData(prev => ({ ...prev, attachmentUrl: res.url }));
+    } catch (err) {
+      showToast("Error al subir archivo.", 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
     try {
-      // Usamos el servicio real para enviar la solicitud
-      await sendContactRequest(formData);
-      
-      console.log('Contact form submitted:', formData);
+      // Usamos el servicio unificado
+      await createSubmission(formData);
       setSubmitStatus('success');
       
       // Reset form
@@ -41,8 +57,9 @@ const ContactPage = () => {
         name: '',
         email: '',
         phone: '',
-        interestType: 'GENERAL',
-        message: ''
+        type: 'CONTACT',
+        message: '',
+        attachmentUrl: ''
       });
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -137,23 +154,38 @@ const ContactPage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="interestType">Tipo de Interés *</label>
+                <label htmlFor="type">Tipo de Solicitud *</label>
                 <select
-                  id="interestType"
-                  name="interestType"
-                  value={formData.interestType}
+                  id="type"
+                  name="type"
+                  value={formData.type}
                   onChange={handleInputChange}
                   required
                   className="form-select"
                 >
-                  <option value="GENERAL">Consulta General</option>
-                  <option value="COMMERCE">Registrar Comercio</option>
-                  <option value="ADVERTISING">Publicidad</option>
-                  <option value="SPONSOR">Sponsor / Auspicio</option>
-                  <option value="PARTNERSHIP">Alianza Estratégica</option>
-                  <option value="OTHER">Otro</option>
+                  <option value="CONTACT">Consulta General</option>
+                  <option value="AD_PROPOSAL">Propuesta de Publicidad</option>
+                  <option value="MAGAZINE_PROPOSAL">Propuesta para Revista</option>
+                  <option value="OTHER">Otro / Otros Intereses</option>
                 </select>
               </div>
+
+              {/* Adjuntos para Publicidad o Revista */}
+              {(formData.type === 'AD_PROPOSAL' || formData.type === 'MAGAZINE_PROPOSAL') && (
+                <div className="form-group attachment-section glass-morphism">
+                  <label>
+                    <Paperclip size={16} /> 
+                    Adjuntar Carpeta, Imagen o Documento
+                  </label>
+                  <input 
+                    type="file" 
+                    onChange={handleFileUpload}
+                    className="form-input-file"
+                  />
+                  {isUploading && <p className="upload-status">Subiendo archivo...</p>}
+                  {formData.attachmentUrl && <p className="upload-success">✅ Archivo listo para enviar</p>}
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="message">Mensaje *</label>
@@ -164,7 +196,7 @@ const ContactPage = () => {
                   onChange={handleInputChange}
                   required
                   rows="6"
-                  placeholder="Contanos cómo querés ser parte de Pandora..."
+                  placeholder="Contanos tu propuesta o consulta detalladamente..."
                   className="form-textarea"
                 />
               </div>

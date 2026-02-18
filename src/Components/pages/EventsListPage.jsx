@@ -5,7 +5,11 @@ import { Link } from 'react-router-dom';
 import { getEvents } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import ScrollToTopButton from '../ScrollToTopButton/ScrollToTopButton';
-import './EventsListPage.css'; // Crearemos este archivo a continuación
+import { MapPin, Calendar, Clock } from 'lucide-react';
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
+import SEOManager from "../SEO/SEOManager";
+import './EventsListPage.css';
 
 const EventsListPage = () => {
   const [events, setEvents] = useState([]);
@@ -29,17 +33,28 @@ const EventsListPage = () => {
     fetchEvents();
   }, []);
 
+  const handleImageError = (e) => {
+    e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop';
+  };
+
   if (loading) {
     return <LoadingSpinner fullscreen message="Cargando agenda..." />;
   }
 
   return (
-    <div className="events-list-container">
-      <header className="events-list-header">
-        <h1>Agenda de Eventos</h1>
-        <p>Descubre todo lo que está pasando en la ciudad.</p>
-      </header>
-      <div className="events-list">
+    <div className="events-page-wrapper">
+      <SEOManager 
+        title="Próximos Eventos" 
+        description="No te pierdas de nada. Consultá la agenda de eventos de Pandora." 
+      />
+      <Navbar />
+      <div className="events-list-container">
+        <header className="events-list-header">
+          <h1>Agenda de Eventos</h1>
+          <p>Descubre todo lo que está pasando en la ciudad.</p>
+        </header>
+
+        <div className="events-grid">
         {events.length > 0 ? (
           events.map(event => {
             // Lógica para formatear la fecha
@@ -48,19 +63,25 @@ const EventsListPage = () => {
             const month = date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '').toUpperCase();
             
             return (
-              <Link to={`/event/${event.id}`} key={event.id} className="event-item-link">
-                <div className="event-item">
-                  <div className="event-date">
-                    <span className="event-day">{day}</span>
-                    <span className="event-month">{month}</span>
+              <Link to={`/event/${event.id}`} key={event.id} className="event-card-link">
+                <div className="event-card">
+                  <div className="event-card-image-wrapper">
+                    <img 
+                      src={event.coverImage || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop'} 
+                      alt={event.name} 
+                      className="event-card-image"
+                      onError={handleImageError}
+                    />
+                    <div className="event-card-date-badge">
+                      <span className="event-card-day">{day}</span>
+                      <span className="event-card-month">{month}</span>
+                    </div>
                   </div>
-                  <div className="event-info">
-                    <h3 className="event-title">{event.name}</h3>
-                    {/* El backend incluye el comercio, así que podemos mostrar su nombre */}
-                    <p className="event-location">{event.commerce.name}</p>
-                  </div>
-                  <div className="event-cover-image">
-                    <img src={event.coverImage} alt={event.name} />
+                  <div className="event-card-content">
+                    <h3 className="event-card-title">{event.name}</h3>
+                    <p className="event-card-location">
+                      <MapPin size={14} className="icon-loc" /> {event.commerce.name}
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -70,7 +91,9 @@ const EventsListPage = () => {
           <p className="no-results-message">No hay eventos programados por el momento. ¡Vuelve pronto!</p>
         )}
       </div>
-      <ScrollToTopButton />
+    </div>
+    <Footer />
+    <ScrollToTopButton />
     </div>
   );
 };

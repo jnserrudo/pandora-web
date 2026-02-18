@@ -1,0 +1,51 @@
+/* src/Components/pages/EventFormPage.css */
+
+/* Reutilizamos muchas clases de CommerceFormPage para consistencia */
+.event-form-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background);
+  color: #fff;
+}
+
+.event-form-container {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8rem 2rem 4rem 2rem;
+}
+
+.event-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.event-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #fff, #b3a0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Date Inputs Specific */
+.date-inputs-row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.date-inputs-row .form-group {
+  flex: 1;
+}
+
+input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}

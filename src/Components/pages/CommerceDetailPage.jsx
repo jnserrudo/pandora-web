@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCommerceById } from "../../services/api";
-import "./CommerceDetailPage.css"; // Crearemos este archivo a continuación
+import { Share2, MapPin, Phone, Globe, Instagram, Facebook, ArrowLeft, Calendar, Info } from 'lucide-react';
+import CommerceCommentForm from '../Commerce/CommerceCommentForm';
+import "./CommerceDetailPage.css";
 
 const CommerceDetailPage = () => {
   const { id } = useParams(); // Obtiene el :id de la URL
@@ -124,6 +126,13 @@ const CommerceDetailPage = () => {
             </div>
           </section>
         )}
+        {/* Feedback Section */}
+        <div className="section-container" style={{ marginTop: '3rem' }}>
+            <CommerceCommentForm 
+                commerceId={id} 
+                commerceName={commerce.name} 
+            />
+        </div>
       </main>
     </div>
   );

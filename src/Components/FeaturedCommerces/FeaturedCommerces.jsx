@@ -2,11 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getCommerces } from "../../services/api";
+import { Heart } from "lucide-react";
+import { getCommerces, toggleFavorite } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 import "./FeaturedCommerces.css";
 
 const FeaturedCommerces = () => {
+  const { token, user } = useAuth();
+  const { showToast } = useToast();
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +23,27 @@ const FeaturedCommerces = () => {
       setLoading(false);
     };
     fetchCommerces();
-  }, []);
+  }, [token]);
+
+  const handleFavorite = async (e, commerceId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!token) {
+      showToast("Debes iniciar sesión para guardar favoritos.", 'info');
+      return;
+    }
+    try {
+      await toggleFavorite(commerceId, 'commerce', token);
+      // Actualizamos UI localmente
+      setCommerces(prev => prev.map(c => 
+        (c.id === commerceId || c._id === commerceId) 
+          ? { ...c, isFavorite: !c.isFavorite } 
+          : c
+      ));
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+    }
+  };
 
   // --- 1. FUNCIÓN HELPER PARA LA LÓGICA DE LA IMAGEN ---
   const getImageUrl = (commerce) => {
@@ -57,6 +82,13 @@ const FeaturedCommerces = () => {
               className="commerce-card-link"
             >
               <div className="commerce-card">
+                <button 
+                  className={`favorite-btn-floating ${commerce.isFavorite ? 'active' : ''}`}
+                  onClick={(e) => handleFavorite(e, commerce.id || commerce._id)}
+                  title="Guardar en favoritos"
+                >
+                  <Heart size={20} fill={commerce.isFavorite ? "currentColor" : "none"} />
+                </button>
                 <img
                   src={imageUrl}
                   alt={commerce.name}

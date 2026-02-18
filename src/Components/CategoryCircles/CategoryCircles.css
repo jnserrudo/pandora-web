@@ -14,7 +14,6 @@
   margin-bottom: 3rem;
   font-weight: 700;
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  font-family: var(--font-main, sans-serif); 
 }
 
 .category-circles-title span {
@@ -25,8 +24,8 @@
 .circles-container {
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  gap: 1.5rem;
+  flex-wrap: nowrap; /* FORZAR UNA SOLA FILA EN DESKTOP */
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -34,9 +33,9 @@
 /* Wrapper para animaciones de entrada */
 .category-circle-wrapper {
   position: relative;
-  width: 300px;
-  height: 300px;
-  flex-shrink: 0;
+  width: 260px; /* Un poco más chicos para asegurar espacio */
+  height: 260px;
+  flex: 0 0 auto;
   cursor: pointer;
   animation: floatIn 0.8s ease-out forwards;
   opacity: 0;
@@ -161,42 +160,47 @@
    MOBILE RESPONSIVE (MEDIA QUERIES)
    ========================================= */
 
-@media (max-width: 1024px) {
+.circles-container {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1000px) {
   .circles-container {
-    gap: 1.5rem;
-  }
-  
-  .category-circle-wrapper {
-    width: 250px;
-    height: 250px;
+    flex-wrap: wrap; /* Permitir envolver solo en pantallas chicas */
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 850px) {
   .category-circles-title {
     font-size: 2.2rem;
     margin-bottom: 2rem;
   }
+}
 
+@media (max-width: 768px) {
   .circles-container {
-    flex-direction: column; /* Apilar verticalmente en móviles */
+    flex-direction: column;
     align-items: center;
+    flex-wrap: nowrap; /* Volver a nowrap para la columna */
     gap: 2rem;
   }
 
   /* MOBILE: SIEMPRE A COLOR (Comportamiento Hover Persistente) */
-  
   .circle-bg {
-    filter: grayscale(0%) brightness(0.9) !important; /* Siempre color */
+    filter: grayscale(0%) brightness(0.9) !important;
   }
 
   .category-circle {
-    border-color: rgba(138, 43, 226, 0.4); /* Borde sutil siempre */
-    /* box-shadow: 0 0 15px rgba(138, 43, 226, 0.3); */
+    border-color: rgba(138, 43, 226, 0.4);
   }
 
   .circle-cta {
-    opacity: 1; /* Botón siempre visible */
+    opacity: 1;
     transform: translateY(0);
     border-color: rgba(255, 255, 255, 0.6);
     font-size: 0.8rem;
@@ -205,10 +209,9 @@
 
   .circle-title {
     font-size: 1.5rem;
-    transform: translateY(-5px); /* Un poco arriba para dejar lugar al botón */
+    transform: translateY(-5px);
   }
   
-  /* Aún mantenemos un pequeño efecto al tocar */
   .category-circle-wrapper:active .category-circle {
     transform: scale(0.98);
   }

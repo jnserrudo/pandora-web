@@ -68,38 +68,177 @@
 
 
 
-.hero-image .mockup-image {
-  max-width: 100%; /* Ajusta el tamaño máximo según necesites */
-  filter: drop-shadow(0 25px 25px rgb(0 0 0 / 0.5)); /* Sombra dramática */
-  transition: transform 0.3s ease;
-}
-.hero-image .mockup-image:hover {
-  transform: translateY(-10px) scale(1.02); /* Pequeña animación al pasar el mouse */
-}
-
-
-
-.hero-image {
-  display: flex; /* Añadimos flex para centrar la imagen si es necesario */
+/* --- NUEVA COMPOSICIÓN ABSTRACTA DE UI --- */
+.hero-image-abstract {
+  position: relative;
+  height: 500px;
+  display: flex;
   justify-content: center;
   align-items: center;
+  perspective: 1200px;
 }
 
-/* --- ESTILOS NUEVOS PARA LA IMAGEN DEL MOCKUP --- */
-.mockup-image {
-  width: 100%; /* La imagen ocupará el 100% del espacio de su contenedor */
-  max-width: 350px; /* Pero no queremos que sea gigante en pantallas grandes */
-  height: auto; /* Mantenemos la proporción de la imagen */
-
-  /* Sombra realista que funciona bien con PNGs transparentes */
-  filter: drop-shadow(0px 30px 25px rgba(0, 0, 0, 0.4));
-  
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+.abstract-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
 }
 
-.mockup-image:hover {
-  /* Efecto sutil de levantamiento al pasar el mouse por encima */
-  transform: translateY(-10px) scale(1.02);
+.floating-ui-card {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+  animation: float-advanced 6s infinite ease-in-out;
+}
+
+.main-card {
+  width: 240px;
+  height: 320px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateY(-15deg);
+  z-index: 2;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header-premium {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.verified-icon {
+  color: #8a2be2;
+}
+
+.header-line-premium {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.card-visual-skeleton {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(255, 32, 147, 0.1));
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-icon {
+  color: rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.3));
+}
+
+.card-details-premium .detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.skeleton-title-premium { width: 100px; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; }
+.skeleton-text-premium { width: 60px; height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+
+.event-mini-card {
+  width: 180px;
+  height: 70px;
+  top: 15%;
+  right: 10%;
+  transform: rotateZ(5deg);
+  z-index: 3;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation-delay: -1s;
+}
+
+.event-icon-premium {
+  width: 40px;
+  height: 40px;
+  background: var(--color-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.event-line-premium { width: 80px; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; margin-bottom: 4px; }
+.event-status-premium { font-size: 0.6rem; font-weight: 800; color: var(--color-accent); letter-spacing: 1px; }
+
+.floating-ui-badge {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  bottom: 20%;
+  left: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 15px 30px rgba(255, 32, 147, 0.5);
+  animation: float-advanced 5s infinite ease-in-out;
+  animation-delay: -3s;
+  z-index: 4;
+}
+
+.decorative-star {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.3);
+  z-index: 1;
+}
+
+.star-1 { top: 10%; left: 10%; animation: float-advanced 8s infinite ease-in-out; }
+
+.hero-glow-orb {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.orb-primary {
+  top: 20%;
+  left: 20%;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, transparent 70%);
+}
+
+.orb-secondary {
+  bottom: 20%;
+  right: 20%;
+  background: radial-gradient(circle, rgba(255, 32, 147, 0.2) 0%, transparent 70%);
+}
+
+@keyframes float-advanced {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-25px) rotate(2deg); }
+}
+
+@media (max-width: 900px) {
+  .hero-image-abstract { height: 400px; margin-bottom: 2rem; }
+  .main-card { width: 180px; height: 240px; }
+  .event-mini-card { width: 150px; right: 5%; }
+  .floating-ui-badge { width: 50px; height: 50px; }
 }
 /* --- Responsive para móviles --- */
 @media (max-width: 900px) {

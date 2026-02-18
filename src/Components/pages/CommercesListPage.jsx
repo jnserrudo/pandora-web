@@ -4,7 +4,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { getCommerces } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
-import LoadingSpinner from '../LoadingSpinner/LoadingSpinner'; // Usamos el spinner artístico
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { MapPin } from 'lucide-react';
 import './CommercesListPage.css';
 
 const CommercesListPage = () => {
@@ -27,7 +28,6 @@ const CommercesListPage = () => {
     const fetchCommerces = async () => {
       setLoading(true);
       try {
-        // Si es 'ALL', pasamos undefined o string vacío a la API según tu implementación
         const catFilter = activeCategory === 'ALL' ? '' : activeCategory;
         const data = await getCommerces(catFilter);
         setCommerces(data);
@@ -40,6 +40,10 @@ const CommercesListPage = () => {
 
     fetchCommerces();
   }, [activeCategory]);
+
+  const handleImageError = (e) => {
+    e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop';
+  };
 
   // Actualizar si cambia la URL
   useEffect(() => {
@@ -75,16 +79,18 @@ const CommercesListPage = () => {
              <LoadingSpinner message="Buscando los mejores lugares..." />
           </div>
         ) : (
-          <div className="commerces-grid">
+          <div className="unified-commerces-grid">
             {commerces.length > 0 ? (
-              commerces.map(commerce => (
+              commerces.map((commerce) => {
+                return (
                 <Link to={`/commerce/${commerce.id}`} key={commerce.id} className="commerce-card-link">
-                  <div className="commerce-card">
-                    <div className="card-image-wrapper">
+                    <div className="commerce-card">
+                      <div className="card-image-wrapper">
                       <img 
-                        src={commerce.galleryImages?.[0] || 'https://via.placeholder.com/400x300?text=Pandora'} 
+                        src={commerce.galleryImages?.[0] || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop'} 
                         alt={commerce.name} 
                         className="commerce-image"
+                        onError={handleImageError}
                       />
                       <span className="card-category-badge">
                         {categoryNames[commerce.category] || commerce.category}
@@ -97,12 +103,16 @@ const CommercesListPage = () => {
                         {commerce.description?.substring(0, 80)}...
                       </p>
                       <div className="card-footer">
-                        <span className="card-location">📍 {commerce.address || 'Salta, Capital'}</span>
+                        <span className="card-location">
+                          <MapPin size={14} className="icon-loc" /> 
+                          <span>{commerce.address || 'Salta, Capital'}</span>
+                        </span>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))
+                    </div>
+                  </Link>
+                );
+              })
             ) : (
               <div className="no-results">
                 <p>No se encontraron comercios en esta categoría.</p>

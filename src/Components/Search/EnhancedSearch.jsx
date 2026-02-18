@@ -45,6 +45,11 @@ const EnhancedSearch = () => {
         const data = await searchGlobal(query);
         setResults(data);
         setShowResults(true);
+        
+        // Registrar búsqueda en analíticas (si tiene resultados y es lo suficientemente larga)
+        if (query.trim().length >= 3) {
+          import('../../services/api').then(m => m.logSearch(query));
+        }
       } catch (error) {
         console.error('Search error:', error);
       } finally {
