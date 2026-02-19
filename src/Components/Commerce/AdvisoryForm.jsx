@@ -50,7 +50,7 @@ const AdvisoryForm = ({ commerceId, metrics, onSubmit, onCancel }) => {
                 type="text" 
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                placeholder="Ej: Optimización de Imágenes de Portada"
+                placeholder="Ejemplo: Optimización de Imágenes de Portada"
                 required
                 className="form-input"
             />
@@ -61,7 +61,7 @@ const AdvisoryForm = ({ commerceId, metrics, onSubmit, onCancel }) => {
             <textarea 
                 value={formData.content}
                 onChange={(e) => setFormData({...formData, content: e.target.value})}
-                placeholder="Explica qué observas en las métricas y comentarios..."
+                placeholder="Explique qué observa en las métricas y comentarios..."
                 required
                 className="form-textarea"
                 rows={4}

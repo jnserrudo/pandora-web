@@ -22,7 +22,8 @@ import {
     Plus, 
     ExternalLink,
     ChevronRight,
-    Target
+    Target,
+    Loader2
 } from 'lucide-react';
 import './MyCommercesPage.css';
 
@@ -112,7 +113,7 @@ const MyCommercesPage = () => {
   const getImageUrl = (commerce) => {
     if (commerce.galleryImages && commerce.galleryImages.length > 0) return getAbsoluteImageUrl(commerce.galleryImages[0]);
     if (commerce.coverImage) return getAbsoluteImageUrl(commerce.coverImage);
-    return "https://via.placeholder.com/400x250.png?text=Pandora+Space"; 
+    return "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora"; 
   };
 
   if (loading) return <LoadingSpinner message="Analizando tus activos digitales..." />;

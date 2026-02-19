@@ -89,8 +89,11 @@ const Navbar = () => {
       case 'SUBMISSION_UPDATED':
         navigate('/my-submissions');
         break;
+      case 'NEW_COMMERCE_COMMENT':
+        navigate(`/admin/commerces/${notif.referenceId}/detail#feedback-section`);
+        break;
       case 'NEW_COMMERCE_ADVISORY':
-        navigate('/my-commerces'); // O una vista específica de asesorías
+        navigate('/my-commerces');
         break;
       default:
         console.log("Notificación sin ruta asignada:", notif.type);

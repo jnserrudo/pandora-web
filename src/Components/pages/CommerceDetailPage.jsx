@@ -3,6 +3,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCommerceById, getAbsoluteImageUrl } from "../../services/api";
+import { 
+  Share2, 
+  MapPin, 
+  Phone, 
+  Globe, 
+  Instagram, 
+  Facebook, 
+  ArrowLeft, 
+  Calendar, 
+  Info 
+} from 'lucide-react';
 import CommerceCommentForm from '../Commerce/CommerceCommentForm';
 import MapView from '../ui/MapView';
 import "./CommerceDetailPage.css";

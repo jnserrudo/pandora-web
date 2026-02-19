@@ -24,7 +24,13 @@ import {
     MousePointer, 
     Star, 
     TrendingUp,
-    Shield
+    Shield,
+    Building,
+    Mail,
+    ExternalLink,
+    MapPin,
+    Phone,
+    Globe
 } from 'lucide-react';
 import './AdminCommerceDetailPage.css';
 
@@ -229,23 +235,24 @@ const AdminCommerceDetailPage = () => {
             </div>
             
             <div className="info-item">
-              <span className="info-label">Email de contacto</span>
-              <p className="info-value">{commerce?.contactEmail || 'No disponible'}</p>
+              <span className="info-label"><Mail size={14} /> Email de contacto</span>
+              <p className="info-value">{commerce?.contactEmail || commerce?.owner?.email || 'No disponible'}</p>
             </div>
             
             <div className="info-item">
-              <span className="info-label">Teléfono</span>
+              <span className="info-label"><Phone size={14} /> Teléfono</span>
               <p className="info-value">{commerce?.phone || 'No disponible'}</p>
             </div>
             
             <div className="info-item">
-              <span className="info-label">Dirección</span>
+              <span className="info-label"><MapPin size={14} /> Dirección</span>
               <p className="info-value">
-                {commerce?.address?.street && `${commerce.address.street}, `}
-                {commerce?.address?.city && `${commerce.address.city}, `}
-                {commerce?.address?.state && `${commerce.address.state}, `}
-                {commerce?.address?.country || ''}
-                {!commerce?.address && 'No disponible'}
+                {typeof commerce?.address === 'string' 
+                  ? commerce.address 
+                  : (commerce?.address 
+                      ? `${commerce.address.street || ''} ${commerce.address.city || ''} ${commerce.address.state || ''}`.trim() 
+                      : 'No disponible')
+                }
               </p>
             </div>
             
@@ -280,7 +287,7 @@ const AdminCommerceDetailPage = () => {
         </section>
 
         {/* Comments Section */}
-        <section className="comments-section-container glass-panel">
+        <section id="feedback-section" className="comments-section-container glass-panel">
             <div className="section-header">
                 <h2><MessageSquare size={24}/> Feedback de Usuarios</h2>
                 

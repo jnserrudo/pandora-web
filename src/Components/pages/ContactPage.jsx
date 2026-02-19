@@ -211,13 +211,13 @@ const ContactPage = () => {
 
               {submitStatus === 'success' && (
                 <div className="form-message success-message flex items-center gap-2">
-                  <CheckCircle size={18} /> ¡Mensaje enviado! Nos contactaremos pronto.
+                  <CheckCircle size={18} /> Mensaje enviado. Nos contactaremos pronto.
                 </div>
               )}
 
               {submitStatus === 'error' && (
                 <div className="form-message error-message flex items-center gap-2">
-                  <XCircle size={18} /> Hubo un error. Por favor, intentá nuevamente.
+                  <XCircle size={18} /> Hubo un error. Por favor, intente nuevamente.
                 </div>
               )}
 

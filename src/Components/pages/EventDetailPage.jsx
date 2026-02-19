@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
+import { getEventById, getAbsoluteImageUrl } from '../../services/api';
 import MapView from '../ui/MapView';
 import './CommerceDetailPage.css'; 
 import './EventDetailPage.css';

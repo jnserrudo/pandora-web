@@ -47,7 +47,7 @@ const FeaturedCommerces = () => {
 
   // --- 1. FUNCIÓN HELPER PARA LA LÓGICA DE LA IMAGEN ---
   const getImageUrl = (commerce) => {
-    const placeholder = "https://via.placeholder.com/400x250.png?text=Pandora";
+    const placeholder = "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
 
     // Prioridad 1: Usar coverImage si es un string válido
     if (commerce.coverImage && commerce.coverImage.trim() !== "") {
@@ -99,7 +99,7 @@ const FeaturedCommerces = () => {
                   onError={(e) => {
                     e.target.onerror = null; // Previene bucles infinitos si el placeholder también falla
                     e.target.src =
-                      "https://via.placeholder.com/400x250.png?text=Error";
+                      "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
                   }}
                 />
                 <div className="commerce-card-overlay">

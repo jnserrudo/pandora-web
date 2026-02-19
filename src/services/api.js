@@ -584,7 +584,7 @@ export const toggleArticleStatus = async (id, isActive, token) => {
 
 export const createCommerceComment = async (commerceId, commentData) => {
   try {
-    const response = await axios.post(`${API_URL}/commerces/${commerceId}/comments`, commentData);
+    const response = await axios.post(`${API_URL}/feedback/commerces/${commerceId}/comments`, commentData);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error al crear comentario.");
@@ -593,7 +593,7 @@ export const createCommerceComment = async (commerceId, commentData) => {
 
 export const getCommerceComments = async (commerceId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/commerces/${commerceId}/comments`, {
+    const response = await axios.get(`${API_URL}/feedback/commerces/${commerceId}/comments`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -604,7 +604,7 @@ export const getCommerceComments = async (commerceId, token) => {
 
 export const markCommentAsRead = async (commentId, token) => {
   try {
-    const response = await axios.patch(`${API_URL}/comments/${commentId}/read`, {}, {
+    const response = await axios.patch(`${API_URL}/feedback/comments/${commentId}/read`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -615,7 +615,7 @@ export const markCommentAsRead = async (commentId, token) => {
 
 export const updateCommentNotes = async (commentId, data, token) => {
   try {
-    const response = await axios.patch(`${API_URL}/comments/${commentId}`, data, {
+    const response = await axios.patch(`${API_URL}/feedback/comments/${commentId}`, data, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -626,7 +626,7 @@ export const updateCommentNotes = async (commentId, data, token) => {
 
 export const deleteCommerceComment = async (commentId, token) => {
   try {
-    await axios.delete(`${API_URL}/comments/${commentId}`, {
+    await axios.delete(`${API_URL}/feedback/comments/${commentId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   } catch (error) {
@@ -638,7 +638,7 @@ export const deleteCommerceComment = async (commentId, token) => {
 
 export const createCommerceAdvisory = async (commerceId, advisoryData, token) => {
   try {
-    const response = await axios.post(`${API_URL}/commerces/${commerceId}/advisories`, advisoryData, {
+    const response = await axios.post(`${API_URL}/feedback/commerces/${commerceId}/advisories`, advisoryData, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -649,7 +649,7 @@ export const createCommerceAdvisory = async (commerceId, advisoryData, token) =>
 
 export const getCommerceAdvisories = async (commerceId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/commerces/${commerceId}/advisories`, {
+    const response = await axios.get(`${API_URL}/feedback/commerces/${commerceId}/advisories`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -660,7 +660,7 @@ export const getCommerceAdvisories = async (commerceId, token) => {
 
 export const updateAdvisoryStatus = async (advisoryId, status, token) => {
   try {
-    const response = await axios.patch(`${API_URL}/advisories/${advisoryId}/status`, { status }, {
+    const response = await axios.patch(`${API_URL}/feedback/advisories/${advisoryId}/status`, { status }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -673,7 +673,7 @@ export const updateAdvisoryStatus = async (advisoryId, status, token) => {
 
 export const getCommerceMetrics = async (commerceId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/commerces/${commerceId}/metrics`, {
+    const response = await axios.get(`${API_URL}/feedback/commerces/${commerceId}/metrics`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -686,7 +686,7 @@ export const getCommerceMetrics = async (commerceId, token) => {
 
 export const getFeaturedCommerces = async () => {
   try {
-    const response = await axios.get(`${API_URL}/commerces/featured`);
+    const response = await axios.get(`${API_URL}/feedback/commerces/featured`);
     return response.data;
   } catch (error) {
     console.error("Error fetching featured commerces:", error);
@@ -696,7 +696,7 @@ export const getFeaturedCommerces = async () => {
 
 export const setCommerceFeatured = async (commerceId, days, token) => {
   try {
-    const response = await axios.post(`${API_URL}/commerces/${commerceId}/featured`, { days }, {
+    const response = await axios.post(`${API_URL}/feedback/commerces/${commerceId}/featured`, { days }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;

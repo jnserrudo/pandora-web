@@ -102,7 +102,7 @@ const UserProfilePage = () => {
               {favorites.map((fav) => (
                 <Link to={`/commerce/${fav.commerceId}`} key={fav.id} className="fav-card-mini">
                   <img 
-                    src={fav.commerce?.coverImage ? getAbsoluteImageUrl(fav.commerce.coverImage) : "https://via.placeholder.com/150?text=Pandora"} 
+                    src={fav.commerce?.coverImage ? getAbsoluteImageUrl(fav.commerce.coverImage) : "https://placehold.co/150x150/0d0218/ffffff/png?text=Pandora"} 
                     alt={fav.commerce?.name} 
                   />
                   <div className="fav-mini-info">
