@@ -1,9 +1,10 @@
 // src/pages/EventDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getEventById } from '../../services/api';
-import './CommerceDetailPage.css'; // USAMOS LOS MISMOS
-import './EventDetailPage.css'; // Crearemos este archivo
+import { MapPin } from 'lucide-react';
+import MapView from '../ui/MapView';
+import './CommerceDetailPage.css'; 
+import './EventDetailPage.css';
 
 const EventDetailPage = () => {
   const { id } = useParams();
@@ -48,7 +49,7 @@ const EventDetailPage = () => {
     <div className="detail-page-container">
       <header 
         className="detail-header" 
-        style={{ backgroundImage: `url(${event.coverImage})` }}
+        style={{ backgroundImage: event.coverImage ? `url(${getAbsoluteImageUrl(event.coverImage)})` : 'none' }}
       >
          {/* --- 3. AÑADIR EL BOTÓN DE VOLVER --- */}
          <button onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
@@ -70,13 +71,27 @@ const EventDetailPage = () => {
               <strong>Finaliza:</strong> {end.date}<br/>a las {end.time}
             </div>
             <div className="info-item">
-              <strong>Lugar:</strong> {event.address || event.commerce.name}
+              <strong>Lugar:</strong> {event.location || event.commerce.name}
+            </div>
+            <div className="info-item">
+              <strong>Dirección:</strong> {event.address || event.commerce.address || "Ver mapa"}
             </div>
             <div className="info-item">
               <strong>Organiza:</strong> {event.commerce.name}
             </div>
           </div>
-          <p>{event.description}</p>
+          
+          {event.latitude && event.longitude && (
+            <div className="event-detail-map" style={{ marginTop: '2rem' }}>
+              <h3>Ubicación en el Mapa</h3>
+              <MapView latitude={event.latitude} longitude={event.longitude} />
+            </div>
+          )}
+
+          <div className="event-description-box" style={{ marginTop: '2.5rem' }}>
+            <h3>Acerca de este evento</h3>
+            <p>{event.description}</p>
+          </div>
         </section>
         
         {event.galleryImages && event.galleryImages.length > 0 && (
@@ -84,7 +99,7 @@ const EventDetailPage = () => {
             <h2>Galería del Evento</h2>
             <div className="gallery-grid">
               {event.galleryImages.map((img, index) => (
-                <img key={index} src={img} alt={`${event.name} galeria ${index + 1}`} />
+                <img key={index} src={getAbsoluteImageUrl(img)} alt={`${event.name} galeria ${index + 1}`} />
               ))}
             </div>
           </section>

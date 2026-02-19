@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getCommerceById } from "../../services/api";
-import { Share2, MapPin, Phone, Globe, Instagram, Facebook, ArrowLeft, Calendar, Info } from 'lucide-react';
+import { getCommerceById, getAbsoluteImageUrl } from "../../services/api";
 import CommerceCommentForm from '../Commerce/CommerceCommentForm';
+import MapView from '../ui/MapView';
 import "./CommerceDetailPage.css";
 
 const CommerceDetailPage = () => {
@@ -46,7 +46,7 @@ const CommerceDetailPage = () => {
     <div className="detail-page-container">
       <header
         className="detail-header"
-        style={{ backgroundImage: coverImage ? `url(${coverImage})` : "none" }}
+        style={{ backgroundImage: coverImage ? `url(${getAbsoluteImageUrl(coverImage)})` : "none" }}
       >
          {/* --- 3. AÑADIR EL BOTÓN DE VOLVER --- */}
          <button onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
@@ -66,12 +66,21 @@ const CommerceDetailPage = () => {
           <p>{commerce.description}</p>
           <div className="info-grid">
             <div className="info-item">
-              <strong>Ubicación:</strong> {commerce.address}
+              <strong>Dirección:</strong> {commerce.address}
             </div>
             <div className="info-item">
               <strong>Teléfono:</strong> {commerce.phone || "No especificado"}
             </div>
           </div>
+
+          {commerce.latitude && commerce.longitude && (
+            <div className="commerce-detail-map" style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
+              <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <MapPin size={24} className="text-primary" /> Ubicación en el Mapa
+              </h3>
+              <MapView latitude={commerce.latitude} longitude={commerce.longitude} />
+            </div>
+          )}
         </section>
 
         {commerce.galleryImages && commerce.galleryImages.length > 0 && (
@@ -81,7 +90,7 @@ const CommerceDetailPage = () => {
               {commerce.galleryImages.map((img, index) => (
                 <img
                   key={index}
-                  src={img}
+                  src={getAbsoluteImageUrl(img)}
                   alt={`${commerce.name} galeria ${index + 1}`}
                 />
               ))}

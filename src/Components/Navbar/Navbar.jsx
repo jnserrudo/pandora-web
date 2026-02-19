@@ -15,7 +15,11 @@ import {
   Ticket
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getNotifications, markNotificationAsRead } from '../../services/NotificationService';
+import { 
+  getNotifications, 
+  markNotificationAsRead,
+  markAllNotificationsAsRead 
+} from '../../services/NotificationService';
 import { getPublicStats } from '../../services/api'; 
 import './Navbar.css';
 
@@ -60,15 +64,48 @@ const Navbar = () => {
     };
   }, [isAuthenticated, token]);
 
-  const handleMarkAsRead = async (id, isRead) => {
-    if (isRead) return;
+  const handleNotificationClick = async (notif) => {
+    // Marcar como leída si no lo está
+    if (!notif.isRead) {
+      try {
+        await markNotificationAsRead(notif.id, token);
+        setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+      } catch (err) {
+        console.error("Error marking as read:", err);
+      }
+    }
+
+    // Navegar según el tipo de notificación
+    switch (notif.type) {
+      case 'NEW_COMMERCE_REQUEST':
+        navigate('/admin/commerces');
+        break;
+      case 'COMMERCE_VALIDATED':
+        navigate('/my-commerces');
+        break;
+      case 'NEW_SUBMISSION':
+        navigate('/admin/submissions');
+        break;
+      case 'SUBMISSION_UPDATED':
+        navigate('/my-submissions');
+        break;
+      case 'NEW_COMMERCE_ADVISORY':
+        navigate('/my-commerces'); // O una vista específica de asesorías
+        break;
+      default:
+        console.log("Notificación sin ruta asignada:", notif.type);
+    }
+
+    setShowNotifications(false);
+  };
+  
+  const handleMarkAllRead = async () => {
+    if (!token) return;
     try {
-      await markNotificationAsRead(id, token);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      await markAllNotificationsAsRead(token);
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (err) {
-      console.error("Error marking as read:", err);
-      // Fallback local por si falla el backend
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      console.error("Error marking all as read:", err);
     }
   };
 
@@ -135,8 +172,21 @@ const Navbar = () => {
                   {showNotifications && (
                     <div className="notifications-dropdown">
                       <div className="dropdown-header">
-                        <h3>Notificaciones</h3>
-                        {unreadCount > 0 && <span className="unread-count">{unreadCount} nuevas</span>}
+                        <div className="header-titles">
+                          <h3>Notificaciones</h3>
+                          {unreadCount > 0 && <span className="unread-count">{unreadCount} nuevas</span>}
+                        </div>
+                        {unreadCount > 0 && (
+                          <button 
+                            className="btn-mark-all-read"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAllRead();
+                            }}
+                          >
+                            Marcar todas como leídas
+                          </button>
+                        )}
                       </div>
                       <div className="notifications-list">
                         {notifications.length === 0 ? (
@@ -146,7 +196,7 @@ const Navbar = () => {
                             <div 
                               key={n.id} 
                               className={`notification-item ${n.isRead ? 'read' : 'unread'}`}
-                              onClick={() => handleMarkAsRead(n.id, n.isRead)}
+                              onClick={() => handleNotificationClick(n)}
                             >
                               <div className="notif-content">
                                 <p>{n.message}</p>
@@ -162,7 +212,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Opciones de Gestión (ADMIN/OWNER) */}
-                {(user?.role === 'OWNER' || user?.role === 'ADMIN') && (
+                {(user?.role === 'OWNER' || user?.role === 'ADMIN') ? (
                   <div className="management-group">
                     <Link to="/my-commerces" className="management-link" title="Mis Comercios">
                       <Store size={20} />
@@ -173,6 +223,12 @@ const Navbar = () => {
                       <span>Nuevo Evento</span>
                     </Link>
                   </div>
+                ) : (
+                  /* Botón para Usuarios que quieren ser Owners */
+                  <Link to="/commerces/create" className="join-partner-btn">
+                    <PlusCircle size={18} />
+                    <span>Sumar mi Comercio</span>
+                  </Link>
                 )}
 
                 {/* Acceso Admin */}
@@ -183,24 +239,36 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                {/* Perfil de Usuario Integrado */}
-                <div className="user-profile-dropdown">
-                  <div className="user-info-side">
-                    <span className="user-role-tag">{user?.role}</span>
-                    <Link to="/profile" className="profile-link">
-                      <div className="avatar-placeholder">
-                        <User size={16} />
-                      </div>
+                {/* Perfil de Usuario con Dropdown al hacer Hover */}
+                <div className="user-profile-menu-container">
+                  <div className="profile-trigger">
+                    <div className="avatar-placeholder">
+                      <User size={16} />
+                    </div>
+                    <div className="user-name-wrapper">
                       <span className="user-name">{user?.name}</span>
-                    </Link>
+                      <ChevronDown size={14} className="chevron-icon" />
+                    </div>
                   </div>
-
-                  <div className="user-actions-side">
-                    <Link to="/my-submissions" className="icon-action-btn" title="Mis Mensajes">
-                      <Inbox size={18} />
+                  
+                  <div className="profile-dropdown-content">
+                    <div className="dropdown-user-header">
+                      <span className="user-role-badge">{user?.role}</span>
+                      <span className="user-email">{user?.email}</span>
+                    </div>
+                    <div className="dropdown-divider"></div>
+                    <Link to="/profile" className="dropdown-item" onClick={closeMenu}>
+                      <User size={16} />
+                      <span>Mi Perfil</span>
                     </Link>
-                    <button onClick={handleLogout} className="btn-logout-icon" title="Cerrar Sesión">
-                      <LogOut size={18} />
+                    <Link to="/my-submissions" className="dropdown-item" onClick={closeMenu}>
+                      <Inbox size={16} />
+                      <span>Mis Mensajes</span>
+                    </Link>
+                    <div className="dropdown-divider"></div>
+                    <button onClick={handleLogout} className="dropdown-item logout-item">
+                      <LogOut size={16} />
+                      <span>Cerrar Sesión</span>
                     </button>
                   </div>
                 </div>

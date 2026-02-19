@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getFeaturedCommerces } from '../../services/api';
+import { getFeaturedCommerces, getAbsoluteImageUrl } from '../../services/api';
 import { Star, MapPin, ArrowRight } from 'lucide-react';
 import './FeaturedCommerces.css';
 
@@ -41,7 +41,7 @@ const FeaturedCommerces = () => {
             <div className={`featured-card plan-${commerce.planLevel}`}>
               <div className="card-image-container">
                 <img 
-                    src={commerce.coverImage || '/placeholder-commerce.jpg'} 
+                    src={commerce.coverImage ? getAbsoluteImageUrl(commerce.coverImage) : '/placeholder-commerce.jpg'} 
                     alt={commerce.name} 
                     className="card-image"
                 />

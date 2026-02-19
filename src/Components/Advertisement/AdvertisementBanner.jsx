@@ -1,6 +1,7 @@
 // src/Components/Advertisement/AdvertisementBanner.jsx
 import React, { useEffect } from 'react';
 import { trackAdvertisement } from '../../services/AdvertisementService';
+import { getAbsoluteImageUrl } from '../../services/api';
 import './AdvertisementBanner.css';
 
 const AdvertisementBanner = ({ advertisement, size = 'large' }) => {
@@ -49,7 +50,7 @@ const AdvertisementBanner = ({ advertisement, size = 'large' }) => {
     >
       <div className="ad-banner-image-wrapper">
         <img 
-          src={advertisement.imageUrl} 
+          src={getAbsoluteImageUrl(advertisement.imageUrl)} 
           alt={advertisement.title}
           className="ad-banner-image"
         />

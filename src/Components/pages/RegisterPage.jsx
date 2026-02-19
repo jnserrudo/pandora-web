@@ -62,7 +62,11 @@ const RegisterPage = () => {
           <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
 
-        <button type="submit" className="auth-button" disabled={loading}>
+        <button 
+          type="submit" 
+          className="auth-button" 
+          disabled={loading || !name.trim() || !username.trim() || !email.trim() || !password}
+        >
           {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
         </button>
         <p className="auth-switch">¿Ya tenés una cuenta? <Link to="/login">Ingresá acá</Link></p>

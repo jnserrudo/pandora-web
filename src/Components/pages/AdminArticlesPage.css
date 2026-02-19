@@ -265,6 +265,7 @@
 }
 
 .btn-action-premium.view:hover { color: #00D4FF; border-color: #00D4FF; }
+.btn-action-premium.publish:hover { color: #2ecc71; border-color: #2ecc71; }
 .btn-action-premium.edit:hover { color: #8A2BE2; border-color: #8A2BE2; }
 .btn-action-premium.delete:hover { color: #E74C3C; border-color: #E74C3C; background: rgba(231, 76, 60, 0.1); }
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getEvents } from '../../services/api';
+import { getEvents, getAbsoluteImageUrl } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import ScrollToTopButton from '../ScrollToTopButton/ScrollToTopButton';
 import { MapPin, Calendar, Clock } from 'lucide-react';
@@ -67,7 +67,7 @@ const EventsListPage = () => {
                 <div className="event-card">
                   <div className="event-card-image-wrapper">
                     <img 
-                      src={event.coverImage || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop'} 
+                      src={event.coverImage ? getAbsoluteImageUrl(event.coverImage) : 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop'} 
                       alt={event.name} 
                       className="event-card-image"
                       onError={handleImageError}
@@ -80,7 +80,7 @@ const EventsListPage = () => {
                   <div className="event-card-content">
                     <h3 className="event-card-title">{event.name}</h3>
                     <p className="event-card-location">
-                      <MapPin size={14} className="icon-loc" /> {event.commerce.name}
+                      <MapPin size={14} className="icon-loc" /> {event.address || event.commerce.name}
                     </p>
                   </div>
                 </div>

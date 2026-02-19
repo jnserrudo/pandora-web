@@ -29,28 +29,29 @@ import './AdminDashboard.css';
 const AdminDashboard = () => {
   const { token } = useAuth();
   const { showToast } = useToast();
-  const [dashboardStats, setDashboardStats] = useState({
-    pendingCommerces: 0,
-    activeAds: 0
-  });
+  
+  const [adminData, setAdminData] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
+    const fetchAllAdminData = async () => {
       try {
+        setStatsLoading(true);
+        setStatsError(null);
         const data = await getAdminStats(token);
-        if (data && data.global) {
-          setDashboardStats({
-            pendingCommerces: data.global.pendingCommerces || 0,
-            activeAds: data.global.activeAds || 0
-          });
-        }
+        setAdminData(data);
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
-        showToast(err?.message || 'Error cargando estadísticas del dashboard.', 'error');
+        // The global interceptor handles total failures, but we might want local feedback too
+        setStatsError(err?.message || 'Error cargando estadísticas del dashboard.');
+        // Avoid toast here if the interceptor is already redirecting or notifying
+      } finally {
+        setStatsLoading(false);
       }
     };
 
-    if (token) fetchDashboardStats();
+    if (token) fetchAllAdminData();
   }, [token]);
 
   const adminModules = [
@@ -115,7 +116,11 @@ const AdminDashboard = () => {
 
         {/* Panel de Analytics Avanzado */}
         <section className="admin-section">
-          <AnalyticsPanel />
+          <AnalyticsPanel 
+            data={adminData} 
+            loading={statsLoading} 
+            error={statsError} 
+          />
         </section>
 
         {/* Configuración de Categorías Home */}
@@ -150,16 +155,18 @@ const AdminDashboard = () => {
         </div>
 
         {/* Sección de Mini Estadísticas (Visual) */}
-        <div className="hub-stats-row">
-           <div className="stat-pill">
-              <UserCheck size={18} />
-              <span>{dashboardStats.pendingCommerces} Comercios Pendientes</span>
-           </div>
-           <div className="stat-pill">
-              <Activity size={18} />
-              <span>{dashboardStats.activeAds} Publicidades Activas</span>
-           </div>
-        </div>
+        {!statsLoading && adminData?.global && (
+          <div className="hub-stats-row">
+            <div className="stat-pill">
+                <UserCheck size={18} />
+                <span>{adminData.global.pendingCommerces || 0} Comercios Pendientes</span>
+            </div>
+            <div className="stat-pill">
+                <Activity size={18} />
+                <span>{adminData.global.activeAds || 0} Publicidades Activas</span>
+            </div>
+          </div>
+        )}
       </div>
       <Footer />
       

@@ -3,7 +3,7 @@ import Navbar from '../Navbar/Navbar';
 import { useToast } from '../../context/ToastContext';
 import { createSubmission, uploadImage } from '../../services/api'; // Importamos el servicio unificado
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import { Paperclip, Send, CheckCircle } from 'lucide-react';
+import { Paperclip, Send, CheckCircle, Store, Megaphone, Star, MessageSquare, XCircle } from 'lucide-react';
 import './ContactPage.css';
 
 const ContactPage = () => {
@@ -28,12 +28,20 @@ const ContactPage = () => {
     }));
   };
 
+  // Validación en tiempo de ejecución
+  const isFormValid = formData.name.trim() && 
+                      formData.email.trim() && 
+                      formData.message.trim() &&
+                      !isSubmitting &&
+                      !isUploading;
+
+  const { token } = useAuth();
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setIsUploading(true);
     try {
-      const res = await uploadImage(file);
+      const res = await uploadImage(file, token);
       setFormData(prev => ({ ...prev, attachmentUrl: res.url }));
     } catch (err) {
       showToast("Error al subir archivo.", 'error');
@@ -85,25 +93,25 @@ const ContactPage = () => {
           {/* Left side - Information */}
           <div className="contact-info-section">
             <div className="contact-info-card">
-              <div className="info-icon">🏪</div>
+              <div className="info-icon"><Store size={24} /></div>
               <h3>Comercios</h3>
               <p>Sumá tu comercio a Pandora y llegá a más clientes.</p>
             </div>
 
             <div className="contact-info-card">
-              <div className="info-icon">📢</div>
+              <div className="info-icon"><Megaphone size={24} /></div>
               <h3>Publicidad</h3>
               <p>Promocioná tu marca con nuestras campañas.</p>
             </div>
 
             <div className="contact-info-card">
-              <div className="info-icon">⭐</div>
+              <div className="info-icon"><Star size={24} /></div>
               <h3>Sponsors</h3>
               <p>Auspiciá eventos y formá parte de Pandora.</p>
             </div>
 
             <div className="contact-info-card">
-              <div className="info-icon">💬</div>
+              <div className="info-icon"><MessageSquare size={24} /></div>
               <h3>Consultas Generales</h3>
               <p>¿Tenés dudas? Estamos para ayudarte.</p>
             </div>
@@ -183,7 +191,7 @@ const ContactPage = () => {
                     className="form-input-file"
                   />
                   {isUploading && <p className="upload-status">Subiendo archivo...</p>}
-                  {formData.attachmentUrl && <p className="upload-success">✅ Archivo listo para enviar</p>}
+                  {formData.attachmentUrl && <p className="upload-success"><CheckCircle size={14} className="inline mr-1" /> Archivo listo para enviar</p>}
                 </div>
               )}
 
@@ -202,21 +210,21 @@ const ContactPage = () => {
               </div>
 
               {submitStatus === 'success' && (
-                <div className="form-message success-message">
-                  ✅ ¡Mensaje enviado! Nos contactaremos pronto.
+                <div className="form-message success-message flex items-center gap-2">
+                  <CheckCircle size={18} /> ¡Mensaje enviado! Nos contactaremos pronto.
                 </div>
               )}
 
               {submitStatus === 'error' && (
-                <div className="form-message error-message">
-                  ❌ Hubo un error. Por favor, intentá nuevamente.
+                <div className="form-message error-message flex items-center gap-2">
+                  <XCircle size={18} /> Hubo un error. Por favor, intentá nuevamente.
                 </div>
               )}
 
               <button 
                 type="submit" 
                 className="form-submit-btn"
-                disabled={isSubmitting}
+                disabled={!isFormValid}
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
               </button>

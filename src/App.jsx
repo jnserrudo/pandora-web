@@ -77,7 +77,7 @@ function App() {
           <Route 
             path="/my-commerces" 
             element={
-              <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
                 <MyCommercesPage />
               </ProtectedRoute>
             } 
@@ -85,7 +85,7 @@ function App() {
           <Route 
             path="/commerces/create" 
             element={
-              <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
                 <CommerceFormPage />
               </ProtectedRoute>
             } 

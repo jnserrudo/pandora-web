@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getArticles } from '../../services/api';
+import { getArticles, getAbsoluteImageUrl } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
@@ -98,7 +98,7 @@ const ArticlesListPage = () => {
               <Link to={`/article/${article.slug}`} key={article.id} className="article-card-link">
                 <div className="article-card">
                   <img 
-                    src={article.coverImage} 
+                    src={getAbsoluteImageUrl(article.coverImage)} 
                     alt={article.title} 
                     className="article-card-image" 
                     onError={handleImageError}

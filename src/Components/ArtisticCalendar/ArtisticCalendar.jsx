@@ -1,6 +1,7 @@
 // src/Components/ArtisticCalendar/ArtisticCalendar.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Calendar } from 'lucide-react';
 import { getEvents } from '../../services/api';
 import './ArtisticCalendar.css';
 
@@ -153,7 +154,7 @@ const ArtisticCalendar = () => {
               ))
             ) : (
               <div className="no-events-placeholder">
-                <div className="placeholder-icon">📅</div>
+                <div className="placeholder-icon"><Calendar size={48} className="opacity-20" /></div>
                 <p>No hay eventos programados para este día.</p>
                 <div className="placeholder-hint">¡Seleccioná otro día para ver la agenda!</div>
               </div>

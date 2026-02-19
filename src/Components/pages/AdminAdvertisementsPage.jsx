@@ -32,7 +32,8 @@ const AdminAdvertisementsPage = () => {
   const fetchAdvertisements = async () => {
     try {
       setLoading(true);
-      const data = await getAdvertisements({});
+      // adminMode=true: bypasses date filters and shows ALL ads
+      const data = await getAdvertisements({}, true);
       setAdvertisements(data);
     } catch (err) {
       console.error("Error fetching advertisements:", err);
@@ -132,7 +133,11 @@ const AdminAdvertisementsPage = () => {
                     <td className="hide-mobile">
                       <div className="row-meta-date-group">
                          <small>Desde: {new Date(ad.startDate).toLocaleDateString()}</small>
-                         <small>Hasta: {new Date(ad.endDate).toLocaleDateString()}</small>
+                         <small>Hasta: {
+                           ad.endDate && new Date(ad.endDate).getFullYear() >= 2000
+                             ? new Date(ad.endDate).toLocaleDateString()
+                             : 'Sin vencimiento'
+                         }</small>
                       </div>
                     </td>
                     <td className="text-right">

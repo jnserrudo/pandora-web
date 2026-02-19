@@ -1,8 +1,45 @@
 // src/services/api.js
 import axios from "axios";
 import { API_URL } from "./config";
+export { API_URL };
 
 console.log("API_URL Resolved:", API_URL);
+
+// Utilidad para asegurar que las URLs de imágenes sean absolutas
+export const getAbsoluteImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return url;
+  if (url.startsWith('http')) return url;
+  const baseUrl = API_URL.replace('/api', '');
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+// --- CONFIGURACIÓN DE AXIOS Y MANEJO GLOBAL DE ERRORES ---
+
+// Interceptor para manejar errores de autenticación a nivel global
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const isLoginPage = window.location.pathname === '/login';
+
+    if (status === 401 && !isLoginPage) {
+      console.warn("Sesión expirada (401). Redirigiendo al login...");
+      localStorage.removeItem('token');
+      // Usamos window.location.href para forzar el re-render total de la app
+      window.location.href = '/login?expired=true';
+    } 
+    
+    if (status === 403) {
+      console.warn("Permisos insuficientes (403).");
+      // Si estamos en una zona administrativa, es mejor sacar al usuario de ahí
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/?auth_error=forbidden';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 // --- FUNCIONES PARA COMERCIOS ---
 
@@ -448,14 +485,21 @@ export const toggleEventStatus = async (id, isActive, token) => {
 
 // 3. Subida de Archivos (General)
 
-export const uploadImage = async (file) => {
+export const uploadImage = async (file, token) => {
   try {
     const formData = new FormData();
     formData.append('image', file);
     
-    // Se asume endpoint /upload que devuelve { url: '...' }
-    const response = await axios.post(`${API_URL}/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    const headers = { 
+      'Content-Type': 'multipart/form-data' 
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // El endpoint real es /api/upload/image (API_URL ya incluye /api)
+    const response = await axios.post(`${API_URL}/upload/image`, formData, {
+      headers,
     });
     return response.data;
   } catch (error) {

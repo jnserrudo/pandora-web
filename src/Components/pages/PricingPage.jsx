@@ -166,10 +166,10 @@ const PricingPage = () => {
                 </div>
 
                 <div className="plan-footer">
-                  <button className="plan-cta">
-                    {plan.level === 1 ? 'Empezar Gratis' : `Mejorar a ${plan.name}`}
+                  <Link to="/commerces/create" className="plan-cta">
+                    {plan.level === 1 ? 'Publicar Comercio Gratis' : `Mejorar a ${plan.name}`}
                     <ArrowRight size={18} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

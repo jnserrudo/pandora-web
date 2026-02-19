@@ -5,7 +5,8 @@ import {
     getMyCommerces, 
     getCommerceAdvisories, 
     updateAdvisoryStatus,
-    getCommerceMetrics 
+    getCommerceMetrics,
+    getAbsoluteImageUrl 
 } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -109,8 +110,8 @@ const MyCommercesPage = () => {
   };
 
   const getImageUrl = (commerce) => {
-    if (commerce.galleryImages && commerce.galleryImages.length > 0) return commerce.galleryImages[0];
-    if (commerce.coverImage) return commerce.coverImage;
+    if (commerce.galleryImages && commerce.galleryImages.length > 0) return getAbsoluteImageUrl(commerce.galleryImages[0]);
+    if (commerce.coverImage) return getAbsoluteImageUrl(commerce.coverImage);
     return "https://via.placeholder.com/400x250.png?text=Pandora+Space"; 
   };
 
@@ -138,7 +139,7 @@ const MyCommercesPage = () => {
                 </header>
 
                 {commerces.length === 0 ? (
-                    <div className="empty-state-hub glass-panel">
+                    <div className="empty-state-hub neo-glass-panel">
                         <div className="empty-icon-container">
                             <Store size={48} />
                         </div>
@@ -151,7 +152,7 @@ const MyCommercesPage = () => {
                 ) : (
                     <div className="commerces-neo-grid">
                         {commerces.map(commerce => (
-                            <div key={commerce.id} className="neo-manage-card glass-panel">
+                            <div key={commerce.id} className="neo-manage-card neo-glass-panel">
                                 <div className="card-media">
                                     <img src={getImageUrl(commerce)} alt={commerce.name} />
                                     {commerce.hasNewAdvisory && (
@@ -163,7 +164,13 @@ const MyCommercesPage = () => {
                                 </div>
                                 
                                 <div className="card-body">
-                                    <span className="card-category">{commerce.category?.replace('_', ' ')}</span>
+                                    <div className="card-top-info">
+                                        <span className="card-category">{commerce.category?.replace('_', ' ')}</span>
+                                        <span className={`status-pill ${commerce.status?.toLowerCase()}`}>
+                                            {commerce.status === 'PENDING' ? 'En Revisión' : 
+                                             commerce.status === 'ACTIVE' ? 'Publicado' : 'Rechazado'}
+                                        </span>
+                                    </div>
                                     <h3 className="card-name">{commerce.name}</h3>
                                     
                                     <div className="card-stats-mini">

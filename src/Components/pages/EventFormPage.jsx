@@ -1,14 +1,18 @@
 // src/Components/pages/EventFormPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createEvent, getMyCommerces, uploadImage } from '../../services/api'; 
+import { createEvent, getMyCommerces, uploadImage, API_URL, getAbsoluteImageUrl } from '../../services/api'; 
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import './CommerceFormPage.css'; // Reutilizamos estilos base
-import './EventFormPage.css';    // Estilos específicos
+import { Camera, Upload, X, MapPin } from 'lucide-react';
+import './CommerceFormPage.css';
+import './EventFormPage.css';
+import './AdminAdvertisementFormPage.css';
+import { useImageUpload } from '../../hooks/useImageUpload';
+import MapPicker from '../ui/MapPicker';
 
 const EventFormPage = () => {
   const navigate = useNavigate();
@@ -22,14 +26,18 @@ const EventFormPage = () => {
     commerceId: '', // Debe seleccionarse de los comercios del usuario
     startDate: '',
     endDate: '',
-    location: '',
+    location: '', // Referencia visual (ej: Planta Alta)
+    address: '',  // Dirección física (ej: Belgrano 123)
+    latitude: null,
+    longitude: null,
     coverImage: ''
   });
 
   const [myCommerces, setMyCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+  const { uploading, fromInputEvent } = useImageUpload();
+  const handleRemoveImage = () => setFormData(prev => ({ ...prev, coverImage: '' }));
 
   // Cargar comercios del usuario para el selector
   useEffect(() => {
@@ -56,21 +64,13 @@ const EventFormPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const result = await uploadImage(file);
-      setFormData(prev => ({ ...prev, coverImage: result.url }));
-    } catch (err) {
-      console.error("Error uploading image:", err);
-      showToast("Error al subir imagen.", 'error');
-    } finally {
-      setUploading(false);
-    }
-  };
+  // Validación en tiempo de ejecución para el botón
+  const isFormValid = formData.name.trim() && 
+                      formData.description.trim() && 
+                      formData.startDate && 
+                      formData.endDate && 
+                      formData.address.trim() &&
+                      formData.commerceId;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,9 +87,23 @@ const EventFormPage = () => {
 
     setLoading(true);
     try {
-      await createEvent(formData, token);
-      showToast('Evento creado con éxito!', 'success');
-      navigate('/events'); // O redirigir a mis eventos si existiera
+      // Normalización de fechas para Prisma (ISO-8601)
+      // Fusionamos "location" (referencia visual) con "address" para evitar errores de schema si no está migrado
+      const fullAddress = formData.location ? `${formData.address} (${formData.location})` : formData.address;
+      
+      const payload = {
+        ...formData,
+        address: fullAddress,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: new Date(formData.endDate).toISOString(),
+      };
+
+      // Quitamos 'location' explícitamente del payload para evitar el error "Unknown argument location"
+      delete payload.location;
+
+      await createEvent(payload, token);
+      showToast('¡Evento creado con éxito!', 'success');
+      navigate('/events'); 
     } catch (err) {
       console.error("Error creating event:", err);
       setError(err.message || "Error al crear el evento.");
@@ -137,7 +151,7 @@ const EventFormPage = () => {
             </div>
 
             <div className="form-group">
-              <label>Nombre del Evento</label>
+              <label>Nombre del Evento <span className="required-tag">(Obligatorio)</span></label>
               <input 
                 type="text" 
                 name="name" 
@@ -151,7 +165,7 @@ const EventFormPage = () => {
 
             <div className="date-inputs-row">
               <div className="form-group">
-                <label>Fecha y Hora Inicio</label>
+                <label>Fecha y Hora Inicio <span className="required-tag">(Obligatorio)</span></label>
                 <input 
                   type="datetime-local" 
                   name="startDate" 
@@ -162,7 +176,7 @@ const EventFormPage = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Fecha y Hora Fin</label>
+                <label>Fecha y Hora Fin <span className="required-tag">(Obligatorio)</span></label>
                 <input 
                   type="datetime-local" 
                   name="endDate" 
@@ -174,21 +188,56 @@ const EventFormPage = () => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Ubicación (Dirección o Nombre detalla)</label>
-              <input 
-                type="text" 
-                name="location" 
-                value={formData.location} 
-                onChange={handleChange} 
-                className="form-control" 
-                placeholder="Ej. Planta Alta, Escenario Principal"
-                required
-              />
+            <div className="grid-2-cols" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label>Dirección Física <span className="required-tag">(Obligatorio)</span></label>
+                <input 
+                  type="text" 
+                  name="address" 
+                  value={formData.address} 
+                  onChange={handleChange} 
+                  className="form-control" 
+                  placeholder="Ej. Av. Belgrano 1234, Salta"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Ubicación Específica</label>
+                <input 
+                  type="text" 
+                  name="location" 
+                  value={formData.location} 
+                  onChange={handleChange} 
+                  className="form-control" 
+                  placeholder="Ej. Planta Alta, Escenario Principal"
+                />
+              </div>
             </div>
 
             <div className="form-group">
-              <label>Descripción</label>
+              <label>Punto en el Mapa (Opcional)</label>
+              <div className="event-map-container" style={{ position: 'relative', borderRadius: '15px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <MapPicker 
+                  initialLat={formData.latitude}
+                  initialLng={formData.longitude}
+                  onChange={(coords) => setFormData(prev => ({ 
+                    ...prev, 
+                    latitude: coords.lat, 
+                    longitude: coords.lng 
+                  }))}
+                />
+                {(formData.latitude && formData.longitude) && (
+                  <div className="coords-badge" style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', padding: '5px 10px', borderRadius: '20px', fontSize: '0.7rem', color: '#2ecc71', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <MapPin size={10} /> Ubicación capturada
+                  </div>
+                )}
+              </div>
+              <small className="field-hint">Marcá en el mapa si el evento es en un lugar distinto a la sede principal.</small>
+            </div>
+
+            <div className="form-group">
+              <label>Descripción <span className="required-tag">(Obligatorio)</span></label>
               <textarea 
                 name="description" 
                 value={formData.description} 
@@ -201,28 +250,77 @@ const EventFormPage = () => {
 
             <div className="form-group">
               <label>Flyer / Imagen de Portada</label>
-              <div className="image-upload-section">
-                 <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleImageUpload} 
-                  style={{display: 'none'}} 
-                  id="event-cover-upload"
-                />
-                <label htmlFor="event-cover-upload" style={{cursor:'pointer', width:'100%', height:'100%'}}>
-                   {uploading ? 'Subiendo...' : (formData.coverImage ? 'Cambiar Imagen' : '📸 Subir Flyer')}
-                </label>
+              <div className={`image-upload-area ${formData.coverImage ? 'has-image' : ''} ${uploading ? 'uploading' : ''}`}>
+                {!formData.coverImage ? (
+                  <>
+                    <input 
+                      type="file" 
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                      onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, coverImage: url })))} 
+                      style={{display:'none'}} 
+                      id="event-cover-upload"
+                      disabled={uploading}
+                    />
+                    <label htmlFor="event-cover-upload" className="upload-label">
+                      {uploading ? (
+                        <div className="upload-content">
+                          <div className="spinner-sm"></div>
+                          <span className="upload-text">Subiendo flyer...</span>
+                        </div>
+                      ) : (
+                        <div className="upload-content">
+                          <Upload size={32} />
+                          <span className="upload-text">Hacé click para subir el flyer del evento</span>
+                          <span className="upload-hint">JPG, PNG, GIF, WebP — Máx. 10MB</span>
+                        </div>
+                      )}
+                    </label>
+                  </>
+                ) : (
+                  <div className="image-preview-container">
+                    {uploading && (
+                      <div className="upload-overlay">
+                        <div className="spinner-sm"></div>
+                        <span>Subiendo flyer...</span>
+                      </div>
+                    )}
+                    <img 
+                      src={getAbsoluteImageUrl(formData.coverImage)} 
+                      alt="Flyer preview"
+                    />
+                    <div className="image-preview-actions">
+                      <input 
+                        type="file" 
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, coverImage: url })))} 
+                        style={{display:'none'}} 
+                        id="event-cover-change"
+                        disabled={uploading}
+                      />
+                      <label htmlFor="event-cover-change" className="btn-change-image">
+                        <Camera size={16} /> Cambiar flyer
+                      </label>
+                      <button 
+                        type="button" 
+                        className="btn-remove-image"
+                        onClick={handleRemoveImage}
+                        disabled={uploading}
+                      >
+                        <X size={16} /> Quitar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              {formData.coverImage && (
-                <div className="image-preview-item" style={{maxWidth:'200px', margin:'1rem auto'}}>
-                  <img src={formData.coverImage} alt="Preview" />
-                </div>
-              )}
             </div>
 
             <div className="form-actions">
               <Link to="/" className="cancel-btn">Cancelar</Link>
-              <button type="submit" className="submit-btn" disabled={loading || uploading}>
+              <button 
+                type="submit" 
+                className="submit-btn" 
+                disabled={loading || uploading || !isFormValid}
+              >
                 {loading ? 'Publicando...' : 'Publicar Evento'}
               </button>
             </div>

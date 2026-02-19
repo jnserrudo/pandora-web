@@ -75,10 +75,9 @@ const AdminCommercesPage = () => {
         adminId: adminUser?.id
       }, token);
 
-      setCommerces(prev => prev.map(c => 
+        setCommerces(prev => prev.map(c => 
         c.id === selectedCommerce.id ? { 
           ...c, 
-          validated: isApproved,
           status: isApproved ? 'ACTIVE' : 'REJECTED'
         } : c
       ));
@@ -104,7 +103,7 @@ const AdminCommercesPage = () => {
           </div>
           <div className="stat-pill">
             <Clock size={18} />
-            <span>{commerces.filter(c => !c.validated).length} Pendientes</span>
+            <span>{commerces.filter(c => c.status === 'PENDING').length} Pendientes</span>
           </div>
         </header>
 
@@ -151,8 +150,8 @@ const AdminCommercesPage = () => {
                       <span className="row-meta">{commerce.category || 'General'}</span>
                     </td>
                     <td className="hide-mobile">
-                      <span className={`badge-premium ${commerce.validated ? 'active' : (commerce.status === 'REJECTED' ? 'danger' : 'warning')}`}>
-                        {commerce.validated ? 'Validado' : (commerce.status === 'REJECTED' ? 'Rechazado' : 'Pendiente')}
+                      <span className={`badge-premium ${commerce.status === 'ACTIVE' ? 'active' : (commerce.status === 'REJECTED' ? 'danger' : 'warning')}`}>
+                        {commerce.status === 'ACTIVE' ? 'Validado' : (commerce.status === 'REJECTED' ? 'Rechazado' : 'Pendiente')}
                       </span>
                     </td>
                     <td className="hide-mobile">
@@ -169,7 +168,7 @@ const AdminCommercesPage = () => {
                           <ExternalLink size={18} />
                         </Link>
                         
-                        {!commerce.validated && (
+                        {commerce.status === 'PENDING' && (
                           <>
                             <button 
                               onClick={() => openValidationModal(commerce, 'APPROVE')} 
@@ -188,7 +187,7 @@ const AdminCommercesPage = () => {
                           </>
                         )}
                         
-                        {commerce.validated && (
+                        {commerce.status === 'ACTIVE' && (
                           <button 
                             onClick={() => openValidationModal(commerce, 'REJECT')} 
                             className="btn-action-premium delete"

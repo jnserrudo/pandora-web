@@ -25,11 +25,7 @@ import { useToast } from '../../context/ToastContext';
 import { useState, useEffect } from 'react';
 import './AnalyticsPanel.css';
 
-const AnalyticsPanel = () => {
-  const { token } = useAuth();
-  const { showToast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const AnalyticsPanel = ({ data, loading, error }) => {
   const [stats, setStats] = useState({
     impressions: 0,
     clicks: 0,
@@ -54,30 +50,24 @@ const AnalyticsPanel = () => {
   const [searchesData, setSearchesData] = useState([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getAdminStats(token);
-        
-        if (data && data.global) {
-          setStats(data.global);
-          if (data.activity && data.activity.length > 0) setActivityData(data.activity);
-          if (data.categories && data.categories.length > 0) setCategoryData(data.categories);
-          if (data.searches) setSearchesData(data.searches);
-        }
-      } catch (err) {
-        console.error("Error fetching admin stats:", err);
-        const message = err?.message || 'Error cargando estadísticas de administración.';
-        setError(message);
-        showToast(message, 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (data && data.global) {
+      setStats(data.global);
+      if (data.activity && data.activity.length > 0) setActivityData(data.activity);
+      if (data.categories && data.categories.length > 0) setCategoryData(data.categories);
+      if (data.searches) setSearchesData(data.searches);
+    }
+  }, [data]);
 
-    if (token) fetchStats();
-  }, [token]);
+  if (loading) return (
+    <div className="analytics-panel loading-state">
+      <div className="analytics-header">
+        <h2>📊 Analíticas del Sistema</h2>
+      </div>
+      <div className="loading-placeholder">Cargando métricas de rendimiento...</div>
+    </div>
+  );
+
+  if (error) return null; // No mostrar nada si hay error (Dashboard manejará el error global)
   return (
     <div className="analytics-panel">
       <div className="analytics-header">

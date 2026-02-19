@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getAbsoluteImageUrl } from '../../services/api';
 import './TrendingMagazine.css';
 
 const TrendingMagazine = ({ articles }) => {
@@ -37,7 +38,7 @@ const TrendingMagazine = ({ articles }) => {
                             className="trending-article-card"
                         >
                             <div className="card-media">
-                                <img src={article.coverImage} alt={article.title} />
+                                <img src={getAbsoluteImageUrl(article.coverImage)} alt={article.title} />
                             </div>
                             <div className="card-info">
                                 <h3>{article.title}</h3>

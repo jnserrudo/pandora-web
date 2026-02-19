@@ -21,6 +21,12 @@ const AdvisoryForm = ({ commerceId, metrics, onSubmit, onCancel }) => {
     }
   };
 
+  // Validación en tiempo de ejecución
+  const isFormValid = formData.title.trim() && 
+                      formData.content.trim() && 
+                      formData.recommendations.trim() &&
+                      !isSubmitting;
+
   return (
     <div className="advisory-form-container glass-panel">
       <div className="advisory-header">
@@ -78,7 +84,11 @@ const AdvisoryForm = ({ commerceId, metrics, onSubmit, onCancel }) => {
             <button type="button" onClick={onCancel} className="btn-cancel">
                 Cancelar
             </button>
-            <button type="submit" disabled={isSubmitting} className="btn-submit-advisory">
+            <button 
+              type="submit" 
+              disabled={!isFormValid} 
+              className="btn-submit-advisory"
+            >
                 <Send size={16} />
                 {isSubmitting ? 'Enviando...' : 'Enviar Asesoría'}
             </button>

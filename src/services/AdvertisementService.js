@@ -4,41 +4,52 @@ import axios from 'axios';
 import { API_URL } from './config';
 
 /**
- * Obtiene todas las publicidades (con filtros opcionales)
+ * Obtiene todas las publicidades
  * @param {Object} filters - Filtros (category, position, isActive)
+ * @param {boolean} adminMode - Si true, devuelve TODAS (sin filtros de fecha ni estado)
  * @returns {Promise<Array>} Lista de publicidades
  */
-export const getAdvertisements = async (filters = {}) => {
+export const getAdvertisements = async (filters = {}, adminMode = false) => {
   try {
     const params = new URLSearchParams();
     
     if (filters.category) params.append('category', filters.category);
     if (filters.position) params.append('position', filters.position);
     if (filters.isActive !== undefined) params.append('isActive', filters.isActive);
+    if (adminMode) params.append('admin', 'true');
 
     const url = `${API_URL}/advertisements${params.toString() ? `?${params.toString()}` : ''}`;
     const response = await axios.get(url);
-    console.log('Response:', response);
+    console.log('Advertisements response:', response.data);
+
+    // En modo admin NUNCA usamos mock data — siempre mostramos lo real
+    if (adminMode) {
+      return response.data;
+    }
+
+    // En modo público, si no hay datos reales usamos mock como fallback visual
     if (response.data.length === 0) {
       return getMockAdvertisements(filters);
     }
     return response.data;
   } catch (error) {
-    console.warn('Error fetching advertisements (using mock data):', error);
-    const mockData = getMockAdvertisements(filters);
-    console.log('Mock data:', mockData);
-    return mockData;
+    console.warn('Error fetching advertisements:', error);
+    // En modo admin, propagamos el error; en público mostramos mock
+    if (adminMode) throw error;
+    return getMockAdvertisements(filters);
   }
 };
 
 /**
  * Obtiene una publicidad por ID
  * @param {number|string} id - ID de la publicidad
+ * @param {boolean} adminMode - Si true, puede ver publicidades inactivas
  * @returns {Promise<Object>} Publicidad
  */
-export const getAdvertisementById = async (id) => {
+export const getAdvertisementById = async (id, adminMode = false) => {
   try {
-    const response = await axios.get(`${API_URL}/advertisements/${id}`);
+    const suffix = adminMode ? '?admin=true' : '';
+    const response = await axios.get(`${API_URL}/advertisements/${id}${suffix}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching advertisement ${id}:`, error);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { createCommerceComment } from '../../services/api';
-import { Star } from 'lucide-react';
+import { Star, MessageSquare, Info, Send, User, Paintbrush, Award, CircleDollarSign, FileText } from 'lucide-react';
 import './CommerceCommentForm.css';
 
 const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
@@ -40,10 +40,13 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
     }
   };
 
+  // Validación en tiempo de ejecución
+  const isFormValid = formData.comment.trim() && !isSubmitting;
+
   return (
     <div className="commerce-comment-form-container">
       <div className="comment-form-header">
-        <h3>💬 Comparte tu Experiencia</h3>
+        <h3><MessageSquare className="inline-block mr-2 text-primary" /> Comparte tu Experiencia</h3>
         <p>Tu opinión nos ayudará a mejorar el servicio de {commerceName}</p>
       </div>
 
@@ -57,11 +60,11 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="form-select"
           >
-            <option value="SERVICIO">🙋 Servicio</option>
-            <option value="AMBIENTE">🎨 Ambiente</option>
-            <option value="CALIDAD">⭐ Calidad</option>
-            <option value="PRECIO">💰 Precio</option>
-            <option value="OTRO">📝 Otro</option>
+            <option value="SERVICIO">Servicio</option>
+            <option value="AMBIENTE">Ambiente</option>
+            <option value="CALIDAD">Calidad</option>
+            <option value="PRECIO">Precio</option>
+            <option value="OTRO">Otro</option>
           </select>
         </div>
 
@@ -108,18 +111,18 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
             onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
             className="form-input"
           />
-          <small className="form-hint">
-            ℹ️ Este comentario es interno y solo lo verán los administradores de Pandora
+          <small className="form-hint flex items-center gap-1">
+            <Info size={14} /> Este comentario es interno y solo lo verán los administradores de Pandora
           </small>
         </div>
 
         {/* Botón Submit */}
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={!isFormValid}
           className="btn-submit-comment"
         >
-          {isSubmitting ? 'Enviando...' : '📤 Enviar Feedback'}
+          {isSubmitting ? 'Enviando...' : <span className="flex items-center justify-center gap-2"><Send size={18} /> Enviar Feedback</span>}
         </button>
       </form>
     </div>

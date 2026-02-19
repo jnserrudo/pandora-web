@@ -52,7 +52,11 @@ const LoginPage = () => {
             required
           />
         </div>
-        <button type="submit" className="auth-button" disabled={loading}>
+        <button 
+          type="submit" 
+          className="auth-button" 
+          disabled={loading || !identifier.trim() || !password}
+        >
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
         <p className="auth-switch">

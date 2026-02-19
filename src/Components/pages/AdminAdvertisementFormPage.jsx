@@ -2,13 +2,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getAdvertisementById, createAdvertisement, updateAdvertisement } from '../../services/AdvertisementService';
-import { uploadImage, getCommerces } from '../../services/api'; 
+import { uploadImage, getCommerces, getAbsoluteImageUrl } from '../../services/api'; 
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import './CommerceFormPage.css'; // Reutilizamos estilos de formulario
+import { Camera, CheckCircle, Pause, Info, Upload, X } from 'lucide-react';
+import './CommerceFormPage.css';
+import './AdminAdvertisementFormPage.css';
+import { useImageUpload } from '../../hooks/useImageUpload';
+
+// Las posiciones definen DÓNDE aparecerá la publicidad en la web
+const POSITION_INFO = {
+  banner_home: {
+    label: 'Banner Home (Principal)',
+    description: 'Imagen grande rotativa en la sección central de la página de inicio. Máxima visibilidad para todos los visitantes. Tamaño recomendado: 1200×400px.'
+  },
+  banner_events: {
+    label: 'Banner Eventos',
+    description: 'Aparece en la parte superior de la sección de Eventos. Ideal para publicidades de espectáculos, shows o actividades culturales. Tamaño recomendado: 1200×300px.'
+  },
+  sidebar: {
+    label: 'Barra Lateral',
+    description: 'Panel visible a la derecha del contenido principal mientras el usuario navega. Perfecto para anuncios más verticales y de lectura secundaria. Tamaño recomendado: 300×600px.'
+  }
+};
 
 const AdminAdvertisementFormPage = () => {
   const { id } = useParams();
@@ -22,23 +41,28 @@ const AdminAdvertisementFormPage = () => {
     description: '',
     imageUrl: '',
     link: '',
-    category: 'COMMERCE', // Enum: COMMERCE, EXTERNAL, SPONSOR
-    position: 'banner_home', // banner_home, sidebar, etc.
+    category: 'COMMERCE',
+    position: 'banner_home',
     isActive: true,
-    startDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+    startDate: new Date().toISOString().split('T')[0],
     endDate: '',
-    commerceId: '' // Opcional
+    commerceId: ''
   });
 
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const { uploading, fromInputEvent } = useImageUpload();
 
-  // Cargar comercios para el dropdown
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    setUploadError(null);
+  };
+
   useEffect(() => {
     const loadCommerces = async () => {
       try {
-        const data = await getCommerces(); // Trae todos
+        const data = await getCommerces();
         setCommerces(data);
       } catch (err) {
         console.error("Error loading commerces list", err);
@@ -47,17 +71,25 @@ const AdminAdvertisementFormPage = () => {
     loadCommerces();
   }, []);
 
-  // Cargar datos si es edición
   useEffect(() => {
     if (isEditMode) {
       const fetchAd = async () => {
         setLoading(true);
         try {
-          const data = await getAdvertisementById(id);
-          // Ajustar fechas para input type="date"
-          const start = data.startDate ? new Date(data.startDate).toISOString().split('T')[0] : '';
-          const end = data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : '';
-          
+          const data = await getAdvertisementById(id, true); // adminMode=true: puede cargar ads inactivas
+
+          // Normalizar fechas: si la fecha es epoch (año < 2000), tratar como vacía
+          // Esto ocurre cuando la ad fue creada sin endDate antes del fix del backend
+          const normalizeDate = (dateStr) => {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime()) || d.getFullYear() < 2000) return '';
+            return d.toISOString().split('T')[0];
+          };
+
+          const start = normalizeDate(data.startDate);
+          const end = normalizeDate(data.endDate);
+
           setFormData({
             title: data.title || '',
             description: data.description || '',
@@ -89,34 +121,27 @@ const AdminAdvertisementFormPage = () => {
     }));
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const result = await uploadImage(file);
-      setFormData(prev => ({ ...prev, imageUrl: result.url }));
-    } catch (err) {
-      console.error(err);
-      showToast("Error subiendo imagen.", 'error');
-    } finally {
-      setUploading(false);
-    }
-  };
+  // Validación en tiempo de ejecución para el botón
+  const isFormValid = formData.title.trim() && 
+                      formData.description.trim() && 
+                      formData.imageUrl && 
+                      formData.link.trim() && 
+                      formData.startDate && 
+                      formData.position;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.imageUrl) {
+      showToast('La imagen del banner es obligatoria.', 'error');
+      return;
+    }
     setLoading(true);
-    
-    // Preparar objeto para enviar
     const payload = {
       ...formData,
-      // Convertir fechas a ISO completo si el backend lo requiere, o dejarlas YYYY-MM-DD
-      startDate: new Date(formData.startDate).toISOString(), 
-      endDate: new Date(formData.endDate).toISOString(),
+      startDate: new Date(formData.startDate).toISOString(),
+      endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
       commerceId: formData.commerceId ? parseInt(formData.commerceId) : null
     };
-
     try {
       if (isEditMode) {
         await updateAdvertisement(id, payload, token);
@@ -128,7 +153,7 @@ const AdminAdvertisementFormPage = () => {
       navigate('/admin/advertisements');
     } catch (error) {
       console.error("Error saving ad:", error);
-      showToast(error.message, 'error');
+      showToast(error.message || 'Error al guardar la publicidad.', 'error');
     } finally {
       setLoading(false);
     }
@@ -136,21 +161,23 @@ const AdminAdvertisementFormPage = () => {
 
   if (loading && isEditMode) return <LoadingSpinner />;
 
+  const selectedPositionInfo = POSITION_INFO[formData.position];
+
   return (
     <div className="commerce-form-wrapper">
       <Navbar />
       <div className="commerce-form-container">
         <div className="form-header">
-           <h1 style={{color: 'var(--color-primary)'}}>
-             {isEditMode ? 'Editar Publicidad' : 'Nueva Campaña Publicitaria'}
-           </h1>
+          <h1>{isEditMode ? 'Editar Publicidad' : 'Nueva Campaña Publicitaria'}</h1>
+          <p>{isEditMode ? 'Modificá los datos de la campaña activa.' : 'Completá los datos para lanzar una nueva campaña.'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="form-card">
-          {/* Fila 1 */}
+
+          {/* Título y Categoría */}
           <div className="form-row">
             <div className="form-group">
-              <label>Título de la Campaña</label>
+              <label>Título de la Campaña <span className="required-tag">(Obligatorio)</span></label>
               <input 
                 type="text" 
                 name="title" 
@@ -158,134 +185,208 @@ const AdminAdvertisementFormPage = () => {
                 onChange={handleChange} 
                 className="form-control" 
                 required 
-                placeholder="Ej: 20% OFF en Cenas"
+                placeholder="Ej: 20% OFF en Cenas de Verano"
               />
+              <small className="field-hint">Aparece como texto alternativo del banner y en reportes internos.</small>
             </div>
             
-             <div className="form-group">
-              <label>Categoría</label>
+            <div className="form-group">
+              <label>Categoría / Tipo <span className="required-tag">(Obligatorio)</span></label>
               <select name="category" value={formData.category} onChange={handleChange} className="form-control">
-                <option value="COMMERCE">Comercio (Interno)</option>
-                <option value="EXTERNAL">Externo (Gobierno/Otros)</option>
-                <option value="SPONSOR">Sponsor Oficial</option>
+                <option value="COMMERCE">Comercio (negocio del ecosistema Pandora)</option>
+                <option value="EXTERNAL">Externo (gobierno, ONG, empresa ajena)</option>
+                <option value="SPONSOR">Sponsor Oficial (patrocinador especial)</option>
               </select>
             </div>
           </div>
 
-          {/* Fila 2 - Condicional Comercio */}
+          {/* Comercio asociado (condicional) */}
           {formData.category === 'COMMERCE' && (
-             <div className="form-group">
-               <label>Asociar a Comercio (Opcional)</label>
-               <select name="commerceId" value={formData.commerceId} onChange={handleChange} className="form-control">
-                 <option value="">-- Seleccionar Comercio --</option>
-                 {commerces.map(c => (
-                   <option key={c.id} value={c.id}>{c.name}</option>
-                 ))}
-               </select>
-               <small style={{color:'rgba(255,255,255,0.5)'}}>Esto vinculará la publicidad al perfil del comercio automáticamente.</small>
-             </div>
+            <div className="form-group">
+              <label>Vincular a un Comercio de Pandora</label>
+              <select name="commerceId" value={formData.commerceId} onChange={handleChange} className="form-control">
+                <option value="">-- Sin asociar (publicidad genérica) --</option>
+                {commerces.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <small className="field-hint">Si lo vinculás, el banner podrá navegar al perfil del comercio en Pandora.</small>
+            </div>
           )}
 
+          {/* Link */}
           <div className="form-group">
-             <label>Link de Redestino</label>
-             <input 
-               type="text" 
-               name="link" 
-               value={formData.link} 
-               onChange={handleChange} 
-               className="form-control" 
-               placeholder={formData.category === 'COMMERCE' ? '/commerce/1' : 'https://susitio.com'}
-               required
-             />
+            <label>URL de Destino <span className="required-tag">(Obligatorio)</span></label>
+            <input 
+              type="text" 
+              name="link" 
+              value={formData.link} 
+              onChange={handleChange} 
+              className="form-control" 
+              placeholder={formData.category === 'COMMERCE' ? '/commerces/25 ó https://sucomercio.com' : 'https://sitioexterno.gov.ar'}
+              required
+            />
+            <small className="field-hint">¿A dónde lleva el banner al hacer click? URL externa (https://...) o ruta interna (/sección).</small>
           </div>
 
+          {/* Descripción */}
           <div className="form-group">
-            <label>Descripción / Texto Promocional</label>
+            <label>Texto Promocional <span className="required-tag">(Obligatorio)</span></label>
             <textarea 
               name="description" 
               value={formData.description} 
               onChange={handleChange} 
               className="form-control" 
               style={{ minHeight: '100px' }} 
-              required 
+              required
+              placeholder="Ej: Descubrí los mejores sabores con 20% de descuento todos los viernes. ¡Reservá tu mesa hoy!"
             />
+            <small className="field-hint">Subtítulo o tagline del anuncio visible debajo del banner.</small>
           </div>
 
-          {/* Fila 3 - Posición e Imagen */}
-          <div className="form-row">
-             <div className="form-group">
-                <label>Posición en la Web</label>
-                <select name="position" value={formData.position} onChange={handleChange} className="form-control">
-                  <option value="banner_home">Banner Home (Principal)</option>
-                  <option value="banner_events">Banner Eventos</option>
-                  <option value="sidebar">Barra Lateral</option>
-                  <option value="popup">Pop-Up (Invasivo)</option>
-                </select>
-             </div>
-             
-             <div className="form-group">
-               <label>Estado</label>
-               <div className="toggle-container" style={{display:'flex', alignItems:'center', gap:'10px', height: '45px'}}>
-                  <input 
-                    type="checkbox" 
-                    name="isActive" 
-                    checked={formData.isActive} 
-                    onChange={handleChange}
-                    id="isActiveToggle"
-                    style={{width:'20px', height:'20px'}}
-                  />
-                  <label htmlFor="isActiveToggle" style={{margin:0, cursor:'pointer'}}>
-                    {formData.isActive ? '✅ Activa (Visible)' : '⏸ Pausada (Oculta)'}
-                  </label>
-               </div>
-             </div>
-          </div>
-
-          {/* Fila 4 - Fechas */}
-          <div className="form-row">
-             <div className="form-group">
-               <label>Fecha Inicio</label>
-               <input 
-                 type="date" 
-                 name="startDate" 
-                 value={formData.startDate} 
-                 onChange={handleChange} 
-                 className="form-control" 
-                 required 
-               />
-             </div>
-             <div className="form-group">
-               <label>Fecha Fin</label>
-               <input 
-                 type="date" 
-                 name="endDate" 
-                 value={formData.endDate} 
-                 onChange={handleChange} 
-                 className="form-control" 
-                 required 
-               />
-             </div>
-          </div>
-
+          {/* Posición en la web */}
           <div className="form-group">
-            <label>Imagen del Banner/Anuncio</label>
-             <div className="image-upload-section">
-                <input type="file" onChange={handleImageUpload} style={{display:'none'}} id="ad-img" />
-                <label htmlFor="ad-img" style={{cursor:'pointer'}}>
-                  {uploading ? 'Subiendo...' : (formData.imageUrl ? 'Cambiar Imagen' : '📸 Seleccionar Foto')}
-                </label>
-             </div>
-             {formData.imageUrl && (
-               <div style={{marginTop:'1rem', border:'1px solid rgba(255,255,255,0.2)', padding:'5px', borderRadius:'8px'}}>
-                 <img src={formData.imageUrl} alt="Preview" style={{maxWidth:'100%', borderRadius:'4px'}} />
-               </div>
-             )}
+            <label>Posición en la Web <span className="required-tag">(Obligatorio)</span></label>
+            <select name="position" value={formData.position} onChange={handleChange} className="form-control">
+              {Object.entries(POSITION_INFO).map(([value, info]) => (
+                <option key={value} value={value}>{info.label}</option>
+              ))}
+            </select>
+            {selectedPositionInfo && (
+              <div className="position-info-box">
+                <Info size={15} />
+                <span>{selectedPositionInfo.description}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Imagen del banner */}
+          <div className="form-group">
+            <label>Imagen del Banner <span className="required-tag">(Obligatorio)</span></label>
+            <div className={`image-upload-area ${formData.imageUrl ? 'has-image' : ''} ${uploading ? 'uploading' : ''}`}>
+              {!formData.imageUrl ? (
+                <>
+                  <input 
+                    type="file" 
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, imageUrl: url })))} 
+                    style={{display:'none'}} 
+                    id="ad-img-upload"
+                    disabled={uploading}
+                  />
+                  <label htmlFor="ad-img-upload" className="upload-label">
+                    {uploading ? (
+                      <div className="upload-content">
+                        <div className="spinner-sm"></div>
+                        <span className="upload-text">Subiendo imagen...</span>
+                      </div>
+                    ) : (
+                      <div className="upload-content">
+                        <Upload size={32} />
+                        <span className="upload-text">Hacé click para seleccionar una imagen</span>
+                        <span className="upload-hint">JPG, PNG, GIF, WebP — Máx. 10MB</span>
+                      </div>
+                    )}
+                  </label>
+                </>
+              ) : (
+                <div className="image-preview-container">
+                  {uploading && (
+                    <div className="upload-overlay">
+                      <div className="spinner-sm"></div>
+                      <span>Subiendo imagen...</span>
+                    </div>
+                  )}
+                  <img 
+                    src={getAbsoluteImageUrl(formData.imageUrl)} 
+                    alt="Preview del banner"
+                  />
+                  <div className="image-preview-actions">
+                    <input 
+                      type="file" 
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                      onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, imageUrl: url })))} 
+                      style={{display:'none'}} 
+                      id="ad-img-change"
+                      disabled={uploading}
+                    />
+                    <label htmlFor="ad-img-change" className="btn-change-image">
+                      <Camera size={16} /> Cambiar imagen
+                    </label>
+                    <button 
+                      type="button" 
+                      className="btn-remove-image"
+                      onClick={handleRemoveImage}
+                      disabled={uploading}
+                    >
+                      <X size={16} /> Quitar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {uploadError && (
+              <small style={{color:'#ff6b6b', marginTop:'0.5rem', display:'block'}}>{uploadError}</small>
+            )}
+          </div>
+
+          {/* Fechas */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Fecha de Inicio <span className="required-tag">(Obligatorio)</span></label>
+              <input 
+                type="date" 
+                name="startDate" 
+                value={formData.startDate} 
+                onChange={handleChange} 
+                className="form-control" 
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label>Fecha de Fin</label>
+              <input 
+                type="date" 
+                name="endDate" 
+                value={formData.endDate} 
+                onChange={handleChange} 
+                className="form-control"
+                min={formData.startDate}
+              />
+              <small className="field-hint">Sin fecha de fin, la campaña no tiene vencimiento automático.</small>
+            </div>
+          </div>
+
+          {/* Estado */}
+          <div className="form-group">
+            <label>Estado de la Campaña</label>
+            <div className="toggle-row">
+              <input 
+                type="checkbox" 
+                name="isActive" 
+                checked={formData.isActive} 
+                onChange={handleChange}
+                id="isActiveToggle"
+                className="toggle-checkbox"
+              />
+              <label htmlFor="isActiveToggle" className="toggle-label">
+                {formData.isActive ? (
+                  <><CheckCircle size={18} className="text-green" /> Activa — visible en la web ahora mismo</>
+                ) : (
+                  <><Pause size={18} className="text-yellow" /> Pausada — no se muestra en la web</>
+                )}
+              </label>
+            </div>
           </div>
 
           <div className="form-actions">
             <Link to="/admin/advertisements" className="cancel-btn">Cancelar</Link>
-            <button type="submit" className="submit-btn" disabled={loading || uploading}>
-              {isEditMode ? 'Actualizar Campaña' : 'Lanzar Campaña'}
+            <button 
+              type="submit" 
+              className="submit-btn" 
+              disabled={loading || uploading || !isFormValid}
+            >
+              {loading ? 'Guardando...' : (isEditMode ? 'Actualizar Campaña' : 'Lanzar Campaña')}
             </button>
           </div>
         </form>

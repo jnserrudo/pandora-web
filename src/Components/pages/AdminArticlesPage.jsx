@@ -12,7 +12,9 @@ import {
   Trash2, 
   Check, 
   X,
-  FileText
+  FileText,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
@@ -47,10 +49,33 @@ const AdminArticlesPage = () => {
   const handleToggleStatus = async (id, currentStatus) => {
     if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'desactivar' : 'reactivar'} esta noticia?`)) return;
     try {
+      // isActive is for logical deletion
+      const { toggleArticleStatus } = await import('../../services/api');
+      await toggleArticleStatus(id, !currentStatus, token);
+      
       setArticles(prev => prev.map(a => 
-        (a._id === id || a.id === id) ? { ...a, isActive: !currentStatus } : a
+        (a.id === id) ? { ...a, isActive: !currentStatus } : a
       ));
-      showToast("Operación realizada con éxito.", 'success');
+      showToast("Estado de visibilidad actualizado.", 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleTogglePublishStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
+    const actionText = newStatus === 'PUBLISHED' ? 'publicar' : 'pasar a borrador';
+    
+    if (!window.confirm(`¿Seguro que deseas ${actionText} esta noticia?`)) return;
+    
+    try {
+      const { updateArticle } = await import('../../services/api');
+      await updateArticle(id, { status: newStatus }, token);
+      
+      setArticles(prev => prev.map(a => 
+        (a.id === id) ? { ...a, status: newStatus } : a
+      ));
+      showToast(`Noticia ${newStatus === 'PUBLISHED' ? 'publicada' : 'movida a borradores'}.`, 'success');
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -120,8 +145,8 @@ const AdminArticlesPage = () => {
                         </span>
                       </td>
                       <td>
-                        <span className={`badge-premium ${article.active ? 'active' : 'draft'}`}>
-                          {article.active ? 'Publicado' : 'Borrador'}
+                        <span className={`badge-premium ${article.status === 'PUBLISHED' ? 'active' : 'draft'}`}>
+                          {article.status === 'PUBLISHED' ? 'Publicado' : 'Borrador'}
                         </span>
                       </td>
                       <td className="hide-mobile">
@@ -129,15 +154,22 @@ const AdminArticlesPage = () => {
                       </td>
                       <td className="text-right">
                         <div className="action-icons-group">
-                          <Link to={`/admin/articles/edit/${article._id || article.id}`} className="btn-action-premium edit" title="Editar">
+                          <button 
+                             className={`btn-action-premium ${article.status === 'PUBLISHED' ? 'view' : 'publish'}`} 
+                             onClick={() => handleTogglePublishStatus(article.id, article.status)}
+                             title={article.status === 'PUBLISHED' ? "Pasar a Borrador" : "Publicar"}
+                          >
+                             {article.status === 'PUBLISHED' ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                          <Link to={`/admin/articles/edit/${article.id}`} className="btn-action-premium edit" title="Editar">
                              <Edit3 size={18} />
                           </Link>
                           <button 
-                             className={`btn-action-premium ${article.isActive ? 'delete' : 'view'}`} 
-                             onClick={() => handleToggleStatus(article._id || article.id, article.isActive)}
-                             title={article.isActive ? "Desactivar" : "Reactivar"}
+                             className={`btn-action-premium delete`} 
+                             onClick={() => handleToggleStatus(article.id, article.isActive)}
+                             title="Eliminar"
                           >
-                             {article.isActive ? <X size={18} /> : <Check size={18} />}
+                             <Trash2 size={18} />
                           </button>
                         </div>
                       </td>

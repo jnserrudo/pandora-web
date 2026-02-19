@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getMyFavorites } from '../../services/api';
+import { getMyFavorites, getAbsoluteImageUrl } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import './UserProfilePage.css';
@@ -102,7 +102,7 @@ const UserProfilePage = () => {
               {favorites.map((fav) => (
                 <Link to={`/commerce/${fav.commerceId}`} key={fav.id} className="fav-card-mini">
                   <img 
-                    src={fav.commerce?.coverImage || "https://via.placeholder.com/150?text=Pandora"} 
+                    src={fav.commerce?.coverImage ? getAbsoluteImageUrl(fav.commerce.coverImage) : "https://via.placeholder.com/150?text=Pandora"} 
                     alt={fav.commerce?.name} 
                   />
                   <div className="fav-mini-info">

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { getCommerces, toggleFavorite } from "../../services/api";
+import { getCommerces, toggleFavorite, getAbsoluteImageUrl } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
@@ -51,7 +51,7 @@ const FeaturedCommerces = () => {
 
     // Prioridad 1: Usar coverImage si es un string válido
     if (commerce.coverImage && commerce.coverImage.trim() !== "") {
-      return commerce.coverImage;
+      return getAbsoluteImageUrl(commerce.coverImage);
     }
     // Prioridad 2: Usar la primera imagen de la galería si existe
     if (
@@ -59,7 +59,7 @@ const FeaturedCommerces = () => {
       Array.isArray(commerce.galleryImages) &&
       commerce.galleryImages.length > 0
     ) {
-      return commerce.galleryImages[0];
+      return getAbsoluteImageUrl(commerce.galleryImages[0]);
     }
     // Prioridad 3: Usar el placeholder
     return placeholder;

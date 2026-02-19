@@ -14,22 +14,27 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Para guardar los datos del perfil
   const [loading, setLoading] = useState(true); // Para el estado de carga inicial
 
+  const fetchUserProfile = async () => {
+    if (token) {
+      try {
+        const profile = await api.getMyProfile(token);
+        setUser(profile);
+      } catch (error) {
+        console.error("Token inválido o expirado. Cerrando sesión.", error);
+        logout();
+      }
+    }
+    setLoading(false);
+  };
+
   // useEffect para cargar el perfil del usuario si hay un token al iniciar la app
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (token) {
-        try {
-          const profile = await api.getMyProfile(token); // Necesitaremos este método en api.js
-          setUser(profile);
-        } catch (error) {
-          console.error("Token inválido o expirado. Cerrando sesión.", error);
-          logout(); // Si el token es inválido, limpiamos todo
-        }
-      }
-      setLoading(false);
-    };
     fetchUserProfile();
   }, [token]);
+
+  const refreshProfile = async () => {
+    await fetchUserProfile();
+  };
 
   const login = async (identifier, password) => {
     const response = await api.loginUser(identifier, password);
@@ -62,6 +67,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     register,
     isAdmin, // Exportamos la función helper
+    refreshProfile, // Exportamos refreshProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

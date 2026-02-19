@@ -1,7 +1,7 @@
 // src/Components/pages/CommercesListPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { getCommerces } from '../../services/api';
+import { getCommerces, getAbsoluteImageUrl } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
@@ -87,7 +87,7 @@ const CommercesListPage = () => {
                     <div className="commerce-card">
                       <div className="card-image-wrapper">
                       <img 
-                        src={commerce.galleryImages?.[0] || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop'} 
+                        src={commerce.galleryImages?.[0] ? getAbsoluteImageUrl(commerce.galleryImages[0]) : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop'} 
                         alt={commerce.name} 
                         className="commerce-image"
                         onError={handleImageError}

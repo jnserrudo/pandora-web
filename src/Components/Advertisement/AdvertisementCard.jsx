@@ -1,6 +1,7 @@
 // src/Components/Advertisement/AdvertisementCard.jsx
 import React, { useEffect } from 'react';
 import { trackAdvertisement } from '../../services/AdvertisementService';
+import { getAbsoluteImageUrl } from '../../services/api';
 import './AdvertisementCard.css';
 
 const AdvertisementCard = ({ advertisement }) => {
@@ -36,7 +37,7 @@ const AdvertisementCard = ({ advertisement }) => {
     >
       <div className="ad-card-image-container">
         <img 
-          src={advertisement.imageUrl} 
+          src={getAbsoluteImageUrl(advertisement.imageUrl)} 
           alt={advertisement.title}
           className="ad-card-image"
         />
