@@ -190,23 +190,30 @@
 .card-neo-actions {
     margin-top: auto;
     display: flex;
-    gap: 0.75rem;
+    flex-wrap: wrap; /* Permite que los botones bajen si no hay espacio */
+    gap: 0.5rem;
 }
 
 .btn-card-neo {
-    flex: 1;
-    height: 44px;
+    flex: 1 1 calc(50% - 0.5rem); /* Ocupa mitad de la fila aprox */
+    min-width: 100px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
+    gap: 0.4rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
     font-weight: 700;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+.btn-card-neo svg {
+    flex-shrink: 0;
 }
 
 .btn-card-neo.advisory {
@@ -230,13 +237,16 @@
 }
 
 .btn-card-neo.view {
-    flex: 0 0 44px;
-    color: rgba(255, 255, 255, 0.4);
+    flex: 1;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.8rem;
 }
 
 .btn-card-neo.view:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(138, 43, 226, 0.15);
     color: #fff;
+    border-color: rgba(138, 43, 226, 0.3);
 }
 
 /* Advisories View */

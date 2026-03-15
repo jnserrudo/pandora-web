@@ -146,7 +146,7 @@ const AdminPlansManagement = () => {
   };
 
   const handleDeleteCoupon = async (id) => {
-    if (!window.confirm("¿Eliminar este cupón permanentemente?")) return;
+    // if (!window.confirm("¿Eliminar este cupón permanentemente?")) return;
     try {
       await deleteCoupon(id, token);
       setCoupons(coupons.filter(c => c.id !== id));

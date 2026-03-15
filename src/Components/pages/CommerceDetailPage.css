@@ -62,11 +62,94 @@
   }
   .info-item {
     font-size: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
   .info-item strong {
     display: block;
     color: #fff;
     margin-bottom: 5px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  /* Branch Item Improvements */
+  .info-item-branch {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .info-item-branch:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(138, 43, 226, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .main-branch-card {
+    background: rgba(138, 43, 226, 0.05) !important;
+    border: 1px solid rgba(138, 43, 226, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-branch-card::after {
+    content: 'CENTRAL';
+    position: absolute;
+    top: 10px;
+    right: -25px;
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 30px;
+    transform: rotate(45deg);
+    letter-spacing: 1px;
+  }
+
+  .branch-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+  }
+
+  .branch-name-row strong {
+    font-size: 1.1rem;
+    letter-spacing: -0.2px;
+  }
+
+  .branch-address {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .branch-phone-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary);
+    filter: brightness(1.2);
+    margin-top: 4px;
+  }
+
+  .branch-phone-row span {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .text-dim {
+    opacity: 0.6;
   }
   .gallery-section, .related-events-section {
     margin-top: 50px;
@@ -128,4 +211,43 @@
 
 .back-button:hover {
   background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* MapLibre Overrides - Force map rendering */
+.commerce-detail-map > div {
+  width: 100% !important;
+}
+
+.commerce-detail-map .maplibregl-map,
+.commerce-detail-map .maplibregl-canvas-container,
+.commerce-detail-map .maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* El contenedor interno del Map que usa clases Tailwind (w-full h-full) */
+.commerce-detail-map [class*="relative"] {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+@media (max-width: 768px) {
+  .commerce-detail-map > div > div:first-child {
+    min-height: 300px !important;
+    height: 350px !important;
+  }
+  
+  .detail-content {
+    padding: 20px;
+    margin: -40px 10px 0;
+  }
+  
+  .header-overlay h1 {
+    font-size: 2rem;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,7 +1,8 @@
 // src/Components/pages/CommerceFormPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { createCommerce, updateCommerce, getCommerceById, uploadImage, API_URL, getAbsoluteImageUrl } from '../../services/api'; 
+import { createCommerce, updateCommerce, getCommerceById, getCategories, uploadImage, API_URL, getAbsoluteImageUrl } from '../../services/api'; 
+import { commerceAttributes } from '../../constants/commerceAttributes';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
@@ -35,8 +36,9 @@ const CommerceFormPage = () => {
     const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
     if (!formData.name.trim()) return "El nombre comercial es obligatorio.";
-    if (!formData.category) return "Debes seleccionar una categoría.";
-    if (!formData.description.trim()) return "La descripción es obligatoria para los usuarios.";
+    if (formData.categoryIds.length === 0) return "Debes seleccionar al menos una categoría.";
+    if (!formData.shortDescription.trim()) return "La descripción breve es obligatoria (máximo 150 caracteres).";
+    if (!formData.description.trim()) return "La descripción completa es obligatoria para los usuarios.";
     if (!formData.address.trim()) return "La dirección física es necesaria para el mapa.";
     
     // Validar Teléfono si está presente
@@ -67,8 +69,10 @@ const CommerceFormPage = () => {
   // Estado del formulario
   const [formData, setFormData] = useState({
     name: '',
+    shortDescription: '',
     description: '',
-    category: 'GASTRONOMIA',
+    categoryIds: [], // Nuevo formato
+    category: '',    // Fallback retrocompatibilidad
     address: '',
     phone: '',
     instagram: '',
@@ -79,46 +83,62 @@ const CommerceFormPage = () => {
     galleryImages: [],
     planLevel: 1,
     latitude: null,
-    longitude: null
+    longitude: null,
+    attributes: [],
+    externalLink: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
 
-  // Cargar datos si estamos en modo edición
+  const [availableCategories, setAvailableCategories] = useState([]);
+
+  // Cargar datos iniciales (Categorías y Comercio si es edición)
   useEffect(() => {
-    if (isEditMode) {
-      const fetchCommerce = async () => {
-        try {
-          setLoading(true);
+    const fetchInitialData = async () => {
+      try {
+        setLoading(true);
+        // 1. Obtener categorías disponibles del servidor
+        const cats = await getCategories();
+        setAvailableCategories(cats);
+
+        // 2. Si estamos en edición, obtener datos del comercio
+        if (isEditMode) {
           const data = await getCommerceById(id);
-          // Rellenar formulario (ajustar según estructura de BD)
           setFormData({
             name: data.name || '',
+            shortDescription: data.shortDescription || '',
             description: data.description || '',
-            category: data.category || 'GASTRONOMIA',
+            categoryIds: data.categories ? data.categories.map(c => c.id) : [],
+            category: data.category || '',
             address: data.address || '',
             phone: data.phone || '',
             instagram: data.instagram || '',
             facebook: data.facebook || '',
             website: data.website || '',
-            openingHours: typeof data.openingHours === 'object' ? JSON.stringify(data.openingHours) : (data.openingHours || ''),
+            openingHours: typeof data.openingHours === 'object' ? JSON.stringify(data.openingHours, null, 2) : (data.openingHours || ''),
             coverImage: data.coverImage || '',
             galleryImages: data.galleryImages || [],
             planLevel: data.planLevel || 1,
             latitude: data.latitude || null,
-            longitude: data.longitude || null
+            longitude: data.longitude || null,
+            attributes: data.attributes || [],
+            paymentProof: data.paymentProof || '',
+            externalLink: data.externalLink || '',
+            videoUrl: data.videoUrl || ''
           });
-        } catch (err) {
-          console.error("Error cargando comercio:", err);
-          setError("No se pudo cargar el comercio para editar.");
-        } finally {
-          setLoading(false);
         }
-      };
-      fetchCommerce();
-    }
+      } catch (err) {
+        console.error("Error cargando datos iniciales:", err);
+        setError("Error al conectar con el servidor. Verifica las categorías.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
   }, [id, isEditMode]);
 
   const handleChange = (e) => {
@@ -126,13 +146,53 @@ const CommerceFormPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Validación en tiempo de ejecución para el botón
-  const isFormValid = formData.name.trim() && 
-                      formData.description.trim() && 
-                      formData.category && 
-                      formData.address.trim() && 
-                      formData.openingHours.trim() &&
-                      (formData.planLevel === 1 || !!formData.paymentProof);
+  const handleAttributeToggle = (attrId) => {
+    setFormData(prev => {
+      const current = prev.attributes || [];
+      return {
+        ...prev,
+        attributes: current.includes(attrId) 
+          ? current.filter(id => id !== attrId) 
+          : [...current, attrId]
+      };
+    });
+  };
+
+  const handleCategoryToggle = (categoryId) => {
+    const current = formData.categoryIds || [];
+    const isSelected = current.includes(categoryId);
+    const limit = formData.planLevel >= 2 ? 3 : 1;
+
+    if (!isSelected && current.length >= limit) {
+      showToast(`Tu plan permite máximo ${limit} categoría(s).`, 'warning');
+      return;
+    }
+
+    setFormData(prev => {
+      const currentIds = prev.categoryIds || [];
+      const isSelectedNow = currentIds.includes(categoryId);
+      let newIds;
+      
+      if (isSelectedNow) {
+        newIds = currentIds.filter(id => id !== categoryId);
+      } else {
+        newIds = [...currentIds, categoryId];
+      }
+
+      return {
+        ...prev,
+        categoryIds: newIds,
+        category: newIds.length > 0 ? String(newIds[0]) : ''
+      };
+    });
+  };
+
+  // Agrupar atributos por categoría para la UI
+  const groupedAttributes = Object.values(commerceAttributes).reduce((acc, attr) => {
+    if (!acc[attr.category]) acc[attr.category] = [];
+    acc[attr.category].push(attr);
+    return acc;
+  }, {});
 
   // Manejador de subida de imágenes
   const handleImageUpload = async (e) => {
@@ -179,29 +239,32 @@ const CommerceFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
+    setSubmitted(true);
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
       showToast(validationError, 'error');
+      // Hacer scroll al primer error visualmente (opcional)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     setLoading(true);
 
     try {
+      // Limpiar payload: remover 'category' (Enum viejo) para usar solo 'categoryIds' (Relacional)
+      const { category: _, ...cleanFormData } = formData;
+      const openingHoursFormatted = formData.openingHours ? (isValidJson(formData.openingHours) ? JSON.parse(formData.openingHours) : formData.openingHours) : null;
+      
+      const payload = {
+        ...cleanFormData,
+        openingHours: openingHoursFormatted
+      };
+
       if (isEditMode) {
-        const payload = {
-          ...formData,
-          openingHours: formData.openingHours ? (isValidJson(formData.openingHours) ? JSON.parse(formData.openingHours) : formData.openingHours) : null
-        };
         await updateCommerce(id, payload, token);
         showToast('Comercio actualizado correctamente!', 'success');
       } else {
-        const payload = {
-          ...formData,
-          openingHours: formData.openingHours ? (isValidJson(formData.openingHours) ? JSON.parse(formData.openingHours) : formData.openingHours) : null
-        };
         await createCommerce(payload, token);
         await refreshProfile(); // Actualizar rol de USER a OWNER
         showToast('¡Solicitud enviada! Nuestro equipo revisará tu propuesta pronto.', 'success');
@@ -246,25 +309,63 @@ const CommerceFormPage = () => {
               name="name" 
               value={formData.name} 
               onChange={handleChange} 
-              className="form-control" 
+              className={`form-control ${submitted && !formData.name.trim() ? 'error-input' : ''}`} 
               required 
               placeholder="Ej. Café Martínez"
             />
           </div>
 
           <div className="form-group">
-            <label>Categoría <span className="required-tag">(Obligatorio)</span></label>
-            <select 
-              name="category" 
-              value={formData.category} 
+            <label>Categorías <span className="required-tag">(Selecciona hasta {formData.planLevel >= 2 ? '3' : '1'} opciones)</span></label>
+            <div className="categories-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.8rem' }}>
+              {availableCategories.map(cat => {
+                const isSelected = formData.categoryIds.includes(cat.id);
+                return (
+                  <div 
+                    key={cat.id}
+                    onClick={() => handleCategoryToggle(cat.id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px', 
+                      borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                      backgroundColor: isSelected ? 'rgba(255, 0, 200, 0.15)' : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${isSelected ? 'var(--color-accent)' : 'rgba(255,255,255,0.1)'}`,
+                      color: isSelected ? '#fff' : '#aaa',
+                      fontWeight: isSelected ? '500' : 'normal'
+                    }}
+                  >
+                    {cat.name}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Descripción Breve <span className="required-tag">(Obligatoria - Máx 150 caracteres)</span></label>
+            <input 
+              type="text" 
+              name="shortDescription" 
+              value={formData.shortDescription} 
+              onChange={(e) => { if (e.target.value.length <= 150) handleChange(e); }}
+              className={`form-control ${submitted && !formData.shortDescription.trim() ? 'error-input' : ''}`} 
+              required 
+              placeholder="Ej. Especialistas en parrilla argentina y pastas artesanales."
+              maxLength={150}
+            />
+            <small style={{color: '#a0a0c0', fontSize: '0.8rem'}}>{formData.shortDescription.length}/150 caracteres</small>
+          </div>
+
+          <div className="form-group">
+            <label>Descripción Completa <span className="required-tag">(Obligatoria)</span></label>
+            <textarea 
+              name="description" 
+              value={formData.description} 
               onChange={handleChange} 
-              className="form-control"
-            >
-              <option value="GASTRONOMIA">Gastronomía</option>
-              <option value="VIDA_NOCTURNA">Vida Nocturna</option>
-              <option value="SALAS_Y_TEATRO">Salas y Teatro</option>
-              {/* Agregar más categorías según enum del backend */}
-            </select>
+              className={`form-control ${submitted && !formData.description.trim() ? 'error-input' : ''}`} 
+              required 
+              placeholder="Contá con detalle qué ofrece tu negocio, tu propuesta de valor, la experiencia que brindás, etc."
+              rows="5"
+            />
           </div>
 
           <div className="grid-2-cols" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
@@ -291,6 +392,19 @@ const CommerceFormPage = () => {
                 placeholder="www.tucomercio.com"
               />
             </div>
+            {formData.planLevel >= 2 && (
+              <div className="form-group">
+                <label>Enlace Externo (Opcional - Nivel 2+)</label>
+                <input 
+                  type="text" 
+                  name="externalLink" 
+                  value={formData.externalLink} 
+                  onChange={handleChange} 
+                  className="form-control" 
+                  placeholder="Ej. Menú PDF, Linktree, Reservas"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid-2-cols" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
@@ -325,7 +439,7 @@ const CommerceFormPage = () => {
               name="openingHours" 
               value={formData.openingHours} 
               onChange={handleChange} 
-              className="form-control" 
+              className={`form-control ${submitted && !formData.openingHours.trim() ? 'error-input' : ''}`} 
               placeholder="Ej. Lun-Vie: 09:00-21:00&#10;Sab: 10:00-14:00"
               rows="3"
             />
@@ -400,17 +514,6 @@ const CommerceFormPage = () => {
             </div>
           )}
 
-          <div className="form-group">
-            <label>Descripción <span className="required-tag">(Obligatorio)</span></label>
-            <textarea 
-              name="description" 
-              value={formData.description} 
-              onChange={handleChange} 
-              className="form-control" 
-              required 
-              placeholder="Describe tu propuesta..."
-            />
-          </div>
 
           <div className="form-group">
             <label>Dirección Física <span className="required-tag">(Obligatorio)</span></label>
@@ -419,7 +522,7 @@ const CommerceFormPage = () => {
               name="address" 
               value={formData.address} 
               onChange={handleChange} 
-              className="form-control" 
+              className={`form-control ${submitted && !formData.address.trim() ? 'error-input' : ''}`} 
               required 
               placeholder="Ej. Av. Belgrano 1234, Salta"
             />
@@ -441,6 +544,43 @@ const CommerceFormPage = () => {
                 Coordenadas capturadas: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
               </p>
             )}
+          </div>
+
+          <div className="form-group">
+            <label>Atributos Destacados</label>
+            <p style={{fontSize: '0.85rem', color: '#a0a0c0', marginBottom: '1rem'}}>
+              Selecciona las características que hacen destacar a tu comercio.
+            </p>
+            <div className="attributes-grid" style={{ display: 'grid', gap: '1.5rem' }}>
+              {Object.entries(groupedAttributes).map(([category, attributes]) => (
+                <div key={category} className="attribute-category-block">
+                  <h4 style={{ fontSize: '1rem', color: 'var(--color-accent)', marginBottom: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.3rem' }}>
+                    {category}
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.8rem' }}>
+                    {attributes.map(attr => {
+                      const Icon = attr.icon;
+                      const isSelected = formData.attributes?.includes(attr.id);
+                      return (
+                        <div 
+                          key={attr.id}
+                          onClick={() => handleAttributeToggle(attr.id)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', 
+                            borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                            backgroundColor: isSelected ? 'rgba(255, 0, 200, 0.15)' : 'rgba(255,255,255,0.03)',
+                            border: `1px solid ${isSelected ? 'var(--color-accent)' : 'rgba(255,255,255,0.1)'}`
+                          }}
+                        >
+                          <Icon size={18} color={isSelected ? 'var(--color-accent)' : '#aaa'} />
+                          <span style={{ fontSize: '0.85rem', color: isSelected ? '#fff' : '#aaa' }}>{attr.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="form-group">
@@ -498,7 +638,7 @@ const CommerceFormPage = () => {
             <button 
               type="submit" 
               className="submit-btn" 
-              disabled={loading || uploading || !isFormValid}
+              disabled={loading || uploading}
             >
               {loading ? 'Enviando...' : (isEditMode ? 'Guardar Cambios' : 'Enviar Solicitud')}
             </button>

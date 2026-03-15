@@ -96,6 +96,13 @@ const AdminDashboard = () => {
       link: '/admin/plans',
       icon: <DollarSign size={32} />,
       color: '#FFD700'
+    },
+    {
+      title: 'Auditoría',
+      description: 'Historial de transacciones y cambios.',
+      link: '/admin/audit',
+      icon: <Activity size={32} />,
+      color: '#8A2BE2'
     }
   ];
 

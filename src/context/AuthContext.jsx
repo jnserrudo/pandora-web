@@ -11,6 +11,7 @@ export const useAuth = () => useContext(AuthContext);
 // El componente Provider que envolverá nuestra aplicación
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken'));
   const [user, setUser] = useState(null); // Para guardar los datos del perfil
   const [loading, setLoading] = useState(true); // Para el estado de carga inicial
 
@@ -20,8 +21,8 @@ export const AuthProvider = ({ children }) => {
         const profile = await api.getMyProfile(token);
         setUser(profile);
       } catch (error) {
-        console.error("Token inválido o expirado. Cerrando sesión.", error);
-        logout();
+        console.error("Token inválido o expirado.", error);
+        // No cerramos sesión inmediatamente aquí, dejamos que el interceptor de API lo maneje
       }
     }
     setLoading(false);
@@ -39,12 +40,16 @@ export const AuthProvider = ({ children }) => {
   const login = async (identifier, password) => {
     const response = await api.loginUser(identifier, password);
     localStorage.setItem('token', response.accessToken);
-    setToken(response.accessToken); // Esto disparará el useEffect de arriba para cargar el perfil
+    localStorage.setItem('refreshToken', response.refreshToken);
+    setToken(response.accessToken);
+    setRefreshToken(response.refreshToken);
   };
   
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     setToken(null);
+    setRefreshToken(null);
     setUser(null);
   };
 

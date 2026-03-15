@@ -181,6 +181,12 @@ select.form-control option {
   background: rgba(0, 0, 0, 0.5);
 }
 
+.form-control.error-input {
+  border-color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.05);
+  box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.1);
+}
+
 textarea.form-control {
   resize: vertical;
   min-height: 120px;
@@ -353,4 +359,25 @@ textarea.form-control {
 
 .proof-preview a:hover {
   opacity: 1;
+}
+
+/* MapLibre Overrides para el formulario de creación */
+.form-card .maplibregl-map,
+.form-card .maplibregl-canvas-container,
+.form-card .maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.form-card [class*="relative"] {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+@media (max-width: 600px) {
+  .form-card .form-group > div > div:first-child {
+    min-height: 300px !important;
+    height: 350px !important;
+  }
 }

@@ -14,6 +14,9 @@ import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import OwnerAdvisoryCard from '../Commerce/OwnerAdvisoryCard';
+import CommerceProductManager from '../Commerce/CommerceProductManager';
+import CommerceBranchManager from '../Commerce/CommerceBranchManager';
+import CommerceFeedbackManager from '../Commerce/CommerceFeedbackManager';
 import { 
     Store, 
     MessageSquare, 
@@ -23,6 +26,8 @@ import {
     ExternalLink,
     ChevronRight,
     Target,
+    Package,
+    MapPin,
     Loader2
 } from 'lucide-react';
 import './MyCommercesPage.css';
@@ -38,7 +43,7 @@ const MyCommercesPage = () => {
   const [selectedCommerce, setSelectedCommerce] = useState(null);
   const [advisories, setAdvisories] = useState([]);
   const [advisoriesLoading, setAdvisoriesLoading] = useState(false);
-  const [view, setView] = useState('GRID'); // 'GRID' | 'ADVISORIES'
+  const [view, setView] = useState('GRID'); // 'GRID' | 'ADVISORIES' | 'FAQS' | 'PRODUCTS' | 'BRANCHES' | 'COMMENTS'
 
   useEffect(() => {
     const fetchMyCommerces = async () => {
@@ -86,7 +91,9 @@ const MyCommercesPage = () => {
             await updateAdvisoryStatus(adv.id, 'READ', token);
         }
     } catch (error) {
-        showToast('Error al cargar asesorías', 'error');
+        // Silencioso: es normal que no haya asesorías o que el owner no tenga permisos completos
+        console.warn('No se pudieron cargar asesorías:', error.message);
+        setAdvisories([]);
     } finally {
         setAdvisoriesLoading(false);
     }
@@ -186,6 +193,43 @@ const MyCommercesPage = () => {
                                     </div>
 
                                     <div className="card-neo-actions">
+                                        {commerce.planLevel >= 2 && (
+                                            <>
+                                                <button 
+                                                    onClick={() => { setSelectedCommerce(commerce); setView('PRODUCTS'); }}
+                                                    className="btn-card-neo view"
+                                                    title="Gestionar Catálogo"
+                                                >
+                                                    <Package size={18} />
+                                                    Catálogo
+                                                </button>
+                                                <button 
+                                                    onClick={() => { setSelectedCommerce(commerce); setView('BRANCHES'); }}
+                                                    className="btn-card-neo view"
+                                                    title="Gestionar Sucursales"
+                                                >
+                                                    <MapPin size={18} />
+                                                    Sucursales
+                                                </button>
+                                                <button 
+                                                    onClick={() => { setSelectedCommerce(commerce); setView('COMMENTS'); }}
+                                                    className="btn-card-neo view"
+                                                    title="Gestionar Reseñas"
+                                                >
+                                                    <MessageSquare size={18} />
+                                                    Reseñas ({commerce.totalComments || 0})
+                                                </button>
+                                            </>
+                                        )}
+                                        {commerce.planLevel >= 3 && (
+                                            <button 
+                                                onClick={() => { setSelectedCommerce(commerce); setView('FAQS'); }}
+                                                className="btn-card-neo view"
+                                            >
+                                                <Target size={18} />
+                                                FAQs
+                                            </button>
+                                        )}
                                         <button 
                                             onClick={() => handleViewAdvisories(commerce)}
                                             className={`btn-card-neo advisory ${commerce.hasNewAdvisory ? 'vibrate' : ''}`}
@@ -207,6 +251,54 @@ const MyCommercesPage = () => {
                     </div>
                 )}
             </>
+        ) : view === 'FAQS' ? (
+            <div className="faqs-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
+                <header className="view-sub-header">
+                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
+                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
+                    </button>
+                </header>
+                <CommerceFAQManager commerceId={selectedCommerce?.id} />
+            </div>
+        ) : view === 'PRODUCTS' ? (
+            <div className="products-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
+                <header className="view-sub-header">
+                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
+                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
+                    </button>
+                    <div className="view-info">
+                        <h2>Catálogo de <strong>{selectedCommerce?.name}</strong></h2>
+                        <p>Agrega, edita o elimina los productos que verán tus clientes.</p>
+                    </div>
+                </header>
+                <CommerceProductManager commerceId={selectedCommerce?.id} planLevel={selectedCommerce?.planLevel} />
+            </div>
+        ) : view === 'BRANCHES' ? (
+            <div className="branches-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
+                <header className="view-sub-header">
+                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
+                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
+                    </button>
+                    <div className="view-info">
+                        <h2>Gestión de Sucursales: <strong>{selectedCommerce?.name}</strong></h2>
+                        <p>Añade y administra otras ubicaciones físicas de tu negocio (Límite según tu plan).</p>
+                    </div>
+                </header>
+                <CommerceBranchManager commerce={selectedCommerce} />
+            </div>
+        ) : view === 'COMMENTS' ? (
+            <div className="feedback-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
+                <header className="view-sub-header">
+                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
+                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
+                    </button>
+                    <div className="view-info">
+                        <h2>Bandeja de Reseñas: <strong>{selectedCommerce?.name}</strong></h2>
+                        <p>Visualiza lo que dicen tus clientes y envíales una respuesta oficial (Plan Plata+).</p>
+                    </div>
+                </header>
+                <CommerceFeedbackManager commerce={selectedCommerce} />
+            </div>
         ) : (
             <div className="advisories-view-container animate-fade-in">
                 <header className="view-sub-header">

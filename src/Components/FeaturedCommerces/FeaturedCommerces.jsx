@@ -1,29 +1,47 @@
 // src/Components/FeaturedCommerces/FeaturedCommerces.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { getCommerces, toggleFavorite, getAbsoluteImageUrl } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 import "./FeaturedCommerces.css";
 
-const FeaturedCommerces = () => {
-  const { token, user } = useAuth();
+const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) => {
+  const { token } = useAuth();
   const { showToast } = useToast();
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchCommerces = async () => {
       setLoading(true);
-      const data = await getCommerces();
-      setCommerces(data);
-      setLoading(false);
+      try {
+        // Ahora filtramos desde el servidor para mayor eficiencia
+        const data = await getCommerces({ planLevel });
+        if (Array.isArray(data)) {
+           // Mantenemos un filtrado preventivo por si el server no lo soporta o para planes específicos
+           if (planLevel) {
+             setCommerces(data.filter(c => {
+               const cLevel = Number(c.planLevel);
+               const targetLevel = Number(planLevel);
+               return cLevel === targetLevel;
+             }));
+           } else {
+             setCommerces(data);
+           }
+        }
+      } catch (error) {
+        console.error("Error fetching commerces:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchCommerces();
-  }, [token]);
+  }, [token, planLevel]);
 
   const handleFavorite = async (e, commerceId) => {
     e.preventDefault();
@@ -34,7 +52,6 @@ const FeaturedCommerces = () => {
     }
     try {
       await toggleFavorite(commerceId, 'commerce', token);
-      // Actualizamos UI localmente
       setCommerces(prev => prev.map(c => 
         (c.id === commerceId || c._id === commerceId) 
           ? { ...c, isFavorite: !c.isFavorite } 
@@ -45,76 +62,88 @@ const FeaturedCommerces = () => {
     }
   };
 
-  // --- 1. FUNCIÓN HELPER PARA LA LÓGICA DE LA IMAGEN ---
-  const getImageUrl = (commerce) => {
-    const placeholder = "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
-
-    // Prioridad 1: Usar coverImage si es un string válido
-    if (commerce.coverImage && commerce.coverImage.trim() !== "") {
-      return getAbsoluteImageUrl(commerce.coverImage);
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, clientWidth } = scrollContainerRef.current;
+      const scrollAmount = variant === "large" ? clientWidth * 0.8 : clientWidth * 0.6;
+      const scrollTo = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
+      scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
-    // Prioridad 2: Usar la primera imagen de la galería si existe
-    if (
-      commerce.galleryImages &&
-      Array.isArray(commerce.galleryImages) &&
-      commerce.galleryImages.length > 0
-    ) {
-      return getAbsoluteImageUrl(commerce.galleryImages[0]);
-    }
-    // Prioridad 3: Usar el placeholder
-    return placeholder;
   };
 
-  if (loading) {
-    return <LoadingSpinner message="Cargando comercios destacados..." />;
-  }
+  const getPlaceholderImage = (category) => {
+    return "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
+  };
+
+  if (loading) return <LoadingSpinner message="Buscando los mejores lugares..." />;
 
   return (
-    <section className="featured-commerces-section">
-      <div className="featured-commerces-grid">
-        {commerces.map((commerce) => {
-          const imageUrl = getImageUrl(commerce);
+    <section className={`featured-commerces-carousel-section ${variant}`}>
+      {title && (
+        <div className="section-header" style={{ marginBottom: '1.5rem', paddingLeft: '1rem' }}>
+           <h2 className="section-title-premium">{title}</h2>
+        </div>
+      )}
 
-          return (
-            <Link
-              to={`/commerce/${commerce.id}`}
-              key={commerce.id}
-              className="commerce-card-link"
-            >
-              <div className="commerce-card">
-                <button 
-                  className={`favorite-btn-floating ${commerce.isFavorite ? 'active' : ''}`}
-                  onClick={(e) => handleFavorite(e, commerce.id || commerce._id)}
-                  title="Guardar en favoritos"
-                >
-                  <Heart size={20} fill={commerce.isFavorite ? "currentColor" : "none"} />
-                </button>
-                <img
-                  src={imageUrl}
-                  alt={commerce.name}
-                  className="commerce-card-image"
-                  // --- 2. EL "SALVAVIDAS": MANEJADOR onError ---
-                  // Si la URL falla (ej. 404 de Cloudinary),
-                  // este evento se dispara y cambia la fuente al placeholder.
-                  onError={(e) => {
-                    e.target.onerror = null; // Previene bucles infinitos si el placeholder también falla
-                    e.target.src =
-                      "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
-                  }}
-                />
-                <div className="commerce-card-overlay">
-                  <div className="commerce-card-info">
-                    <h4 className="commerce-card-name">{commerce.name}</h4>
-                    <span className="commerce-card-category">
-                      {commerce.category.replace("_", " ")}
-                    </span>
+      {commerces.length === 0 ? (
+          <div className="featured-empty-diagnostic" style={{ 
+              padding: '3rem 1rem', 
+              textAlign: 'center', 
+              color: 'rgba(255,255,255,0.4)',
+              background: 'rgba(255,255,255,0.02)',
+              borderRadius: '1rem',
+              margin: '1rem auto',
+              maxWidth: '800px',
+              border: '1px solid rgba(255,255,255,0.05)'
+          }}>
+              <p>No hay locales disponibles actualmente</p>
+              <small style={{ opacity: 0.5 }}>{planLevel ? `Plan: ${planLevel}` : 'Todos los planes'}</small>
+          </div>
+      ) : (
+        <div className="carousel-wrapper">
+          <button className="carousel-nav-btn prev" onClick={() => scroll('left')}>
+            <ChevronLeft size={24} />
+          </button>
+          
+          <div className="commerces-scroll-container" ref={scrollContainerRef}>
+            {commerces.map((commerce) => (
+              <Link 
+                key={commerce.id || commerce._id} 
+                to={`/commerce/${commerce.id || commerce._id}`} 
+                className="commerce-carousel-card-link"
+              >
+                <div className="commerce-carousel-card">
+                  <img 
+                    className="commerce-card-image"
+                    src={getAbsoluteImageUrl(commerce.coverImage || (commerce.galleryImages?.[0] || commerce.image))} 
+                    alt={commerce.name} 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = getPlaceholderImage(commerce.category);
+                    }}
+                  />
+                  
+                  <button 
+                    className={`favorite-btn-floating ${commerce.isFavorite ? 'active' : ''}`}
+                    onClick={(e) => handleFavorite(e, commerce.id || commerce._id)}
+                  >
+                    <Heart size={18} fill={commerce.isFavorite ? "currentColor" : "none"} />
+                  </button>
+
+                  <div className="commerce-card-overlay">
+                    <h3 className="commerce-card-name">{commerce.name}</h3>
+                    <span className="commerce-card-category">{commerce.category}</span>
                   </div>
                 </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+              </Link>
+            ))}
+          </div>
+
+          <button className="carousel-nav-btn next" onClick={() => scroll('right')}>
+            <ChevronRight size={24} />
+          </button>
+        </div>
+      )}
     </section>
   );
 };

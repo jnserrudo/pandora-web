@@ -52,7 +52,7 @@ const AdminContactRequestsPage = () => {
   }, [token]);
 
   const handleArchive = async (id) => {
-    if (!window.confirm("¿Archivar este mensaje?")) return;
+    // if (!window.confirm("¿Archivar este mensaje?")) return;
     try {
       await archiveContactRequest(id, token);
       setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'ARCHIVED' } : r));

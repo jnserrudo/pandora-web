@@ -48,7 +48,7 @@ const AdminAdvertisementsPage = () => {
   }, [token]);
 
   const handleToggleStatus = async (id, currentStatus) => {
-    if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'pausar' : 'activar'} esta campaña?`)) return;
+    // if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'pausar' : 'activar'} esta campaña?`)) return;
     try {
       await toggleAdvertisementStatus(id, !currentStatus, token);
       fetchAdvertisements();

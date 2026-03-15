@@ -1,0 +1,365 @@
+/* src/Components/Commerce/CommerceFeedbackManager.css */
+
+.feedback-manager-container {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-surface-hover);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+  
+.feedback-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-surface-hover);
+}
+
+.feedback-manager-header h3 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.5rem;
+}
+
+.feedback-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.stat-pill.highlight {
+    background: rgba(234, 179, 8, 0.1); /* Yellow tint */
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.upgrade-notice-feedback {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background-color: rgba(255, 170, 0, 0.05);
+    border: 1px solid rgba(255, 170, 0, 0.2);
+    border-radius: 10px;
+    color: var(--color-text);
+    margin-bottom: 2rem;
+}
+
+.upgrade-notice-feedback p {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.empty-feedback-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.empty-feedback-state h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--color-text);
+    font-size: 1.25rem;
+}
+
+.empty-feedback-state p {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.comments-list-owner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.comment-owner-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.comment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.comment-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.comment-user-info .avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.comment-user-info h5 {
+    margin: 0 0 0.25rem 0;
+    color: var(--color-text);
+    font-size: 1.05rem;
+}
+
+.comment-date {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.comment-rating-category {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.comment-category-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+}
+
+.comment-body {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-style: italic;
+    border-left: 3px solid rgba(255,255,255,0.1);
+}
+
+.comment-reply-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-init-reply {
+    align-self: flex-start;
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-init-reply:hover {
+    background: rgba(0, 198, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.existing-reply {
+    background: rgba(139, 92, 246, 0.1); /* Purple tint */
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+.reply-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+}
+
+.existing-reply p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+.btn-edit-reply {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-edit-reply:hover {
+    color: var(--color-text);
+}
+
+/* Blocked Content Styles (Upselling) */
+.comment-blocked-content {
+    position: relative;
+    padding: 0.5rem 0;
+    overflow: hidden;
+}
+
+.blurred-text {
+    filter: blur(5px);
+    opacity: 0.3;
+    user-select: none;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.upsell-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(138, 43, 226, 0.15);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    backdrop-filter: blur(4px);
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: pulse-upsell 2s infinite ease-in-out;
+}
+
+@keyframes pulse-upsell {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.03); box-shadow: 0 4px 20px rgba(138, 43, 226, 0.3); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Reply Form Styles */
+.reply-form-container {
+    margin-top: 1rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.reply-form-container.active {
+    display: block;
+}
+
+.reply-form-container label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.reply-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: vertical;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+}
+
+.reply-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-muted);
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, var(--color-primary), #ff00ff);
+    border: none;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+}
+
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

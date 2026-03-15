@@ -23,11 +23,27 @@
 
 .circles-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* Alineado al inicio para el scroll */
   gap: 1.5rem;
-  flex-wrap: nowrap; /* FORZAR UNA SOLA FILA EN DESKTOP */
-  max-width: 1200px;
-  margin: 0 auto;
+  overflow-x: auto; /* Habilitar scroll horizontal */
+  padding: 1rem 2rem 2.5rem; /* Espacio para el glow y scrollbar */
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Ocultar scrollbar en Firefox */
+  -ms-overflow-style: none; /* Ocultar en IE/Edge */
+  max-width: 100%;
+  margin: 0;
+}
+
+.circles-container::-webkit-scrollbar {
+  display: none; /* Ocultar en Chrome/Safari */
+}
+
+/* Centrado para Desktop si hay pocos items */
+@media (min-width: 1024px) {
+  .circles-container {
+    justify-content: center;
+    overflow-x: hidden; /* No scroll en desktop si caben */
+  }
 }
 
 /* Wrapper para animaciones de entrada */
@@ -40,6 +56,7 @@
   animation: floatIn 0.8s ease-out forwards;
   opacity: 0;
   transform: translateY(30px);
+  scroll-snap-align: center;
 }
 
 @keyframes floatIn {
@@ -160,18 +177,11 @@
    MOBILE RESPONSIVE (MEDIA QUERIES)
    ========================================= */
 
-.circles-container {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
+/* Responsive - Tablets */
 @media (max-width: 1000px) {
-  .circles-container {
-    flex-wrap: wrap; /* Permitir envolver solo en pantallas chicas */
+  .category-circle-wrapper {
+    width: 220px;
+    height: 220px;
   }
 }
 
@@ -182,12 +192,17 @@
   }
 }
 
+/* Mobile: Carrusel horizontal (NO apilado) */
 @media (max-width: 768px) {
   .circles-container {
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: nowrap; /* Volver a nowrap para la columna */
-    gap: 2rem;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: 1rem 1rem 1.5rem;
+  }
+
+  .category-circle-wrapper {
+    width: 200px;
+    height: 200px;
   }
 
   /* MOBILE: SIEMPRE A COLOR (Comportamiento Hover Persistente) */
@@ -211,7 +226,7 @@
     font-size: 1.5rem;
     transform: translateY(-5px);
   }
-  
+
   .category-circle-wrapper:active .category-circle {
     transform: scale(0.98);
   }

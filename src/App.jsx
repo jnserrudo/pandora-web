@@ -33,6 +33,7 @@ import AdminEventsPage from "./Components/pages/AdminEventsPage";
 import AdminSubmissionHub from "./Components/pages/AdminSubmissionHub";
 import AdminPlansManagement from "./Components/pages/AdminPlansManagement";
 import AdminCommerceDetailPage from "./Components/pages/AdminCommerceDetailPage";
+import AdminAuditPage from "./Components/pages/AdminAuditPage";
 
 function App() {
   return (
@@ -205,6 +206,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminPlansManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/audit" 
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminAuditPage />
               </ProtectedRoute>
             } 
           />

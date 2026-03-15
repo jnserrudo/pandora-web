@@ -138,7 +138,7 @@ const Navbar = () => {
     <header className={`navbar-container ${isScrolled ? 'scrolled' : ''}`}>
       <nav className="navbar-content">
         <Link to="/" className="navbar-logo" onClick={closeMenu}>
-          PANDORA
+          PAN<span>DORA</span>
         </Link>
 
         {/* Menú de escritorio */}

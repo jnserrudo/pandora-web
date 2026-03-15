@@ -219,14 +219,23 @@
 @media (max-width: 768px) {
   .enhanced-search-container {
     max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .search-input-wrapper {
+    padding: 0.6rem 1rem;
   }
 
   .search-input {
     font-size: 0.9rem;
+    width: 100%;
+    min-height: 40px; /* Asegurar altura para evitar recortes */
   }
 
   .search-results-dropdown {
     max-height: 400px;
+    width: calc(100% - 2rem);
+    left: 1rem;
   }
 
   .result-item {
@@ -235,5 +244,14 @@
 
   .result-name {
     font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-input::placeholder {
+    font-size: 0.8rem;
   }
 }

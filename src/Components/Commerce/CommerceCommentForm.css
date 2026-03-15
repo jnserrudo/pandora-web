@@ -192,12 +192,15 @@
 .input-icon {
   position: absolute;
   left: 1.25rem;
-  color: rgba(255, 255, 255, 0.3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.4);
   pointer-events: none;
+  z-index: 2;
 }
 
 .form-input-premium {
-  padding-left: 3.25rem;
+  padding-left: 3.5rem !important;
 }
 
 .privacy-badge {

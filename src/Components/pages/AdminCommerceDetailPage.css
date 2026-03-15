@@ -91,6 +91,54 @@
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
+.plan-badge.cursor-pointer {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.plan-badge.cursor-pointer:hover {
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transform: scale(1.05);
+}
+
+/* Select de nivel de plan dentro del panel admin */
+.admin-detail-page select,
+.commerce-info-grid select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #1e1b4b;
+  color: #f8fafc;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a5b4fc' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  transition: all 0.2s;
+}
+
+.admin-detail-page select:hover,
+.commerce-info-grid select:hover {
+  border-color: rgba(139, 92, 246, 0.7);
+}
+
+.admin-detail-page select:focus,
+.commerce-info-grid select:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.admin-detail-page select option,
+.commerce-info-grid select option {
+  background-color: #1e1b4b;
+  color: #f8fafc;
+  padding: 0.5rem;
+  font-weight: 500;
+}
+
 .btn-advisory {
   display: flex;
   align-items: center;

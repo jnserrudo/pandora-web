@@ -9,7 +9,9 @@ import {
     createCommerceAdvisory,
     markCommentAsRead,
     deleteCommerceComment,
-    updateCommentNotes
+    updateCommentNotes,
+    updateCommerce,
+    getPlans
 } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
@@ -43,8 +45,12 @@ const AdminCommerceDetailPage = () => {
   const [commerce, setCommerce] = useState(null);
   const [comments, setComments] = useState([]);
   const [metrics, setMetrics] = useState(null);
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdvisoryForm, setShowAdvisoryForm] = useState(false);
+  const [isEditingPlan, setIsEditingPlan] = useState(false);
+  const [newPlanLevel, setNewPlanLevel] = useState(1);
+  const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
   
   // Filtros de comentarios
   const [filter, setFilter] = useState('ALL'); // 'ALL', 'UNREAD', 'URGENT'
@@ -56,10 +62,11 @@ const AdminCommerceDetailPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [commerceData, commentsData, metricsData] = await Promise.all([
+      const [commerceData, commentsData, metricsData, plansData] = await Promise.all([
         getCommerceById(id, token),
         getCommerceComments(id, token),
-        getCommerceMetrics(id, token)
+        getCommerceMetrics(id, token),
+        getPlans(token).catch(() => []) // Fallback si falla
       ]);
       
       console.log('Commerce data:', commerceData); // Para depuración
@@ -67,6 +74,13 @@ const AdminCommerceDetailPage = () => {
       setCommerce(commerceData);
       setComments(commentsData);
       setMetrics(metricsData);
+      setPlans(plansData && plansData.length > 0 ? plansData : [
+        { level: 1, name: 'Free' },
+        { level: 2, name: 'Plata' },
+        { level: 3, name: 'Oro' },
+        { level: 4, name: 'Platino' }
+      ]);
+      setNewPlanLevel(commerceData.planLevel || 1);
     } catch (error) {
       console.error('Error loading commerce data:', error);
       showToast('Error cargando datos del comercio. ' + (error.response?.data?.message || ''), 'error');
@@ -89,7 +103,7 @@ const AdminCommerceDetailPage = () => {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('¿Estás seguro de eliminar este comentario?')) return;
+    // if (!window.confirm('¿Estás seguro de eliminar este comentario?')) return;
     
     try {
         await deleteCommerceComment(commentId, token);
@@ -114,7 +128,7 @@ const AdminCommerceDetailPage = () => {
     }
   };
 
-  const handleSubmitAdvisory = async (commerceId, data) => {
+    const handleSubmitAdvisory = async (commerceId, data) => {
     try {
         await createCommerceAdvisory(commerceId, data, token);
         showToast('Asesoría enviada con éxito', 'success');
@@ -123,6 +137,21 @@ const AdminCommerceDetailPage = () => {
         console.error(error);
         showToast('Error al enviar asesoría', 'error');
     }
+  };
+
+  const handleSavePlan = async () => {
+      try {
+          setIsUpdatingPlan(true);
+          await updateCommerce(id, { planLevel: parseInt(newPlanLevel) }, token);
+          setCommerce({ ...commerce, planLevel: parseInt(newPlanLevel) });
+          setMetrics({ ...metrics, planLevel: parseInt(newPlanLevel) });
+          showToast('Nivel de plan actualizado con éxito', 'success');
+          setIsEditingPlan(false);
+      } catch (error) {
+          showToast('Error al actualizar el plan', 'error');
+      } finally {
+          setIsUpdatingPlan(false);
+      }
   };
 
   const filteredComments = comments.filter(c => {
@@ -150,7 +179,10 @@ const AdminCommerceDetailPage = () => {
                     <span className={`status-badge status-${commerce?.status?.toLowerCase()}`}>
                         {commerce?.status}
                     </span>
-                    <span className="plan-badge">Plan Nivel {metrics?.planLevel}</span>
+                    <span className="plan-badge cursor-pointer" onClick={() => setIsEditingPlan(!isEditingPlan)} title="Clic para cambiar plan">
+                        Plan Nivel {metrics?.planLevel}
+                        <Shield size={14} style={{ display: 'inline', marginLeft: '5px' }} />
+                    </span>
                 </div>
                 
                 <div className="header-actions">
@@ -232,6 +264,82 @@ const AdminCommerceDetailPage = () => {
               <span className={`status-badge status-${commerce?.status?.toLowerCase() || 'pending'}`}>
                 {commerce?.status || 'Pendiente'}
               </span>
+            </div>
+            
+            <div className="info-item" style={{ gridColumn: 'span 2', background: 'rgba(139, 92, 246, 0.1)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span className="info-label" style={{ color: 'var(--color-primary)' }}>Nivel de Plan Asignado</span>
+                    {isEditingPlan ? (
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px', alignItems: 'center' }}>
+                            <select 
+                                value={newPlanLevel} 
+                                onChange={(e) => setNewPlanLevel(e.target.value)}
+                                style={{
+                                    background: 'var(--color-surface)',
+                                    color: 'white',
+                                    padding: '0.5rem',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    borderRadius: '8px',
+                                    outline: 'none'
+                                }}
+                            >
+                                {plans.map(p => (
+                                    <option key={p.level} value={p.level}>Nivel {p.level} - {p.name}</option>
+                                ))}
+                            </select>
+                            <button 
+                                onClick={handleSavePlan} 
+                                disabled={isUpdatingPlan}
+                                style={{
+                                    background: 'var(--color-primary)',
+                                    border: 'none',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '8px',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {isUpdatingPlan ? 'Guardando...' : 'Guardar y Asignar'}
+                            </button>
+                            <button 
+                                onClick={() => setIsEditingPlan(false)}
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '8px',
+                                    color: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    ) : (
+                        <p className="info-value" style={{ fontSize: '1.2rem', margin: '5px 0' }}>
+                            Nivel {commerce?.planLevel} 
+                            ({plans.find(p => p.level === commerce?.planLevel)?.name || 'Estandar'})
+                        </p>
+                    )}
+                  </div>
+                  {!isEditingPlan && (
+                      <button 
+                        onClick={() => setIsEditingPlan(true)}
+                        style={{
+                            background: 'transparent',
+                            border: '1px solid var(--color-primary)',
+                            color: 'var(--color-primary)',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '50px',
+                            cursor: 'pointer'
+                        }}
+                      >
+                          Cambiar de Plan
+                      </button>
+                  )}
+              </div>
             </div>
             
             <div className="info-item">

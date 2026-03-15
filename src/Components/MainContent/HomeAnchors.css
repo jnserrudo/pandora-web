@@ -1,0 +1,73 @@
+/* src/Components/MainContent/HomeAnchors.css */
+
+.home-anchors-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.anchors-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.anchor-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: rgba(13, 2, 24, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.anchor-btn:hover {
+  border-color: var(--color-accent, #ff00c8);
+  background: rgba(138, 43, 226, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(138, 43, 226, 0.3);
+}
+
+.social-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-link:hover {
+  color: #fff;
+  border-color: var(--color-accent, #ff00c8);
+  background: rgba(138, 43, 226, 0.2);
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .anchor-btn {
+    font-size: 0.82rem;
+    padding: 0.5rem 1.2rem;
+  }
+}

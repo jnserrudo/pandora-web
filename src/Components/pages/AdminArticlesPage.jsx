@@ -47,7 +47,7 @@ const AdminArticlesPage = () => {
   }, [token]);
 
   const handleToggleStatus = async (id, currentStatus) => {
-    if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'desactivar' : 'reactivar'} esta noticia?`)) return;
+    // if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'desactivar' : 'reactivar'} esta noticia?`)) return;
     try {
       // isActive is for logical deletion
       const { toggleArticleStatus } = await import('../../services/api');
@@ -66,7 +66,7 @@ const AdminArticlesPage = () => {
     const newStatus = currentStatus === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
     const actionText = newStatus === 'PUBLISHED' ? 'publicar' : 'pasar a borrador';
     
-    if (!window.confirm(`¿Seguro que deseas ${actionText} esta noticia?`)) return;
+    // if (!window.confirm(`¿Seguro que deseas ${actionText} esta noticia?`)) return;
     
     try {
       const { updateArticle } = await import('../../services/api');

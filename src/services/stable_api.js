@@ -1,82 +1,18 @@
-// src/services/api.js
+﻿// src/services/api.js
 import axios from "axios";
 import { API_URL } from "./config";
-export { API_URL };
 
 console.log("API_URL Resolved:", API_URL);
 
-// Utilidad para asegurar que las URLs de imágenes sean absolutas
-export const getAbsoluteImageUrl = (url) => {
-  if (!url || typeof url !== 'string') return url;
-  if (url.startsWith('http')) return url;
-  const baseUrl = API_URL.replace('/api', '');
-  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-};
-
-// --- CONFIGURACIÓN DE AXIOS Y MANEJO GLOBAL DE ERRORES ---
-
-// Interceptor para manejar errores de autenticación a nivel global
-axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    const status = error.response?.status;
-    const isLoginPage = window.location.pathname === '/login';
-
-    if (status === 401 && !isLoginPage && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const storedRefreshToken = localStorage.getItem('refreshToken');
-
-      if (storedRefreshToken) {
-        try {
-          console.warn("Sesión expirada. Intentando refrescar token...");
-          const response = await axios.post(`${API_URL}/auth/refresh-token`, {
-            refreshToken: storedRefreshToken
-          });
-          
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-          
-          // Guardar nuevos tokens
-          localStorage.setItem('token', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-          
-          // Actualizar cabecera del request original y reintentar
-          originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
-          return axios(originalRequest);
-        } catch (refreshError) {
-          console.error("No se pudo refrescar el token:", refreshError);
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          window.location.href = '/login?expired=true';
-        }
-      } else {
-        localStorage.removeItem('token');
-        window.location.href = '/login?expired=true';
-      }
-    } 
-    
-    if (status === 403) {
-      console.warn("Permisos insuficientes (403).");
-      if (window.location.pathname.startsWith('/admin')) {
-        window.location.href = '/?auth_error=forbidden';
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
 // --- FUNCIONES PARA COMERCIOS ---
 
-// Obtiene comercios (opcionalmente filtrados por categoría o nivel de plan)
-export const getCommerces = async (filters = {}) => {
+// Obtiene comercios (opcionalmente filtrados por categor├¡a)
+export const getCommerces = async (category) => {
   try {
-    const safeFilters = filters || {};
-    const { category, planLevel } = typeof safeFilters === 'object' ? safeFilters : { category: safeFilters };
-    
-    let url = `${API_URL}/commerces?`;
-    if (category) url += `category=${category}&`;
-    if (planLevel) url += `planLevel=${planLevel}&`;
+    let url = `${API_URL}/commerces`;
+    if (category) {
+      url += `?category=${category}`;
+    }
     
     const response = await axios.get(url);
     return response.data;
@@ -86,26 +22,15 @@ export const getCommerces = async (filters = {}) => {
   }
 };
 
-// --- NUEVA FUNCIÓN ---
-// Obtiene un comercio específico por su ID
+// --- NUEVA FUNCI├ôN ---
+// Obtiene un comercio espec├¡fico por su ID
 export const getCommerceById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/commerces/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching commerce with id ${id}:`, error);
-    throw error; // Lanza el error para que la página de detalle lo maneje
-  }
-};
-
-// Obtiene todas las categorías disponibles
-export const getCategories = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/categories`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    throw error;
+    throw error; // Lanza el error para que la p├ígina de detalle lo maneje
   }
 };
 
@@ -122,7 +47,7 @@ export const getEvents = async () => {
   }
 };
 
-// Obtiene un evento específico por su ID
+// Obtiene un evento espec├¡fico por su ID
 export const getEventById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/events/${id}`);
@@ -133,11 +58,11 @@ export const getEventById = async (id) => {
   }
 };
 
-// --- FUNCIONES PARA ARTÍCULOS ---
+// --- FUNCIONES PARA ART├ìCULOS ---
 
-// --- FUNCIONES PARA ARTÍCULOS ---
+// --- FUNCIONES PARA ART├ìCULOS ---
 
-// Obtiene artículos (ahora con soporte de paginación)
+// Obtiene art├¡culos (ahora con soporte de paginaci├│n)
 export const getArticles = async (page = 1, limit = 10, sortBy = 'recent') => {
   try {
     const url = `${API_URL}/articles?page=${page}&limit=${limit}&sortBy=${sortBy}`;
@@ -154,7 +79,7 @@ export const getArticles = async (page = 1, limit = 10, sortBy = 'recent') => {
   }
 };
 
-// Obtiene un artículo específico por su slug
+// Obtiene un art├¡culo espec├¡fico por su slug
 export const getArticleBySlug = async (slug) => {
   try {
     const url = `${API_URL}/articles/${slug}`;
@@ -166,7 +91,7 @@ export const getArticleBySlug = async (slug) => {
   }
 };
 
-// --- FUNCIÓN DE BÚSQUEDA ---
+// --- FUNCI├ôN DE B├ÜSQUEDA ---
 
 export const searchGlobal = async (query) => {
   try {
@@ -175,7 +100,7 @@ export const searchGlobal = async (query) => {
     return response.data;
   } catch (error) {
     console.error("Error during search:", error);
-    // Retornamos estructura vacía para evitar errores en el frontend
+    // Retornamos estructura vac├¡a para evitar errores en el frontend
     return { commerces: [], events: [], articles: [] };
   }
 };
@@ -206,7 +131,7 @@ export const getMySubmissions = async (token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado. Por favor re-inicia sesión para ver tus solicitudes.");
+      throw new Error("Tu sesi├│n ha expirado. Por favor re-inicia sesi├│n para ver tus solicitudes.");
     }
     throw new Error(error.response?.data?.message || "Error al obtener tus solicitudes.");
   }
@@ -220,9 +145,9 @@ export const getAdminSubmissions = async (token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión administrativa ha expirado. Por favor re-inicia sesión.");
+      throw new Error("Tu sesi├│n administrativa ha expirado. Por favor re-inicia sesi├│n.");
     }
-    throw new Error(error.response?.data?.message || "Error al obtener el buzón administrativo.");
+    throw new Error(error.response?.data?.message || "Error al obtener el buz├│n administrativo.");
   }
 };
 
@@ -234,7 +159,7 @@ export const replyToSubmission = async (id, responseData, token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Sesión expirada. Por favor re-inicia sesión para responder.");
+      throw new Error("Sesi├│n expirada. Por favor re-inicia sesi├│n para responder.");
     }
     throw new Error(error.response?.data?.message || "Error al responder la solicitud.");
   }
@@ -261,7 +186,7 @@ export const updatePlan = async (id, data, token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión para realizar cambios.");
+      throw new Error("Tu sesi├│n ha expirado. Por favor, vuelve a iniciar sesi├│n para realizar cambios.");
     }
     throw new Error(error.response?.data?.message || "Error al actualizar el plan.");
   }
@@ -274,9 +199,9 @@ export const applyCoupon = async (code, token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado o no tienes permisos. Por favor re-inicia sesión.");
+      throw new Error("Tu sesi├│n ha expirado o no tienes permisos. Por favor re-inicia sesi├│n.");
     }
-    throw new Error(error.response?.data?.message || "Cupón inválido o expirado.");
+    throw new Error(error.response?.data?.message || "Cup├│n inv├ílido o expirado.");
   }
 };
 
@@ -289,7 +214,7 @@ export const getCoupons = async (token, all = true) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión para ver los cupones.");
+      throw new Error("Tu sesi├│n ha expirado. Por favor, vuelve a iniciar sesi├│n para ver los cupones.");
     }
     throw new Error(error.response?.data?.message || "Error al obtener cupones.");
   }
@@ -303,9 +228,9 @@ export const createCoupon = async (data, token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado. Por favor re-inicia sesión para crear cupones.");
+      throw new Error("Tu sesi├│n ha expirado. Por favor re-inicia sesi├│n para crear cupones.");
     }
-    throw new Error(error.response?.data?.message || "Error al crear cupón.");
+    throw new Error(error.response?.data?.message || "Error al crear cup├│n.");
   }
 };
 
@@ -317,9 +242,9 @@ export const updateCoupon = async (id, data, token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado. Por favor re-inicia sesión para modificar cupones.");
+      throw new Error("Tu sesi├│n ha expirado. Por favor re-inicia sesi├│n para modificar cupones.");
     }
-    throw new Error(error.response?.data?.message || "Error al actualizar cupón.");
+    throw new Error(error.response?.data?.message || "Error al actualizar cup├│n.");
   }
 };
 
@@ -331,9 +256,9 @@ export const deleteCoupon = async (id, token) => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
-      throw new Error("Tu sesión ha expirado. Por favor re-inicia sesión para eliminar cupones.");
+      throw new Error("Tu sesi├│n ha expirado. Por favor re-inicia sesi├│n para eliminar cupones.");
     }
-    throw new Error(error.response?.data?.message || "Error al eliminar cupón.");
+    throw new Error(error.response?.data?.message || "Error al eliminar cup├│n.");
   }
 };
 
@@ -369,20 +294,20 @@ export const getAdminStats = async (token) => {
     });
 
     if (status === 401) {
-      throw new Error('Tu sesión ha expirado. Por favor re-inicia sesión.');
+      throw new Error('Tu sesi├│n ha expirado. Por favor re-inicia sesi├│n.');
     }
     if (status === 403) {
-      throw new Error('No tenés permisos para ver las estadísticas de admin.');
+      throw new Error('No ten├®s permisos para ver las estad├¡sticas de admin.');
     }
     if (status >= 500) {
-      throw new Error(apiMessage || 'El servidor falló al generar las estadísticas (error 500).');
+      throw new Error(apiMessage || 'El servidor fall├│ al generar las estad├¡sticas (error 500).');
     }
 
-    throw new Error(apiMessage || 'Error al obtener estadísticas de administración.');
+    throw new Error(apiMessage || 'Error al obtener estad├¡sticas de administraci├│n.');
   }
 };
 
-// --- FUNCIONES DE AUTENTICACIÓN Y PERFIL ---
+// --- FUNCIONES DE AUTENTICACI├ôN Y PERFIL ---
 
 export const registerUser = async (name, username, email, password) => {
   try {
@@ -398,17 +323,6 @@ export const registerUser = async (name, username, email, password) => {
   }
 };
 
-export const refreshAccessToken = async (refreshToken) => {
-  try {
-    const response = await axios.post(`${API_URL}/auth/refresh-token`, {
-      refreshToken,
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al refrescar token.");
-  }
-};
-
 export const loginUser = async (identifier, password) => {
   try {
     const response = await axios.post(`${API_URL}/auth/login`, {
@@ -418,7 +332,7 @@ export const loginUser = async (identifier, password) => {
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error al iniciar sesión."
+      error.response?.data?.message || "Error al iniciar sesi├│n."
     );
   }
 };
@@ -436,10 +350,10 @@ export const getMyProfile = async (token) => {
   }
 };
 
-// --- ANEXO: GESTIÓN (ABM) ---
-// Estas funciones requieren Token de Autenticación
+// --- ANEXO: GESTI├ôN (ABM) ---
+// Estas funciones requieren Token de Autenticaci├│n
 
-// 1. Gestión de Comercios (OWNER)
+// 1. Gesti├│n de Comercios (OWNER)
 
 export const getMyCommerces = async (token) => {
   try {
@@ -474,7 +388,7 @@ export const updateCommerce = async (id, data, token) => {
   }
 };
 
-// Validar comercio (Específico para Admin)
+// Validar comercio (Espec├¡fico para Admin)
 export const validateCommerce = async (id, validationData, token) => {
   try {
     const response = await axios.put(`${API_URL}/commerces/${id}/validate`, validationData, {
@@ -497,7 +411,7 @@ export const toggleCommerceStatus = async (id, isActive, token) => {
   }
 };
 
-// 2. Gestión de Eventos (OWNER / ADMIN)
+// 2. Gesti├│n de Eventos (OWNER / ADMIN)
 
 export const createEvent = async (data, token) => {
   try {
@@ -534,21 +448,14 @@ export const toggleEventStatus = async (id, isActive, token) => {
 
 // 3. Subida de Archivos (General)
 
-export const uploadImage = async (file, token) => {
+export const uploadImage = async (file) => {
   try {
     const formData = new FormData();
     formData.append('image', file);
     
-    const headers = { 
-      'Content-Type': 'multipart/form-data' 
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    // El endpoint real es /api/upload/image (API_URL ya incluye /api)
-    const response = await axios.post(`${API_URL}/upload/image`, formData, {
-      headers,
+    // Se asume endpoint /upload que devuelve { url: '...' }
+    const response = await axios.post(`${API_URL}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   } catch (error) {
@@ -590,7 +497,7 @@ export const getAdminArticles = async (token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("Error al obtener artículos para admin.");
+    throw new Error("Error al obtener art├¡culos para admin.");
   }
 };
 
@@ -601,7 +508,7 @@ export const createArticle = async (data, token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al crear artículo.");
+    throw new Error(error.response?.data?.message || "Error al crear art├¡culo.");
   }
 };
 
@@ -612,7 +519,7 @@ export const updateArticle = async (id, data, token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al actualizar artículo.");
+    throw new Error(error.response?.data?.message || "Error al actualizar art├¡culo.");
   }
 };
 
@@ -623,7 +530,7 @@ export const toggleArticleStatus = async (id, isActive, token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al actualizar estado del artículo.");
+    throw new Error(error.response?.data?.message || "Error al actualizar estado del art├¡culo.");
   }
 };
 
@@ -633,7 +540,7 @@ export const toggleArticleStatus = async (id, isActive, token) => {
 
 export const createCommerceComment = async (commerceId, commentData) => {
   try {
-    const response = await axios.post(`${API_URL}/feedback/commerces/${commerceId}/comments`, commentData);
+    const response = await axios.post(`${API_URL}/commerces/${commerceId}/comments`, commentData);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error al crear comentario.");
@@ -642,7 +549,7 @@ export const createCommerceComment = async (commerceId, commentData) => {
 
 export const getCommerceComments = async (commerceId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/feedback/commerces/${commerceId}/comments`, {
+    const response = await axios.get(`${API_URL}/commerces/${commerceId}/comments`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -653,7 +560,7 @@ export const getCommerceComments = async (commerceId, token) => {
 
 export const markCommentAsRead = async (commentId, token) => {
   try {
-    const response = await axios.patch(`${API_URL}/feedback/comments/${commentId}/read`, {}, {
+    const response = await axios.patch(`${API_URL}/comments/${commentId}/read`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -664,7 +571,7 @@ export const markCommentAsRead = async (commentId, token) => {
 
 export const updateCommentNotes = async (commentId, data, token) => {
   try {
-    const response = await axios.patch(`${API_URL}/feedback/comments/${commentId}`, data, {
+    const response = await axios.patch(`${API_URL}/comments/${commentId}`, data, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -675,7 +582,7 @@ export const updateCommentNotes = async (commentId, data, token) => {
 
 export const deleteCommerceComment = async (commentId, token) => {
   try {
-    await axios.delete(`${API_URL}/feedback/comments/${commentId}`, {
+    await axios.delete(`${API_URL}/comments/${commentId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   } catch (error) {
@@ -683,63 +590,51 @@ export const deleteCommerceComment = async (commentId, token) => {
   }
 };
 
-export const replyToCommerceComment = async (commentId, replyText, token) => {
-  try {
-    const response = await axios.patch(`${API_URL}/feedback/comments/${commentId}/reply`, 
-      { commerceReply: replyText }, 
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al responder el comentario.");
-  }
-};
-
-// --- ASESORÍAS ---
+// --- ASESOR├ìAS ---
 
 export const createCommerceAdvisory = async (commerceId, advisoryData, token) => {
   try {
-    const response = await axios.post(`${API_URL}/feedback/commerces/${commerceId}/advisories`, advisoryData, {
+    const response = await axios.post(`${API_URL}/commerces/${commerceId}/advisories`, advisoryData, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al crear asesoría.");
+    throw new Error(error.response?.data?.message || "Error al crear asesor├¡a.");
   }
 };
 
 export const getCommerceAdvisories = async (commerceId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/feedback/commerces/${commerceId}/advisories`, {
+    const response = await axios.get(`${API_URL}/commerces/${commerceId}/advisories`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al obtener asesorías.");
+    throw new Error(error.response?.data?.message || "Error al obtener asesor├¡as.");
   }
 };
 
 export const updateAdvisoryStatus = async (advisoryId, status, token) => {
   try {
-    const response = await axios.patch(`${API_URL}/feedback/advisories/${advisoryId}/status`, { status }, {
+    const response = await axios.patch(`${API_URL}/advisories/${advisoryId}/status`, { status }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al actualizar asesoría.");
+    throw new Error(error.response?.data?.message || "Error al actualizar asesor├¡a.");
   }
 };
 
-// --- MÉTRICAS ---
+// --- M├ëTRICAS ---
 
 export const getCommerceMetrics = async (commerceId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/feedback/commerces/${commerceId}/metrics`, {
+    const response = await axios.get(`${API_URL}/commerces/${commerceId}/metrics`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al obtener métricas.");
+    throw new Error(error.response?.data?.message || "Error al obtener m├®tricas.");
   }
 };
 
@@ -747,7 +642,7 @@ export const getCommerceMetrics = async (commerceId, token) => {
 
 export const getFeaturedCommerces = async () => {
   try {
-    const response = await axios.get(`${API_URL}/feedback/commerces/featured`);
+    const response = await axios.get(`${API_URL}/commerces/featured`);
     return response.data;
   } catch (error) {
     console.error("Error fetching featured commerces:", error);
@@ -757,7 +652,7 @@ export const getFeaturedCommerces = async () => {
 
 export const setCommerceFeatured = async (commerceId, days, token) => {
   try {
-    const response = await axios.post(`${API_URL}/feedback/commerces/${commerceId}/featured`, { days }, {
+    const response = await axios.post(`${API_URL}/commerces/${commerceId}/featured`, { days }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -791,105 +686,4 @@ export const getPublicStats = async () => {
         });
         return { articles: 0, events: 0, commerces: 0 };
     }
-};
-
-// ==================== FUNCIONES FAQ ====================
-
-export const getCommerceFAQs = async (commerceId) => {
-  try {
-    const response = await axios.get(`${API_URL}/commerces/${commerceId}/faqs`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching FAQs:", error);
-    return [];
-  }
-};
-
-export const createCommerceFAQ = async (commerceId, data, token) => {
-  try {
-    const response = await axios.post(`${API_URL}/commerces/${commerceId}/faqs`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al crear FAQ.");
-  }
-};
-
-export const updateCommerceFAQ = async (commerceId, faqId, data, token) => {
-  try {
-    const response = await axios.put(`${API_URL}/commerces/${commerceId}/faqs/${faqId}`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al actualizar FAQ.");
-  }
-};
-
-export const deleteCommerceFAQ = async (commerceId, faqId, token) => {
-  try {
-    await axios.delete(`${API_URL}/commerces/${commerceId}/faqs/${faqId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al eliminar FAQ.");
-  }
-};
-
-// ==================== FUNCIONES DE CATÁLOGO / PRODUCTOS ====================
-
-export const getCommerceProducts = async (commerceId) => {
-  try {
-    const response = await axios.get(`${API_URL}/commerces/${commerceId}/products`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching Commerce Products:", error);
-    return [];
-  }
-};
-
-export const createCommerceProduct = async (commerceId, data, token) => {
-  try {
-    const response = await axios.post(`${API_URL}/commerces/${commerceId}/products`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al crear producto.");
-  }
-};
-
-export const deleteCommerceProduct = async (commerceId, productId, token) => {
-  try {
-    await axios.delete(`${API_URL}/commerces/${commerceId}/products/${productId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al eliminar producto.");
-  }
-};
-
-// ==================== FUNCIONES DE AUDITORÍA ====================
-
-export const getAuditLogs = async (token, page = 1, limit = 20) => {
-  try {
-    const response = await axios.get(`${API_URL}/audit?page=${page}&limit=${limit}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al obtener los logs de auditoría.");
-  }
-};
-
-export const getAuditLogById = async (id, token) => {
-  try {
-    const response = await axios.get(`${API_URL}/audit/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error al obtener el detalle del log.");
-  }
 };

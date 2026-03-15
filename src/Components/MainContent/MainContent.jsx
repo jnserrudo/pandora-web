@@ -1,7 +1,6 @@
 // src/components/MainContent/MainContent.jsx
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import HeroSection from "../Hero/HeroSection";
 import CallToAction from "../CallToAction/CallToAction";
 import FeaturedCommerces from "../FeaturedCommerces/FeaturedCommerces";
@@ -10,39 +9,25 @@ import CategoryCircles from "../CategoryCircles/CategoryCircles";
 import AdvertisementBanner from "../Advertisement/AdvertisementBanner";
 import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar";
 import TrendingMagazine from "../Magazine/TrendingMagazine";
+import HomeAnchors from "./HomeAnchors";
 import { getAdvertisements } from "../../services/AdvertisementService";
 import { getArticles } from "../../services/api";
-import useScrollAnimation from "../../hooks/useScrollAnimation";
 import "./MainContent.css";
 
 const MainContent = () => {
-  // State for advertisements carousels
   const [commerceAds, setCommerceAds] = useState([]);
-  const [currentCommerceAdIndex, setCurrentCommerceAdIndex] = useState(0);
-  
   const [otherAds, setOtherAds] = useState([]);
-  const [currentOtherAdIndex, setCurrentOtherAdIndex] = useState(0);
-
   const [trendingArticles, setTrendingArticles] = useState([]);
 
-  // Hooks para animaciones
-  const searchAnimation = useScrollAnimation({ animationType: 'fade-in', delay: 100 });
-  const commercesAnimation = useScrollAnimation({ animationType: 'zoom-in', delay: 200 });
-  const calendarAnimation = useScrollAnimation({ animationType: 'fade-in', delay: 100 });
-  const ctaAnimation = useScrollAnimation({ animationType: 'glow', delay: 150 });
-
-  // Load advertisements, articles, etc.
   useEffect(() => {
     const loadContent = async () => {
       try {
-        // Ads
         const ads = await getAdvertisements({ position: 'banner_home', isActive: true });
-        if (ads.length > 0) {
+        if (Array.isArray(ads)) {
           setCommerceAds(ads.filter(ad => ad.category === 'commerce'));
           setOtherAds(ads.filter(ad => ad.category !== 'commerce'));
         }
 
-        // Trending Articles (Magazine)
         const articlesData = await getArticles(1, 10, 'recent');
         setTrendingArticles(articlesData.articles || []);
       } catch (error) {
@@ -52,87 +37,88 @@ const MainContent = () => {
     loadContent();
   }, []);
 
-  // Timers for Ads
-  useEffect(() => {
-    if (commerceAds.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentCommerceAdIndex((prevIndex) => (prevIndex + 1) % commerceAds.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [commerceAds]);
-
-  useEffect(() => {
-    if (otherAds.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentOtherAdIndex((prevIndex) => (prevIndex + 1) % otherAds.length);
-    }, 7000);
-    return () => clearInterval(interval);
-  }, [otherAds]);
-
   return (
     <main className="app-container hub-layout">
       <div className="app-layout">
         
-        {/* PRIORIDAD 1: Categorías y Búsqueda */}
-        <div className="top-discovery-section" style={{ paddingTop: '2rem', marginBottom: '4rem' }}>
+        {/* ===== 1. CATEGORÍAS (Burbujas en carrusel) ===== */}
+        <div className="top-discovery-section" style={{ paddingTop: '1rem' }}>
           <CategoryCircles />
-          <div ref={searchAnimation.ref} className={searchAnimation.className} style={{ marginTop: '1rem' }}>
-            <EnhancedSearch />
-          </div>
         </div>
 
-        {/* Hero Section (Bajado una posición) */}
-        <HeroSection />
-
-        <div className="section-divider" style={{ marginTop: '4rem' }}>
-          <h2>Recomendado para vos</h2>
+        {/* ===== 2. BUSCADOR ===== */}
+        <div style={{ marginTop: '0.5rem' }}>
+          <EnhancedSearch />
         </div>
 
-        <div ref={commercesAnimation.ref} className={commercesAnimation.className}>
-          <FeaturedCommerces />
+        {/* ===== 3. ANCLAS (Noticias/Calendario) + RRSS ===== */}
+        <div style={{ marginTop: '1.5rem' }}>
+          <HomeAnchors />
         </div>
 
-        {/* --- NUEVA SECCIÓN: MAGAZINE LO MÁS VISTO (Según referencia) --- */}
-        <TrendingMagazine articles={trendingArticles} />
+        {/* ===== 4. DESTACADOS PLATINO (Carrusel Grande) ===== */}
+        <div id="featured-platinum" style={{ marginTop: '2rem' }}>
+          <FeaturedCommerces 
+            title="Sugeridos de Hoy" 
+            variant="large" 
+            planLevel={4}
+          />
+        </div>
 
-        {/* --- CAROUSEL 1: PANDORA COMMERCE ADS --- */}
-        {commerceAds.length > 0 && (
-          <div style={{ marginTop: '4rem', marginBottom: '4rem' }}>
-             <AdvertisementBanner 
-                key={commerceAds[currentCommerceAdIndex].id}
-                advertisement={commerceAds[currentCommerceAdIndex]} 
-                size="large" 
-             />
-          </div>
-        )}
+        {/* ===== 5. MAGAZINE (Lo Más Visto) ===== */}
+        <div id="magazine-section" style={{ marginTop: '2rem' }}>
+          <TrendingMagazine articles={trendingArticles} />
+        </div>
 
-        {/* --- CALENDARIO ARTÍSTICO DE EVENTOS --- */}
-        <div ref={calendarAnimation.ref} className={calendarAnimation.className} style={{ marginTop: '4rem', marginBottom: '4rem' }}>
+        {/* ===== 6. COMERCIOS ORO (Carrusel Mediano) ===== */}
+        <div id="featured-gold" style={{ marginTop: '2rem' }}>
+          <FeaturedCommerces 
+            title="Comercios Destacados" 
+            variant="medium" 
+            planLevel={3}
+          />
+        </div>
+
+        {/* ===== 7. CALENDARIO DE EVENTOS ===== */}
+        <div id="calendar-section" style={{ marginTop: '3rem' }}>
           <div className="section-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-             <h2 style={{ fontSize: '2.5rem', color: '#fff', textTransform: 'uppercase' }}>
-               Calendario de <span style={{ color: 'var(--color-accent)' }}>Eventos</span>
+             <h2 className="section-title-premium">
+               Calendario de <span className="text-accent">Eventos</span>
              </h2>
-             <p style={{ color: 'rgba(255,255,255,0.7)' }}>Planificá tu próxima salida con nosotros</p>
           </div>
           <ArtisticCalendar />
         </div>
 
-        {/* --- CAROUSEL 2: OTHER ADS --- */}
-        {otherAds.length > 0 && (
-           <div style={{ marginBottom: '4rem' }}>
-              <div className="section-divider" style={{ marginBottom: '1rem' }}>
-                  <span style={{ fontSize: '0.9rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '2px' }}>Espacio Publicitario</span>
-              </div>
-              <AdvertisementBanner 
-                key={otherAds[currentOtherAdIndex].id}
-                advertisement={otherAds[currentOtherAdIndex]} 
-                size="medium"
-              />
-           </div>
-        )}
+        {/* ===== 8. PUBLICIDADES (Carruseles Nativos) ===== */}
+        <div id="publicidades-section" style={{ marginTop: '3rem' }}>
+          {commerceAds.length > 0 && (
+            <div className="ads-carousel-wrapper">
+               <div className="ads-horizontal-scroll">
+                 {commerceAds.map(ad => (
+                   <div key={ad.id} className="ad-card-carousel-item">
+                     <AdvertisementBanner advertisement={ad} size="large" />
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
+        </div>
 
-        {/* PRIORIDAD FINAL: Descargar la Aplicación */}
-        <div ref={ctaAnimation.ref} className={ctaAnimation.className} style={{ marginBottom: '4rem' }}>
+        {/* Guía completa (Opcional, se mantiene por el usuario "no borrar nada") */}
+        <div id="all-commerces-section" style={{ marginTop: '4rem', paddingBottom: '2rem' }}>
+          <FeaturedCommerces 
+            title="Explorá nuestra guía completa" 
+            variant="medium" 
+          />
+        </div>
+
+        {/* Hero Section (Al final como banner) */}
+        <div style={{ marginTop: '2rem' }}>
+          <HeroSection />
+        </div>
+
+        {/* Footer / CTA Final */}
+        <div style={{ paddingBottom: '4rem' }}>
           <CallToAction />
         </div>
       </div>

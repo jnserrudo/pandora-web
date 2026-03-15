@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import { createCommerceComment } from '../../services/api';
-import { Star, MessageSquare, Info, Send, User, Settings, ShieldCheck, Heart, Headphones } from 'lucide-react';
+import { Star, MessageSquare, Info, Send, User, Settings, ShieldCheck, Heart, Headphones, Lock, AlertTriangle } from 'lucide-react';
 import './CommerceCommentForm.css';
 
-const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
+const CommerceCommentForm = ({ commerceId, commerceName, ownerId, onSuccess }) => {
   const { showToast } = useToast();
+  const { user, token } = useAuth();
   const [formData, setFormData] = useState({
     comment: '',
     rating: 5,
@@ -14,8 +16,17 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Validaciones de estado
+  const isOwner = user && ownerId && parseInt(user.userId) === parseInt(ownerId);
+  const isLoggedIn = !!token;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isOwner) {
+        showToast('No puedes comentar en tu propio negocio', 'warning');
+        return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -40,8 +51,7 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
     }
   };
 
-  // Validación en tiempo de ejecución
-  const isFormValid = formData.comment.trim() && !isSubmitting;
+  const isFormValid = formData.comment.trim() && !isSubmitting && !isOwner;
 
   const categoryIcons = {
     SERVICIO: <Headphones size={18} />,
@@ -50,6 +60,16 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
     PRECIO: <ShieldCheck size={18} />,
     OTRO: <Settings size={18} />
   };
+
+  if (isOwner) {
+      return (
+        <div className="commerce-comment-form-container glass-panel owner-blocked">
+            <AlertTriangle size={48} className="text-yellow-500 mb-4" />
+            <h3>¡Esta es tu casa!</h3>
+            <p>Como dueño de <strong>{commerceName}</strong>, no puedes dejarte reseñas a ti mismo. Tu rol es gestionar y responder el feedback de tus clientes.</p>
+        </div>
+      );
+  }
 
   return (
     <div className="commerce-comment-form-container glass-panel">
@@ -77,7 +97,7 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
               >
                 <option value="SERVICIO">Atención y Servicio</option>
                 <option value="AMBIENTE">Ambiente y Decoración</option>
-                <option value="CALIDAD">Calidad de Productos</option>
+                <option value="CALIDAD">Quality of Products</option>
                 <option value="PRECIO">Relación Precio/Valor</option>
                 <option value="OTRO">Otros comentarios</option>
               </select>
@@ -119,23 +139,33 @@ const CommerceCommentForm = ({ commerceId, commerceName, onSuccess }) => {
           />
         </div>
 
-        {/* Nombre (opcional) */}
+        {/* Info de Identidad / Nombre */}
         <div className="form-group">
-          <label htmlFor="userName">Tu nombre (opcional)</label>
-          <div className="input-with-icon">
-            <User size={18} className="input-icon" />
-            <input
-                type="text"
-                id="userName"
-                placeholder="Permanecer anónimo"
-                value={formData.userName}
-                onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-                className="form-input-premium"
-            />
-          </div>
+          {isLoggedIn ? (
+            <div className="user-identity-feedback">
+                <User size={18} className="text-primary" />
+                <span>Comentando como <strong>{user?.name}</strong></span>
+            </div>
+          ) : (
+            <>
+                <label htmlFor="userName">Tu nombre (opcional)</label>
+                <div className="input-with-icon">
+                    <User size={18} className="input-icon" />
+                    <input
+                        type="text"
+                        id="userName"
+                        placeholder="Permanecer anónimo"
+                        value={formData.userName}
+                        onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                        className="form-input-premium"
+                    />
+                </div>
+            </>
+          )}
+          
           <div className="privacy-badge">
-             <Info size={14} /> 
-             <span>Feedback de uso interno exclusivo para administradores</span>
+             {isLoggedIn ? <ShieldCheck size={14} /> : <Info size={14} />}
+             <span>{isLoggedIn ? 'Identidad verificada por Pandora' : 'Feedback de uso interno exclusivo para administradores'}</span>
           </div>
         </div>
 

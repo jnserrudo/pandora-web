@@ -112,6 +112,7 @@ const Map = forwardRef(function Map(
   {
     children,
     className,
+    style: containerStyle,
     theme: themeProp,
     styles,
     projection,
@@ -269,7 +270,7 @@ const Map = forwardRef(function Map(
 
   return (
     <MapContext.Provider value={contextValue}>
-      <div ref={containerRef} className={cn("relative w-full h-full", className)}>
+      <div ref={containerRef} className={cn("relative w-full h-full", className)} style={{ width: '100%', height: '100%', position: 'relative', ...containerStyle }}>
         {!isLoaded && <DefaultLoader />}
         {/* SSR-safe: children render only when map is loaded on client */}
         {mapInstance && children}
@@ -413,11 +414,15 @@ function MapMarker({
 
 function MarkerContent({
   children,
-  className
+  className,
+  style
 }) {
   const { marker } = useMarkerContext();
 
-  return createPortal(<div className={cn("relative cursor-pointer", className)}>
+  return createPortal(<div 
+    className={cn("relative cursor-pointer", className)}
+    style={style}
+  >
     {children || <DefaultMarkerIcon />}
   </div>, marker.getElement());
 }
@@ -425,7 +430,9 @@ function MarkerContent({
 function DefaultMarkerIcon() {
   return (
     <div
-      className="relative h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow-lg" />
+      className="relative h-4 w-4 rounded-full border-2 border-white shadow-lg" 
+      style={{ backgroundColor: '#8a2be2' }}
+    />
   );
 }
 

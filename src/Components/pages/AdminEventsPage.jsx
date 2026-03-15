@@ -46,7 +46,7 @@ const AdminEventsPage = () => {
   }, [token]);
 
   const handleToggleEvent = async (id, currentStatus) => {
-    if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'desactivar' : 'reactivar'} este evento?`)) return;
+    // if (!window.confirm(`¿Seguro que deseas ${currentStatus ? 'desactivar' : 'reactivar'} este evento?`)) return;
     try {
       // Usamos la nueva función del service
       // await toggleEventStatus(id, !currentStatus, token);

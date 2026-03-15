@@ -13,8 +13,13 @@ export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
   const showToast = useCallback((message, type = 'info') => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => {
+      // Evitar duplicados exactos que ya están visibles
+      if (prev.some(t => t.message === message)) return prev;
+      
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      return [...prev, { id, message, type }];
+    });
   }, []);
 
   const removeToast = useCallback((id) => {

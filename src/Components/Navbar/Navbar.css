@@ -34,14 +34,20 @@
   font-weight: 900;
   color: #fff;
   text-decoration: none;
-  letter-spacing: 4px;
+  letter-spacing: 2px; /* Reducido un poco para legibilidad */
   transition: all 0.3s ease;
   position: relative;
+  font-family: var(--font-main);
+}
+
+.navbar-logo span {
+  color: var(--color-accent, #ff00c8);
+  font-weight: 200; /* Contraste ultra fino para look premium */
+  letter-spacing: 4px;
 }
 
 .navbar-logo:hover {
-  text-shadow: 0 0 20px var(--color-primary);
-  letter-spacing: 6px;
+  text-shadow: 0 0 15px var(--color-primary);
 }
 
 /* --- MAIN LINKS --- */
