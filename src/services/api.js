@@ -789,7 +789,7 @@ export const getPublicStats = async () => {
             data: error.response?.data,
             url: error.config?.url
         });
-        return { articles: 0, events: 0, commerces: 0 };
+        return { articles: 0, events: 0, commerces: 0, plans: 0 };
     }
 };
 

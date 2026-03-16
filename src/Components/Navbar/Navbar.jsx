@@ -31,7 +31,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [stats, setStats] = useState({ articles: 0, events: 0, commerces: 0 });
+  const [stats, setStats] = useState({ articles: 0, events: 0, commerces: 0, plans: 0 });
 
   const fetchStats = async () => {
     try {
@@ -153,7 +153,9 @@ const Navbar = () => {
             <Link to="/commerces" className={`nav-link ${isActive('/commerces') ? 'active' : ''}`}>
               Comercios <span className="nav-stat">({stats.commerces})</span>
             </Link>
-            <Link to="/pricing" className={`nav-link ${isActive('/pricing') ? 'active' : ''}`}>Planes</Link>
+            <Link to="/pricing" className={`nav-link ${isActive('/pricing') ? 'active' : ''}`}>
+              Planes <span className="nav-stat">({stats.plans})</span>
+            </Link>
           </div>
 
           <div className="navbar-actions">
@@ -303,7 +305,9 @@ const Navbar = () => {
             <Link to="/commerces" onClick={closeMenu}>
               Comercios <span className="m-stat">({stats.commerces})</span>
             </Link>
-            <Link to="/pricing" onClick={closeMenu}>Planes</Link>
+            <Link to="/pricing" onClick={closeMenu}>
+              Planes <span className="m-stat">({stats.plans})</span>
+            </Link>
             
             {isAuthenticated && (
               <>

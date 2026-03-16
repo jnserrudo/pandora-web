@@ -44,7 +44,33 @@ const PricingPage = () => {
             { level: 4, name: "ELITE", price: 6000, description: "Socio Pandora con analíticas.", iconName: "Crown", color: "#FFD700", features: ["Socio Pandora", "Analíticas", "Soporte 24/7"] }
           ]);
         } else {
-          setPlans(data);
+          // Adaptar datos del backend (benefits string -> features array)
+          const adapted = data.map(p => {
+            let features = [];
+            if (p.features) {
+              features = Array.isArray(p.features) ? p.features : [p.features];
+            } else if (p.benefits) {
+              // El backend guarda benefits como texto (posiblemente con saltos de línea)
+              features = p.benefits.split('\n').map(f => f.trim()).filter(f => f);
+            }
+
+            // Asignar Iconos y Colores por defecto si no vienen del DB
+            const defaults = {
+                1: { icon: "MousePointer2", color: "#94a3b8" },
+                2: { icon: "Zap", color: "#00D4FF" },
+                3: { icon: "Award", color: "var(--color-primary)", featured: true },
+                4: { icon: "Crown", color: "#FFD700" }
+            }[p.level] || { icon: "MousePointer2", color: "#8A2BE2" };
+
+            return {
+              ...p,
+              iconName: p.iconName || defaults.icon,
+              color: p.color || defaults.color,
+              featured: p.featured !== undefined ? p.featured : (defaults.featured || false),
+              features: features.length > 0 ? features : ["Sin beneficios especificados"]
+            };
+          });
+          setPlans(adapted);
         }
       } catch (err) {
         console.error("Error fetching plans:", err);

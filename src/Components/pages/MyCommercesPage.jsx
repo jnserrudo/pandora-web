@@ -21,7 +21,15 @@ import CommerceFAQManager from '../Commerce/CommerceFAQManager';
 import { 
     MapPin,
     HelpCircle,
-    Loader2
+    Loader2,
+    Store,
+    Plus,
+    Target,
+    MessageSquare,
+    Trophy,
+    Package,
+    Settings,
+    ExternalLink
 } from 'lucide-react';
 import './MyCommercesPage.css';
 
