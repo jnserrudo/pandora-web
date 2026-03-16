@@ -30,20 +30,26 @@
 }
 
 .navbar-logo {
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: #fff;
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  letter-spacing: 2px; /* Reducido un poco para legibilidad */
   transition: all 0.3s ease;
   position: relative;
-  font-family: var(--font-main);
 }
 
-.navbar-logo span {
-  color: var(--color-accent, #ff00c8);
-  font-weight: 200; /* Contraste ultra fino para look premium */
-  letter-spacing: 4px;
+.navbar-logo-img {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  transition: all 0.4s ease;
+}
+
+.navbar-logo:hover .navbar-logo-img {
+  filter: drop-shadow(0 0 10px var(--color-primary));
+}
+
+.navbar-container.scrolled .navbar-logo-img {
+  height: 60px;
 }
 
 .navbar-logo:hover {
