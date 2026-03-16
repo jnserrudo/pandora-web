@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
+import { ArrowLeft } from "lucide-react";
 import "./AuthForm.css"; // Crearemos un CSS reutilizable
 
 const LoginPage = () => {
@@ -79,6 +80,13 @@ const LoginPage = () => {
         <p className="auth-switch">
           ¿No tenés una cuenta? <Link to="/register">Registrate acá</Link>
         </p>
+        
+        <div className="auth-footer-nav">
+          <Link to="/" className="back-home-link">
+            <ArrowLeft size={16} />
+            Volver a la Página Principal
+          </Link>
+        </div>
       </form>
     </div>
   );
