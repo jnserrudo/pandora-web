@@ -17,17 +17,10 @@ import OwnerAdvisoryCard from '../Commerce/OwnerAdvisoryCard';
 import CommerceProductManager from '../Commerce/CommerceProductManager';
 import CommerceBranchManager from '../Commerce/CommerceBranchManager';
 import CommerceFeedbackManager from '../Commerce/CommerceFeedbackManager';
+import CommerceFAQManager from '../Commerce/CommerceFAQManager';
 import { 
-    Store, 
-    MessageSquare, 
-    Trophy, 
-    Settings, 
-    Plus, 
-    ExternalLink,
-    ChevronRight,
-    Target,
-    Package,
     MapPin,
+    HelpCircle,
     Loader2
 } from 'lucide-react';
 import './MyCommercesPage.css';
@@ -226,7 +219,7 @@ const MyCommercesPage = () => {
                                                 onClick={() => { setSelectedCommerce(commerce); setView('FAQS'); }}
                                                 className="btn-card-neo view"
                                             >
-                                                <Target size={18} />
+                                                <HelpCircle size={18} />
                                                 FAQs
                                             </button>
                                         )}

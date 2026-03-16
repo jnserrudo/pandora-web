@@ -15,7 +15,7 @@ import {
   MessageCircle,
   ArrowLeft, 
   Calendar,  
-  Info 
+  HelpCircle 
 } from 'lucide-react';
 import CommerceCommentForm from '../Commerce/CommerceCommentForm';
 import CommerceProducts from '../Commerce/CommerceProducts';
@@ -271,7 +271,7 @@ const CommerceDetailPage = () => {
         {commerce.planLevel >= 3 && faqs.length > 0 && (
           <section className="commerce-faqs-section" style={{ marginTop: '3rem' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Info size={24} className="text-primary" /> Preguntas Frecuentes
+              <HelpCircle size={24} className="text-primary" /> Preguntas Frecuentes
             </h2>
             <div className="faqs-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
               {faqs.map(faq => (
