@@ -121,6 +121,7 @@ const AdminSubmissionHub = () => {
                 <select value={filter} onChange={(e) => setFilter(e.target.value)} className="btn-filter-premium">
                   <option value="ALL">Todos los tipos</option>
                   <option value="PENDING">Solo Pendientes</option>
+                  <option value="EVENT_REQUEST">Solicitudes de Evento</option>
                   <option value="PLAN_UPGRADE">Pagos / Planes</option>
                   <option value="AD_PROPOSAL">Publicidad</option>
                   <option value="MAGAZINE_PROPOSAL">Revista</option>
@@ -146,8 +147,14 @@ const AdminSubmissionHub = () => {
                       <div className="row-main-info">
                         <span className="row-title">{sub.name || sub.user?.name || 'Usuario Pandora'}</span>
                         <div className="sub-type-badge">
-                          {sub.type === 'PLAN_UPGRADE' ? <DollarSign size={12} /> : <FileText size={12} />}
-                          <span>{sub.type}</span>
+                          {sub.type === 'PLAN_UPGRADE' ? <DollarSign size={12} /> : sub.type === 'EVENT_REQUEST' ? <CheckCircle2 size={12} /> : <FileText size={12} />}
+                          <span>{
+                            sub.type === 'EVENT_REQUEST' ? 'Solicitud Evento' :
+                            sub.type === 'PLAN_UPGRADE' ? 'Pago / Plan' :
+                            sub.type === 'AD_PROPOSAL' ? 'Publicidad' :
+                            sub.type === 'MAGAZINE_PROPOSAL' ? 'Revista' :
+                            sub.type === 'CONTACT' ? 'Contacto' : sub.type
+                          }</span>
                         </div>
                       </div>
                     </td>

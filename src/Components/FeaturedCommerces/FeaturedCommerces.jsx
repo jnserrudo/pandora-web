@@ -1,6 +1,6 @@
 // src/Components/FeaturedCommerces/FeaturedCommerces.jsx
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { getCommerces, toggleFavorite, getAbsoluteImageUrl } from "../../services/api";
@@ -15,6 +15,8 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef(null);
+  const autoPlayRef = useRef(null);
+  const isPausedRef = useRef(false);
 
   useEffect(() => {
     const fetchCommerces = async () => {
@@ -62,14 +64,25 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
     }
   };
 
-  const scroll = (direction) => {
+  const scroll = useCallback((direction) => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, clientWidth, scrollWidth } = scrollContainerRef.current;
       const scrollAmount = variant === "large" ? clientWidth * 0.8 : clientWidth * 0.6;
-      const scrollTo = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
+      let scrollTo = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
+      // Volver al inicio si llega al final
+      if (direction === 'right' && scrollLeft + clientWidth >= scrollWidth - 10) {
+        scrollTo = 0;
+      }
       scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
-  };
+  }, [variant]);
+
+  useEffect(() => {
+    autoPlayRef.current = setInterval(() => {
+      if (!isPausedRef.current) scroll('right');
+    }, 4000);
+    return () => clearInterval(autoPlayRef.current);
+  }, [scroll]);
 
   const getPlaceholderImage = (category) => {
     return "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
@@ -100,7 +113,11 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
               <small style={{ opacity: 0.5 }}>{planLevel ? `Plan: ${planLevel}` : 'Todos los planes'}</small>
           </div>
       ) : (
-        <div className="carousel-wrapper">
+        <div
+          className="carousel-wrapper"
+          onMouseEnter={() => { isPausedRef.current = true; }}
+          onMouseLeave={() => { isPausedRef.current = false; }}
+        >
           <button className="carousel-nav-btn prev" onClick={() => scroll('left')}>
             <ChevronLeft size={24} />
           </button>

@@ -152,6 +152,25 @@
   background-color: #fff; /* Puntos blancos en selección */
 }
 
+.event-dot--featured {
+  background-color: #FFD700 !important;
+  box-shadow: 0 0 5px #FFD700 !important;
+}
+
+/* Estrella para días con eventos destacados */
+.featured-star {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.55rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.calendar-day.has-featured {
+  border: 1px solid rgba(255, 215, 0, 0.35);
+}
+
 
 /* --- Right Side: Details Panel --- */
 .calendar-details-panel {

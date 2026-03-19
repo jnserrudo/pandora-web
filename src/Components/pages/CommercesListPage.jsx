@@ -5,18 +5,19 @@ import { getCommerces, getAbsoluteImageUrl } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import { MapPin } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import './CommercesListPage.css';
 
 const CommercesListPage = () => {
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
   
-  const [commerces, setCommerces] = useState([]);
+  const [allCommerces, setAllCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(categoryParam || 'ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('recent');
 
-  // Mapeo de valores de BD a texto legible
   const categoryNames = {
     'ALL': 'Todos',
     'VIDA_NOCTURNA': 'Vida Nocturna',
@@ -28,29 +29,45 @@ const CommercesListPage = () => {
     const fetchCommerces = async () => {
       setLoading(true);
       try {
-        const catFilter = activeCategory === 'ALL' ? '' : activeCategory;
-        const data = await getCommerces(catFilter);
-        setCommerces(data);
+        const data = await getCommerces();
+        setAllCommerces(data);
       } catch (error) {
         console.error("Error cargando comercios:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCommerces();
-  }, [activeCategory]);
+  }, []);
+
+  useEffect(() => {
+    if (categoryParam) setActiveCategory(categoryParam);
+  }, [categoryParam]);
 
   const handleImageError = (e) => {
     e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop';
   };
 
-  // Actualizar si cambia la URL
-  useEffect(() => {
-    if (categoryParam) {
-      setActiveCategory(categoryParam);
-    }
-  }, [categoryParam]);
+  // Filtrado y ordenamiento client-side
+  const filtered = allCommerces
+    .filter(c => {
+      const matchCat = activeCategory === 'ALL' || c.category === activeCategory ||
+        (c.categories && c.categories.some(cat => cat.slug === activeCategory || cat.name === activeCategory));
+      const term = searchTerm.toLowerCase();
+      const matchSearch = !term ||
+        c.name?.toLowerCase().includes(term) ||
+        c.description?.toLowerCase().includes(term) ||
+        c.shortDescription?.toLowerCase().includes(term) ||
+        c.address?.toLowerCase().includes(term);
+      return matchCat && matchSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'az') return a.name.localeCompare(b.name);
+      if (sortBy === 'za') return b.name.localeCompare(a.name);
+      if (sortBy === 'plan') return (b.planLevel || 1) - (a.planLevel || 1);
+      // recent: por id desc (más nuevo primero)
+      return b.id - a.id;
+    });
 
   return (
     <div className="commerces-page-wrapper">
@@ -60,6 +77,49 @@ const CommercesListPage = () => {
         <header className="commerces-header">
           <h1>Nuestros Locales</h1>
           <p>Explorá las mejores opciones de Salta</p>
+
+          {/* Buscador */}
+          <div className="commerces-search-bar" style={{ margin: '1.5rem 0 1rem', display: 'flex', gap: '0.75rem', alignItems: 'center', maxWidth: '500px' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, descripción o dirección..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  paddingLeft: '38px',
+                  padding: '10px 12px 10px 38px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '10px',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  outline: 'none'
+                }}
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              style={{
+                padding: '10px 12px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="recent">Más recientes</option>
+              <option value="az">A → Z</option>
+              <option value="za">Z → A</option>
+              <option value="plan">Por plan</option>
+            </select>
+          </div>
           
           <div className="category-filters">
             {Object.keys(categoryNames).map(catKey => (
@@ -76,49 +136,53 @@ const CommercesListPage = () => {
 
         {loading ? (
           <div className="loader-container">
-             <LoadingSpinner message="Buscando los mejores lugares..." />
+            <LoadingSpinner message="Buscando los mejores lugares..." />
           </div>
         ) : (
-          <div className="unified-commerces-grid">
-            {commerces.length > 0 ? (
-              commerces.map((commerce) => {
-                return (
-                <Link to={`/commerce/${commerce.id}`} key={commerce.id} className="commerce-card-link">
+          <>
+            {searchTerm && (
+              <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                {filtered.length} resultado{filtered.length !== 1 ? 's' : ''} para &ldquo;{searchTerm}&rdquo;
+              </p>
+            )}
+            <div className="unified-commerces-grid">
+              {filtered.length > 0 ? (
+                filtered.map((commerce) => (
+                  <Link to={`/commerce/${commerce.id}`} key={commerce.id} className="commerce-card-link">
                     <div className="commerce-card">
                       <div className="card-image-wrapper">
-                      <img 
-                        src={commerce.galleryImages?.[0] ? getAbsoluteImageUrl(commerce.galleryImages[0]) : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop'} 
-                        alt={commerce.name} 
-                        className="commerce-image"
-                        onError={handleImageError}
-                      />
-                      <span className="card-category-badge">
-                        {categoryNames[commerce.category] || commerce.category}
-                      </span>
-                    </div>
-                    
-                    <div className="card-content">
-                      <h3 className="card-title">{commerce.name}</h3>
-                      <p className="card-description">
-                        {commerce.description?.substring(0, 80)}...
-                      </p>
-                      <div className="card-footer">
-                        <span className="card-location">
-                          <MapPin size={14} className="icon-loc" /> 
-                          <span>{commerce.address || 'Salta, Capital'}</span>
+                        <img 
+                          src={commerce.galleryImages?.[0] ? getAbsoluteImageUrl(commerce.galleryImages[0]) : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop'} 
+                          alt={commerce.name} 
+                          className="commerce-image"
+                          onError={handleImageError}
+                        />
+                        <span className="card-category-badge">
+                          {categoryNames[commerce.category] || commerce.category}
                         </span>
                       </div>
-                    </div>
+                      <div className="card-content">
+                        <h3 className="card-title">{commerce.name}</h3>
+                        <p className="card-description">
+                          {commerce.description?.substring(0, 80)}...
+                        </p>
+                        <div className="card-footer">
+                          <span className="card-location">
+                            <MapPin size={14} className="icon-loc" /> 
+                            <span>{commerce.address || 'Salta, Capital'}</span>
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </Link>
-                );
-              })
-            ) : (
-              <div className="no-results">
-                <p>No se encontraron comercios en esta categoría.</p>
-              </div>
-            )}
-          </div>
+                ))
+              ) : (
+                <div className="no-results">
+                  <p>No se encontraron comercios{searchTerm ? ` para "${searchTerm}"` : ' en esta categoría'}.</p>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 

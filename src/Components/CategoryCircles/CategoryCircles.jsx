@@ -1,10 +1,28 @@
 // src/Components/CategoryCircles/CategoryCircles.jsx
-import React from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CategoryCircles.css';
 
 const CategoryCircles = () => {
   const navigate = useNavigate();
+  const containerRef = useRef(null);
+  const isPausedRef = useRef(false);
+  const touchStartX = useRef(0);
+
+  const scrollStep = useCallback(() => {
+    if (!containerRef.current || isPausedRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+    if (scrollLeft + clientWidth >= scrollWidth - 10) {
+      containerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      containerRef.current.scrollBy({ left: 280, behavior: 'smooth' });
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(scrollStep, 3000);
+    return () => clearInterval(timer);
+  }, [scrollStep]);
 
   const categories = [
     {
@@ -35,13 +53,33 @@ const CategoryCircles = () => {
     navigate(`/commerces?category=${category}`);
   };
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    isPausedRef.current = true;
+  };
+
+  const handleTouchEnd = (e) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40 && containerRef.current) {
+      containerRef.current.scrollBy({ left: diff > 0 ? 280 : -280, behavior: 'smooth' });
+    }
+    setTimeout(() => { isPausedRef.current = false; }, 2000);
+  };
+
   return (
     <section className="category-circles-section">
       <h2 className="category-circles-title">
         Todo en un solo <span>lugar</span>
       </h2>
       
-      <div className="circles-container">
+      <div
+        className="circles-container"
+        ref={containerRef}
+        onMouseEnter={() => { isPausedRef.current = true; }}
+        onMouseLeave={() => { isPausedRef.current = false; }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {categories.map((cat, index) => (
           <div 
             key={cat.id} 

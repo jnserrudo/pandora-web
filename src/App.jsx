@@ -1,7 +1,7 @@
 // src/App.jsx
 import React from "react";
 import { ToastProvider } from "./context/ToastContext";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./Components/pages/HomePage";
 import LoginPage from "./Components/pages/LoginPage";
 import RegisterPage from "./Components/pages/RegisterPage";
@@ -102,7 +102,7 @@ function App() {
           <Route 
             path="/events/create" 
             element={
-              <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
                 <EventFormPage />
               </ProtectedRoute>
             } 
@@ -217,6 +217,9 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          {/* Catch-all: redirige al home en lugar de mostrar pantalla en blanco */}
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
       </main>

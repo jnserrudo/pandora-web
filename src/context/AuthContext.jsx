@@ -54,8 +54,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Añadimos la función de registro
-  const register = async (name, username, email, password) => {
-    await api.registerUser(name, username, email, password);
+  const register = async (name, username, email, password, dni = null) => {
+    await api.registerUser(name, username, email, password, dni);
   };
 
   // Helper para verificar si el usuario es administrador

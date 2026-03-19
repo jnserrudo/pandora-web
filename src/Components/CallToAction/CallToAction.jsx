@@ -4,6 +4,8 @@ import playStore from '../../assets/play_store.png'; // 1. Importa la imagen
 import appStore from '../../assets/app_store.jfif'; // 1. Importa la imagen
 
 const CallToAction = () => {
+  // Sección de descarga temporalmente oculta
+  return null;
   return (
     <section id="download" className="cta-section">
       <div className="cta-content">

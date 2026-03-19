@@ -8,19 +8,31 @@ import {
   LogOut,
   Settings,
   Store,
-  Star
+  Star,
+  Check,
+  X,
+  CreditCard
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getMyFavorites, getAbsoluteImageUrl } from '../../services/api';
+import { getMyFavorites, getAbsoluteImageUrl, updateUserProfile } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, refreshProfile } = useAuth();
   const [favorites, setFavorites] = React.useState([]);
   const [loadingFavs, setLoadingFavs] = React.useState(true);
+
+  const [editingDni, setEditingDni] = React.useState(false);
+  const [dniValue, setDniValue] = React.useState('');
+  const [savingDni, setSavingDni] = React.useState(false);
+  const [dniError, setDniError] = React.useState('');
+
+  React.useEffect(() => {
+    if (user?.dni) setDniValue(user.dni);
+  }, [user]);
 
   React.useEffect(() => {
     const fetchFavs = async () => {
@@ -37,6 +49,24 @@ const UserProfilePage = () => {
     };
     fetchFavs();
   }, [token]);
+
+  const handleSaveDni = async () => {
+    if (!dniValue.trim()) {
+      setDniError('El DNI no puede estar vacío.');
+      return;
+    }
+    setSavingDni(true);
+    setDniError('');
+    try {
+      await updateUserProfile({ dni: dniValue.trim() }, token);
+      await refreshProfile();
+      setEditingDni(false);
+    } catch (err) {
+      setDniError(err.message);
+    } finally {
+      setSavingDni(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -130,10 +160,44 @@ const UserProfilePage = () => {
               <p>{user?.email}</p>
             </div>
 
-            <button className="btn-edit-profile">
-              <Edit size={18} />
-              Editar Información
-            </button>
+            <div className="info-item">
+              <label><CreditCard size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />DNI</label>
+              {editingDni ? (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem' }}>
+                  <input
+                    type="text"
+                    value={dniValue}
+                    onChange={(e) => setDniValue(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Ej. 35123456"
+                    maxLength={10}
+                    inputMode="numeric"
+                    style={{ 
+                      background: 'rgba(255,255,255,0.05)', 
+                      border: '1px solid rgba(255,255,255,0.2)', 
+                      borderRadius: '8px', 
+                      padding: '6px 10px', 
+                      color: '#fff',
+                      fontSize: '0.9rem',
+                      width: '150px'
+                    }}
+                  />
+                  <button onClick={handleSaveDni} disabled={savingDni} title="Guardar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2ecc71' }}>
+                    <Check size={18} />
+                  </button>
+                  <button onClick={() => { setEditingDni(false); setDniError(''); }} title="Cancelar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff6b6b' }}>
+                    <X size={18} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <p>{user?.dni || <span style={{ color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>No registrado</span>}</p>
+                  <button onClick={() => setEditingDni(true)} title="Editar DNI" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
+                    <Edit size={14} />
+                  </button>
+                </div>
+              )}
+              {dniError && <span style={{ color: '#ff6b6b', fontSize: '0.8rem' }}>{dniError}</span>}
+            </div>
           </div>
 
           <div className="profile-quick-actions">

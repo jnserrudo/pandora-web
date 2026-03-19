@@ -111,10 +111,11 @@ export const getCategories = async () => {
 
 // --- FUNCIONES PARA EVENTOS (NUEVAS) ---
 
-// Obtiene todos los eventos publicados
-export const getEvents = async () => {
+// Obtiene todos los eventos (con token opcional para admin — ve todos los estados)
+export const getEvents = async (token = null) => {
   try {
-    const response = await axios.get(`${API_URL}/events`);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await axios.get(`${API_URL}/events`, { headers });
     return response.data;
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -384,17 +385,25 @@ export const getAdminStats = async (token) => {
 
 // --- FUNCIONES DE AUTENTICACIÓN Y PERFIL ---
 
-export const registerUser = async (name, username, email, password) => {
+export const registerUser = async (name, username, email, password, dni = null) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, {
-      name,
-      username,
-      email,
-      password,
-    });
+    const payload = { name, username, email, password };
+    if (dni && dni.trim()) payload.dni = dni.trim();
+    const response = await axios.post(`${API_URL}/auth/register`, payload);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error al registrarse.");
+  }
+};
+
+export const updateUserProfile = async (data, token) => {
+  try {
+    const response = await axios.patch(`${API_URL}/users/me`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al actualizar el perfil.");
   }
 };
 
@@ -518,6 +527,28 @@ export const updateEvent = async (id, data, token) => {
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error al actualizar evento.");
+  }
+};
+
+export const approveEvent = async (id, token) => {
+  try {
+    const response = await axios.patch(`${API_URL}/events/${id}/approve`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al aprobar el evento.");
+  }
+};
+
+export const rejectEvent = async (id, adminNote, token) => {
+  try {
+    const response = await axios.patch(`${API_URL}/events/${id}/reject`, { adminNote }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al rechazar el evento.");
   }
 };
 

@@ -60,6 +60,10 @@ const ArtisticCalendar = () => {
     });
   };
 
+  const hasFeaturedEventOnDay = (day) => {
+    return getEventsForDay(day).some(e => e.featured);
+  };
+
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
@@ -76,16 +80,18 @@ const ArtisticCalendar = () => {
     const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === currentMonth;
     const isToday = new Date().getDate() === day && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
 
+    const hasFeatured = hasFeaturedEventOnDay(day);
     calendarDays.push(
       <div 
         key={day} 
-        className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}`}
+        className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''} ${hasFeatured ? 'has-featured' : ''}`}
         onClick={() => handleDateClick(day)}
       >
         <span className="day-number">{day}</span>
+        {hasFeatured && <span className="featured-star" title="Evento destacado">⭐</span>}
         {hasEvents && <div className="event-indicators">
           {dayEvents.slice(0, 3).map((_, idx) => (
-            <span key={idx} className="event-dot"></span>
+            <span key={idx} className={`event-dot${dayEvents[idx]?.featured ? ' event-dot--featured' : ''}`}></span>
           ))}
         </div>}
       </div>
@@ -146,8 +152,11 @@ const ArtisticCalendar = () => {
                     {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                   <div className="mini-event-info">
-                    <h4>{event.name}</h4>
-                    <p>{event.commerce?.name || 'Evento Especial'}</p>
+                    <h4>
+                      {event.featured && <span style={{ color: '#FFD700', marginRight: '4px' }}>⭐</span>}
+                      {event.name}
+                    </h4>
+                    <p>{event.commerce?.name || event.organizerName || 'Evento Especial'}</p>
                   </div>
                   <div className="mini-event-arrow">→</div>
                 </div>

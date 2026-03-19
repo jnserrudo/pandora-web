@@ -17,11 +17,8 @@ const HeroSection = () => {
           La noche salteña, en tu <span className="highlight">bolsillo</span>.
         </h1>
         <p className="subtitle">
-          Descubrí, explorá y viví lo mejor de Salta. Pandora es tu guía definitiva para eventos, gastronomía y cultura. Descargá la app y que empiece la aventura.
+          Descubrí, explorá y viví lo mejor de Salta. Pandora es tu guía definitiva para eventos, gastronomía y cultura.
         </p>
-        <div className="hero-buttons">
-          <a href="#download" className="cta-button primary">Descargar App</a>
-        </div>
       </div>
       
       <div className="hero-image-abstract">

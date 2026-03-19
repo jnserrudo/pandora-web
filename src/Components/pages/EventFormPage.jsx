@@ -23,14 +23,16 @@ const EventFormPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    commerceId: '', // Debe seleccionarse de los comercios del usuario
+    commerceId: '',
+    organizerName: '',
     startDate: '',
     endDate: '',
-    location: '', // Referencia visual (ej: Planta Alta)
-    address: '',  // Dirección física (ej: Belgrano 123)
+    location: '',
+    address: '',
     latitude: null,
     longitude: null,
-    coverImage: ''
+    coverImage: '',
+    featured: false,
   });
 
   const [myCommerces, setMyCommerces] = useState([]);
@@ -39,30 +41,32 @@ const EventFormPage = () => {
   const { uploading, fromInputEvent } = useImageUpload();
   const handleRemoveImage = () => setFormData(prev => ({ ...prev, coverImage: '' }));
 
-  // Cargar comercios del usuario para el selector
+  // Cargar comercios del usuario para el selector (no bloquea si no tiene)
   useEffect(() => {
     const fetchCommerces = async () => {
       try {
         const data = await getMyCommerces(token);
         setMyCommerces(data);
         if (data.length > 0) {
-          // Pre-seleccionar el primer comercio
           setFormData(prev => ({ ...prev, commerceId: data[0].id }));
         }
       } catch (err) {
         console.error("Error cargando comercios:", err);
-        setError("Necesitas tener un comercio registrado para crear eventos.");
       } finally {
         setLoading(false);
       }
     };
     if (token) fetchCommerces();
+    else setLoading(false);
   }, [token]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
+
+  // Fecha mínima: 72 horas desde ahora
+  const minStartDate = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString().slice(0, 16);
 
   // Validación en tiempo de ejecución para el botón
   const isFormValid = formData.name.trim() && 
@@ -70,49 +74,61 @@ const EventFormPage = () => {
                       formData.startDate && 
                       formData.endDate && 
                       formData.address.trim() &&
-                      formData.commerceId;
+                      (formData.commerceId || formData.organizerName.trim());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.commerceId) {
-      showToast("Debes seleccionar un comercio.", 'warning');
+
+    if (!formData.commerceId && !formData.organizerName.trim()) {
+      showToast("Debes seleccionar un comercio o ingresar un nombre de organizador.", 'warning');
       return;
     }
-    
+
     // Validación fechas
-    if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+    const startMs = new Date(formData.startDate).getTime();
+    const endMs = new Date(formData.endDate).getTime();
+    const minMs = Date.now() + 72 * 60 * 60 * 1000;
+
+    if (startMs < minMs) {
+      showToast("La fecha de inicio debe ser al menos 72 horas desde ahora.", 'warning');
+      return;
+    }
+    if (endMs <= startMs) {
       showToast("La fecha de fin debe ser posterior al inicio.", 'warning');
       return;
     }
 
     setLoading(true);
     try {
-      // Normalización de fechas para Prisma (ISO-8601)
-      // Fusionamos "location" (referencia visual) con "address" para evitar errores de schema si no está migrado
       const fullAddress = formData.location ? `${formData.address} (${formData.location})` : formData.address;
-      
+
       const payload = {
-        ...formData,
-        address: fullAddress,
+        name: formData.name,
+        description: formData.description,
         startDate: new Date(formData.startDate).toISOString(),
         endDate: new Date(formData.endDate).toISOString(),
+        address: fullAddress,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        coverImage: formData.coverImage,
+        featured: formData.featured,
       };
 
-      // Quitamos 'location' explícitamente del payload para evitar el error "Unknown argument location"
-      delete payload.location;
+      if (formData.commerceId) payload.commerceId = formData.commerceId;
+      if (formData.organizerName.trim()) payload.organizerName = formData.organizerName.trim();
 
       await createEvent(payload, token);
-      showToast('¡Evento creado con éxito!', 'success');
+      showToast('¡Solicitud de evento enviada! El equipo Pandora la revisará pronto.', 'success');
       navigate('/events'); 
     } catch (err) {
       console.error("Error creating event:", err);
-      setError(err.message || "Error al crear el evento.");
+      setError(err.message || "Error al enviar la solicitud.");
       setLoading(false);
     }
   };
 
-  if (loading && myCommerces.length === 0 && !error) {
-     return <div className="event-form-wrapper"><LoadingSpinner message="Verificando permisos..." /></div>;
+  if (loading && !error) {
+     return <div className="event-form-wrapper"><LoadingSpinner message="Cargando..." /></div>;
   }
 
   return (
@@ -121,33 +137,55 @@ const EventFormPage = () => {
       
       <div className="event-form-container">
         <div className="event-header">
-          <h1>Crear Nuevo Evento</h1>
-          <p>Publica tus actividades en la Agenda Cultural</p>
+          <h1>Solicitar Nuevo Evento</h1>
+          <p>Completá el formulario y el equipo Pandora revisará tu solicitud antes de publicarla.</p>
         </div>
 
-        {myCommerces.length === 0 && !loading ? (
-           <div className="empty-state">
-             <h3>No tienes comercios registrados</h3>
-             <p>Para crear un evento, primero debes registrar un comercio.</p>
-             <Link to="/commerces/create" className="create-commerce-btn">Registrar Comercio</Link>
-           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="form-card">
+        <form onSubmit={handleSubmit} className="form-card">
             {error && <div className="error-message" style={{marginBottom:'1rem', color:'#ff6b6b'}}>{error}</div>}
 
+            {/* Organizador: comercio propio o nombre libre */}
             <div className="form-group">
-              <label>Organizador (Tu Comercio)</label>
-              <select 
-                name="commerceId" 
-                value={formData.commerceId} 
-                onChange={handleChange} 
-                className="form-control"
-                required
-              >
-                {myCommerces.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              <label>Organizador</label>
+              {myCommerces.length > 0 ? (
+                <>
+                  <select 
+                    name="commerceId" 
+                    value={formData.commerceId} 
+                    onChange={handleChange} 
+                    className="form-control"
+                  >
+                    <option value="">— Sin comercio asociado —</option>
+                    {myCommerces.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  {!formData.commerceId && (
+                    <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                      <label>Nombre del organizador <span className="required-tag">(Obligatorio si no hay comercio)</span></label>
+                      <input
+                        type="text"
+                        name="organizerName"
+                        value={formData.organizerName}
+                        onChange={handleChange}
+                        className="form-control"
+                        placeholder="Ej. Festival Cultural Salta"
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <input
+                  type="text"
+                  name="organizerName"
+                  value={formData.organizerName}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="Ej. Festival Cultural Salta"
+                  required
+                />
+              )}
+              <small className="field-hint">Podés asociarlo a uno de tus comercios o indicar el nombre del organizador.</small>
             </div>
 
             <div className="form-group">
@@ -165,14 +203,15 @@ const EventFormPage = () => {
 
             <div className="date-inputs-row">
               <div className="form-group">
-                <label>Fecha y Hora Inicio <span className="required-tag">(Obligatorio)</span></label>
+                <label>Fecha y Hora Inicio <span className="required-tag">(mín. 72hs desde hoy)</span></label>
                 <input 
                   type="datetime-local" 
                   name="startDate" 
                   value={formData.startDate} 
                   onChange={handleChange} 
                   className="form-control" 
-                  required 
+                  required
+                  min={minStartDate}
                 />
               </div>
               <div className="form-group">
@@ -183,7 +222,8 @@ const EventFormPage = () => {
                   value={formData.endDate} 
                   onChange={handleChange} 
                   className="form-control" 
-                  required 
+                  required
+                  min={formData.startDate || minStartDate}
                 />
               </div>
             </div>
@@ -314,6 +354,20 @@ const EventFormPage = () => {
               </div>
             </div>
 
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.15)', borderRadius: '10px' }}>
+              <input
+                type="checkbox"
+                id="featured-check"
+                name="featured"
+                checked={formData.featured}
+                onChange={handleChange}
+                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#FFD700' }}
+              />
+              <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>
+                ⭐ Marcar como Evento Destacado
+              </label>
+            </div>
+
             <div className="form-actions">
               <Link to="/" className="cancel-btn">Cancelar</Link>
               <button 
@@ -321,12 +375,11 @@ const EventFormPage = () => {
                 className="submit-btn" 
                 disabled={loading || uploading || !isFormValid}
               >
-                {loading ? 'Publicando...' : 'Publicar Evento'}
+                {loading ? 'Enviando solicitud...' : 'Enviar Solicitud de Evento'}
               </button>
             </div>
 
           </form>
-        )}
       </div>
       <Footer />
     </div>

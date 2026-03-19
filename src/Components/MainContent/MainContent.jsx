@@ -10,6 +10,7 @@ import AdvertisementBanner from "../Advertisement/AdvertisementBanner";
 import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar";
 import TrendingMagazine from "../Magazine/TrendingMagazine";
 import HomeAnchors from "./HomeAnchors";
+import Ambassadors from "../Ambassadors/Ambassadors";
 import { getAdvertisements } from "../../services/AdvertisementService";
 import { getArticles } from "../../services/api";
 import "./MainContent.css";
@@ -42,27 +43,18 @@ const MainContent = () => {
       <div className="app-layout">
         
         {/* ===== 1. CATEGORÍAS (Burbujas en carrusel) ===== */}
-        <div className="top-discovery-section" style={{ paddingTop: '1rem' }}>
+        <div className="top-discovery-section" style={{ paddingTop: '0.5rem' }}>
           <CategoryCircles />
         </div>
 
         {/* ===== 2. BUSCADOR ===== */}
-        <div style={{ marginTop: '0.5rem' }}>
+        <div style={{ marginTop: '0.25rem' }}>
           <EnhancedSearch />
         </div>
 
-        {/* ===== 3. ANCLAS (Noticias/Calendario) + RRSS ===== */}
-        <div style={{ marginTop: '1.5rem' }}>
+        {/* ===== 3. ANCLAS (Noticias/Calendario) + RRSS — visible sin scroll ===== */}
+        <div style={{ marginTop: '0.75rem' }}>
           <HomeAnchors />
-        </div>
-
-        {/* ===== 4. DESTACADOS PLATINO (Carrusel Grande) ===== */}
-        <div id="featured-platinum" style={{ marginTop: '2rem' }}>
-          <FeaturedCommerces 
-            title="Sugeridos de Hoy" 
-            variant="large" 
-            planLevel={4}
-          />
         </div>
 
         {/* ===== 5. MAGAZINE (Lo Más Visto) ===== */}
@@ -87,6 +79,11 @@ const MainContent = () => {
              </h2>
           </div>
           <ArtisticCalendar />
+        </div>
+
+        {/* ===== EMBAJADORES ===== */}
+        <div style={{ marginTop: '3rem' }}>
+          <Ambassadors />
         </div>
 
         {/* ===== 8. PUBLICIDADES (Carruseles Nativos) ===== */}

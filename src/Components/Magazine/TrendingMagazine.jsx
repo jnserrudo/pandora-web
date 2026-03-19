@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getAbsoluteImageUrl } from '../../services/api';
@@ -6,16 +6,27 @@ import './TrendingMagazine.css';
 
 const TrendingMagazine = ({ articles }) => {
     const scrollContainer = useRef(null);
+    const isPausedRef = useRef(false);
 
-    const scroll = (direction) => {
+    const scroll = useCallback((direction) => {
         if (scrollContainer.current) {
-            const { scrollLeft, clientWidth } = scrollContainer.current;
-            const scrollTo = direction === 'left' 
-                ? scrollLeft - clientWidth / 2 
+            const { scrollLeft, clientWidth, scrollWidth } = scrollContainer.current;
+            let scrollTo = direction === 'left'
+                ? scrollLeft - clientWidth / 2
                 : scrollLeft + clientWidth / 2;
+            if (direction === 'right' && scrollLeft + clientWidth >= scrollWidth - 10) {
+                scrollTo = 0;
+            }
             scrollContainer.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            if (!isPausedRef.current) scroll('right');
+        }, 4500);
+        return () => clearInterval(timer);
+    }, [scroll]);
 
     return (
         <section className="trending-magazine-section">
@@ -36,7 +47,11 @@ const TrendingMagazine = ({ articles }) => {
                     <small style={{ marginTop: '0.5rem', display: 'block' }}>Próximamente contenido exclusivo</small>
                 </div>
             ) : (
-                <div className="trending-carousel-container">
+                <div
+                className="trending-carousel-container"
+                onMouseEnter={() => { isPausedRef.current = true; }}
+                onMouseLeave={() => { isPausedRef.current = false; }}
+            >
                     <button className="nav-btn prev" onClick={() => scroll('left')}>
                         <ChevronLeft />
                     </button>

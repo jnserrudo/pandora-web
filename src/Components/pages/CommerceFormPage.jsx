@@ -449,19 +449,24 @@ const CommerceFormPage = () => {
           <div className="form-group">
             <label>Nivel de Plan Deseado</label>
             <div className="plan-selector">
-              {[1, 2, 3, 4].map(level => (
-                <div 
-                  key={level} 
-                  className={`plan-option ${formData.planLevel === level ? 'active' : ''}`}
-                  onClick={() => setFormData(prev => ({ ...prev, planLevel: level }))}
-                >
-                  <span className="plan-number">{level}</span>
-                  <span className="plan-label">
-                    {level === 1 ? 'Free' : level === 2 ? 'Plus' : level === 3 ? 'Premium' : 'Diamond'}
-                  </span>
-                  {level > 1 && <span className="premium-tag">PRO</span>}
-                </div>
-              ))}
+              {[1, 2, 3, 4].map(level => {
+                const isLocked = level === 4;
+                const labels = { 1: 'Free', 2: 'Plus', 3: 'Premium', 4: 'Diamond' };
+                return (
+                  <div 
+                    key={level} 
+                    className={`plan-option ${formData.planLevel === level ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                    onClick={() => !isLocked && setFormData(prev => ({ ...prev, planLevel: level }))}
+                    title={isLocked ? 'Próximamente — Plan no disponible aún' : ''}
+                    style={isLocked ? { opacity: 0.45, cursor: 'not-allowed', filter: 'grayscale(0.6)' } : {}}
+                  >
+                    <span className="plan-number">{level}</span>
+                    <span className="plan-label">{labels[level]}</span>
+                    {level > 1 && !isLocked && <span className="premium-tag">PRO</span>}
+                    {isLocked && <span className="premium-tag" style={{ background: 'rgba(255,255,255,0.1)', color: '#888' }}>PRONTO</span>}
+                  </div>
+                );
+              })}
             </div>
             <p className="plan-info-text">
               {formData.planLevel === 1 
@@ -473,6 +478,29 @@ const CommerceFormPage = () => {
           {/* Sección de Comprobante de Pago - Solo visible si Plan > 1 */}
           {formData.planLevel > 1 && (
             <div className="form-group plan-payment-proof glass-morphism">
+              {/* Datos bancarios para transferir */}
+              <div style={{
+                background: 'rgba(138, 43, 226, 0.08)',
+                border: '1px solid rgba(138, 43, 226, 0.25)',
+                borderRadius: '12px',
+                padding: '1rem 1.25rem',
+                marginBottom: '1.25rem'
+              }}>
+                <p style={{ color: '#c084fc', fontWeight: 700, marginBottom: '0.6rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  📤 Datos para la transferencia
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem', fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)' }}>
+                  <span><strong style={{ color: '#fff' }}>Banco:</strong> Banco Macro</span>
+                  <span><strong style={{ color: '#fff' }}>Titular:</strong> Pandora S.A.S.</span>
+                  <span><strong style={{ color: '#fff' }}>CBU:</strong> 2850590940090418135201</span>
+                  <span><strong style={{ color: '#fff' }}>Alias:</strong> PANDORA.SALTA</span>
+                  <span><strong style={{ color: '#fff' }}>CUIT:</strong> 30-71234567-8</span>
+                </div>
+                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', marginTop: '0.75rem' }}>
+                  Realizá la transferencia y luego adjuntá el comprobante a continuación. El equipo validará tu solicitud dentro de las 48 hs hábiles.
+                </p>
+              </div>
+
               <label>Comprobante de Pago <span className="required-tag">(Obligatorio para Planes PRO)</span></label>
               <div className="proof-upload-zone">
                 <input 
