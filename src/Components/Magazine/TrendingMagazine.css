@@ -144,7 +144,7 @@
 
 @media (max-width: 768px) {
     .trending-magazine-section {
-        padding: 2rem 0;
+        padding: 2rem 1rem;
         margin: 2rem 0;
     }
 
@@ -161,33 +161,28 @@
     }
 
     .trending-article-card {
-        flex: 0 0 260px;
+        flex: 0 0 240px;
+    }
+
+    .card-media {
+        height: 150px;
     }
 
     .nav-btn {
-        display: none; /* Mobile swipe is better */
+        display: none;
     }
 }
 
-@media (max-width: 768px) {
-    .trending-magazine-section {
-        padding: 2rem 1rem;
-        margin: 2rem 1rem;
-    }
-
-    .trending-header h2 {
-        font-size: 1.8rem;
-    }
-
+@media (max-width: 480px) {
     .trending-article-card {
         flex: 0 0 200px;
     }
 
     .card-media {
-        height: 140px;
+        height: 130px;
     }
 
-    .nav-btn {
-        display: none;
+    .card-info h3 {
+        font-size: 1rem;
     }
 }

@@ -227,13 +227,113 @@
   font-size: 1.2rem;
 }
 
+/* Buscador y select de ordenamiento */
+.commerces-search-bar {
+  margin: 1.5rem auto 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  max-width: 560px;
+  width: 100%;
+}
+
+.commerces-search-input-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.commerces-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.commerces-search-input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.commerces-search-input:focus {
+  border-color: rgba(138, 43, 226, 0.5);
+}
+
+.commerces-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.commerces-sort-select {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.commerces-sort-select:focus {
+  border-color: rgba(138, 43, 226, 0.5);
+}
+
+.commerces-sort-select option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
 /* Responsivo */
 @media (max-width: 768px) {
+  .commerces-list-container {
+    padding: 120px 1rem 2rem 1rem;
+  }
+
   .commerces-header h1 {
     font-size: 2.2rem;
+    letter-spacing: 1px;
   }
-  
-  .commerces-grid {
-    gap: 1.5rem;
+
+  .unified-commerces-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .commerces-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 100%;
+  }
+
+  .commerces-sort-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .commerces-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .category-filters {
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    font-size: 0.78rem;
+    padding: 0.5rem 1rem;
   }
 }

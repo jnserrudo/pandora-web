@@ -79,40 +79,21 @@ const CommercesListPage = () => {
           <p>Explorá las mejores opciones de Salta</p>
 
           {/* Buscador */}
-          <div className="commerces-search-bar" style={{ margin: '1.5rem 0 1rem', display: 'flex', gap: '0.75rem', alignItems: 'center', maxWidth: '500px' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+          <div className="commerces-search-bar">
+            <div className="commerces-search-input-wrapper">
+              <Search size={16} className="commerces-search-icon" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, descripción o dirección..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{
-                  width: '100%',
-                  paddingLeft: '38px',
-                  padding: '10px 12px 10px 38px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '10px',
-                  color: '#fff',
-                  fontSize: '0.9rem',
-                  outline: 'none'
-                }}
+                className="commerces-search-input"
               />
             </div>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              style={{
-                padding: '10px 12px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '10px',
-                color: '#fff',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                outline: 'none'
-              }}
+              className="commerces-sort-select"
             >
               <option value="recent">Más recientes</option>
               <option value="az">A → Z</option>

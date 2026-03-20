@@ -37,6 +37,8 @@
   -ms-overflow-style: none;
   flex: 1;
   padding: 0.5rem 0.25rem 1rem;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ambassadors-scroll::-webkit-scrollbar {
@@ -126,8 +128,37 @@
   background: rgba(138, 43, 226, 0.3);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .amb-nav-btn {
+    display: none;
+  }
+
+  .ambassadors-section {
+    padding: 2rem 0.75rem;
+  }
+
+  .ambassadors-header h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
   .ambassador-card {
-    flex: 0 0 180px;
+    flex: 0 0 160px;
+    padding: 1.2rem 0.75rem;
+  }
+
+  .ambassador-avatar,
+  .ambassador-avatar-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+
+  .ambassador-info h3 {
+    font-size: 0.9rem;
+  }
+
+  .ambassador-desc {
+    font-size: 0.75rem;
   }
 }

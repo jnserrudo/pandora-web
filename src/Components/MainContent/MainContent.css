@@ -5,8 +5,14 @@
 
 @media (max-width: 768px) {
   .app-container {
-    padding: 3.5rem 0 2rem 0;
+    padding: 5rem 0 2rem 0;
     overflow-x: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 4.5rem 0 1.5rem 0;
   }
 }
 

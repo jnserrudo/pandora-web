@@ -231,3 +231,29 @@
     transform: scale(0.98);
   }
 }
+
+@media (max-width: 480px) {
+  .category-circles-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-circle-wrapper {
+    width: 160px;
+    height: 160px;
+  }
+
+  .circle-title {
+    font-size: 1.2rem;
+  }
+
+  .circle-cta {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.9rem;
+  }
+
+  .circles-container {
+    gap: 0.75rem;
+    padding: 0.75rem 0.75rem 1.25rem;
+  }
+}
