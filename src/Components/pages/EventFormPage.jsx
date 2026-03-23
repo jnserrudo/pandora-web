@@ -1,23 +1,26 @@
 // src/Components/pages/EventFormPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createEvent, getMyCommerces, uploadImage, API_URL, getAbsoluteImageUrl } from '../../services/api'; 
+import { createEvent, getMyCommerces, getAllCommerces, uploadImage, API_URL, getAbsoluteImageUrl } from '../../services/api'; 
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import { Camera, Upload, X, MapPin } from 'lucide-react';
+import { Camera, Upload, X, MapPin, Star } from 'lucide-react';
 import './CommerceFormPage.css';
 import './EventFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import MapPicker from '../ui/MapPicker';
+import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
 const EventFormPage = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { showToast } = useToast();
+
+  const isAdmin = user?.role === 'ADMIN';
 
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -36,19 +39,29 @@ const EventFormPage = () => {
   });
 
   const [myCommerces, setMyCommerces] = useState([]);
+  const [allCommerces, setAllCommerces] = useState([]);
+  const [commerceSearch, setCommerceSearch] = useState('');
+  const [showCommerceDropdown, setShowCommerceDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { uploading, fromInputEvent } = useImageUpload();
   const handleRemoveImage = () => setFormData(prev => ({ ...prev, coverImage: '' }));
 
-  // Cargar comercios del usuario para el selector (no bloquea si no tiene)
+  // Cargar comercios según rol
   useEffect(() => {
     const fetchCommerces = async () => {
       try {
-        const data = await getMyCommerces(token);
-        setMyCommerces(data);
-        if (data.length > 0) {
-          setFormData(prev => ({ ...prev, commerceId: data[0].id }));
+        if (isAdmin) {
+          // Admin: cargar TODOS los comercios
+          const data = await getAllCommerces(token);
+          setAllCommerces(data);
+        } else {
+          // Owner/User: solo sus comercios
+          const data = await getMyCommerces(token);
+          setMyCommerces(data);
+          if (data.length > 0) {
+            setFormData(prev => ({ ...prev, commerceId: data[0].id }));
+          }
         }
       } catch (err) {
         console.error("Error cargando comercios:", err);
@@ -58,7 +71,7 @@ const EventFormPage = () => {
     };
     if (token) fetchCommerces();
     else setLoading(false);
-  }, [token]);
+  }, [token, isAdmin]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -118,8 +131,14 @@ const EventFormPage = () => {
       if (formData.organizerName.trim()) payload.organizerName = formData.organizerName.trim();
 
       await createEvent(payload, token);
-      showToast('¡Solicitud de evento enviada! El equipo Pandora la revisará pronto.', 'success');
-      navigate('/events'); 
+      
+      if (isAdmin) {
+        showToast('Evento creado y publicado correctamente.', 'success');
+        navigate('/admin/events');
+      } else {
+        showToast('¡Solicitud de evento enviada! El equipo Pandora la revisará pronto.', 'success');
+        navigate('/events');
+      } 
     } catch (err) {
       console.error("Error creating event:", err);
       setError(err.message || "Error al enviar la solicitud.");
@@ -137,8 +156,8 @@ const EventFormPage = () => {
       
       <div className="event-form-container">
         <div className="event-header">
-          <h1>Solicitar Nuevo Evento</h1>
-          <p>Completá el formulario y el equipo Pandora revisará tu solicitud antes de publicarla.</p>
+          <h1>{isAdmin ? 'Crear Nuevo Evento' : 'Solicitar Nuevo Evento'}</h1>
+          <p>{isAdmin ? 'Completá el formulario para publicar el evento directamente.' : 'Completá el formulario y el equipo Pandora revisará tu solicitud antes de publicarla.'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="form-card">
@@ -147,8 +166,122 @@ const EventFormPage = () => {
             {/* Organizador: comercio propio o nombre libre */}
             <div className="form-group">
               <label>Organizador</label>
-              {myCommerces.length > 0 ? (
+              {isAdmin ? (
                 <>
+                  {/* Admin: buscador de TODOS los comercios */}
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      placeholder="Buscar comercio por nombre..."
+                      value={commerceSearch}
+                      onChange={(e) => {
+                        setCommerceSearch(e.target.value);
+                        setShowCommerceDropdown(true);
+                      }}
+                      onFocus={() => setShowCommerceDropdown(true)}
+                      className="form-control"
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                    {showCommerceDropdown && commerceSearch && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        backgroundColor: 'rgba(20, 20, 35, 0.95)',
+                        border: '1px solid rgba(138, 43, 226, 0.3)',
+                        borderRadius: '8px',
+                        marginTop: '-0.5rem',
+                        zIndex: 1000,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                      }}>
+                        {allCommerces
+                          .filter(c => c.name.toLowerCase().includes(commerceSearch.toLowerCase()))
+                          .map(c => (
+                            <div
+                              key={c.id}
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, commerceId: c.id }));
+                                setCommerceSearch(c.name);
+                                setShowCommerceDropdown(false);
+                              }}
+                              style={{
+                                padding: '0.75rem 1rem',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                transition: 'background 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(138, 43, 226, 0.2)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <div style={{ color: '#fff', fontWeight: 500 }}>{c.name}</div>
+                              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                                {c.category || 'Sin categoría'}
+                              </div>
+                            </div>
+                          ))}
+                        {allCommerces.filter(c => c.name.toLowerCase().includes(commerceSearch.toLowerCase())).length === 0 && (
+                          <div style={{ padding: '1rem', color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                            No se encontraron comercios
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {formData.commerceId && (
+                      <div style={{
+                        padding: '0.75rem',
+                        background: 'rgba(138, 43, 226, 0.1)',
+                        border: '1px solid rgba(138, 43, 226, 0.3)',
+                        borderRadius: '8px',
+                        marginBottom: '0.5rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <span style={{ color: '#fff' }}>
+                          Comercio seleccionado: <strong>{allCommerces.find(c => c.id === formData.commerceId)?.name}</strong>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, commerceId: '' }));
+                            setCommerceSearch('');
+                          }}
+                          style={{
+                            background: 'rgba(255,70,70,0.2)',
+                            border: '1px solid rgba(255,70,70,0.3)',
+                            color: '#ff6b6b',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {!formData.commerceId && (
+                    <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                      <label>Nombre del organizador <span className="required-tag">(Obligatorio si no hay comercio)</span></label>
+                      <input
+                        type="text"
+                        name="organizerName"
+                        value={formData.organizerName}
+                        onChange={handleChange}
+                        className="form-control"
+                        placeholder="Ej. Festival Cultural Salta"
+                      />
+                    </div>
+                  )}
+                  <small className="field-hint">Como admin, podés asociarlo a cualquier comercio o indicar el organizador.</small>
+                </>
+              ) : myCommerces.length > 0 ? (
+                <>
+                  {/* Owner/User: solo sus comercios */}
                   <select 
                     name="commerceId" 
                     value={formData.commerceId} 
@@ -173,19 +306,22 @@ const EventFormPage = () => {
                       />
                     </div>
                   )}
+                  <small className="field-hint">Podés asociarlo a uno de tus comercios o indicar el nombre del organizador.</small>
                 </>
               ) : (
-                <input
-                  type="text"
-                  name="organizerName"
-                  value={formData.organizerName}
-                  onChange={handleChange}
-                  className="form-control"
-                  placeholder="Ej. Festival Cultural Salta"
-                  required
-                />
+                <>
+                  <input
+                    type="text"
+                    name="organizerName"
+                    value={formData.organizerName}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder="Ej. Festival Cultural Salta"
+                    required
+                  />
+                  <small className="field-hint">Indicá el nombre del organizador del evento.</small>
+                </>
               )}
-              <small className="field-hint">Podés asociarlo a uno de tus comercios o indicar el nombre del organizador.</small>
             </div>
 
             <div className="form-group">
@@ -317,39 +453,12 @@ const EventFormPage = () => {
                     </label>
                   </>
                 ) : (
-                  <div className="image-preview-container">
-                    {uploading && (
-                      <div className="upload-overlay">
-                        <div className="spinner-sm"></div>
-                        <span>Subiendo flyer...</span>
-                      </div>
-                    )}
-                    <img 
-                      src={getAbsoluteImageUrl(formData.coverImage)} 
-                      alt="Flyer preview"
-                    />
-                    <div className="image-preview-actions">
-                      <input 
-                        type="file" 
-                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                        onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, coverImage: url })))} 
-                        style={{display:'none'}} 
-                        id="event-cover-change"
-                        disabled={uploading}
-                      />
-                      <label htmlFor="event-cover-change" className="btn-change-image">
-                        <Camera size={16} /> Cambiar flyer
-                      </label>
-                      <button 
-                        type="button" 
-                        className="btn-remove-image"
-                        onClick={handleRemoveImage}
-                        disabled={uploading}
-                      >
-                        <X size={16} /> Quitar
-                      </button>
-                    </div>
-                  </div>
+                  <ImageOverlayPreview
+                    imageUrl={getAbsoluteImageUrl(formData.coverImage)}
+                    onUploadChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, coverImage: url })))}
+                    onRemove={handleRemoveImage}
+                    uploading={uploading}
+                  />
                 )}
               </div>
             </div>
@@ -363,8 +472,8 @@ const EventFormPage = () => {
                 onChange={handleChange}
                 style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#FFD700' }}
               />
-              <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0 }}>
-                ⭐ Marcar como Evento Destacado
+              <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Star size={16} fill="#FFD700" /> Marcar como Evento Destacado
               </label>
             </div>
 

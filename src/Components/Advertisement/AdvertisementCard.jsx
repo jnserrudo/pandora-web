@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { trackAdvertisement } from '../../services/AdvertisementService';
 import { getAbsoluteImageUrl } from '../../services/api';
+import { Store, Megaphone, Star } from 'lucide-react';
 import './AdvertisementCard.css';
 
 const AdvertisementCard = ({ advertisement }) => {
@@ -45,9 +46,9 @@ const AdvertisementCard = ({ advertisement }) => {
         
         {/* Floating badge */}
         <div className="ad-card-badge">
-          {advertisement.category === 'commerce' && '🏪 Comercio'}
-          {advertisement.category === 'external' && '📢 Publicidad'}
-          {advertisement.category === 'sponsor' && '⭐ Sponsor'}
+          {advertisement.category === 'commerce' && <><Store size={14} style={{ display: 'inline-block', marginRight: '4px' }} /> Comercio</>}
+          {advertisement.category === 'external' && <><Megaphone size={14} style={{ display: 'inline-block', marginRight: '4px' }} /> Publicidad</>}
+          {advertisement.category === 'sponsor' && <><Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} /> Sponsor</>}
         </div>
       </div>
 

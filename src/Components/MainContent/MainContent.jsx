@@ -43,22 +43,18 @@ const MainContent = () => {
       <div className="app-layout">
         
         {/* ===== 1. CATEGORÍAS (Burbujas en carrusel) ===== */}
-        <div className="top-discovery-section" style={{ paddingTop: '0.5rem' }}>
+        <div className="top-discovery-section">
           <CategoryCircles />
         </div>
 
         {/* ===== 2. BUSCADOR ===== */}
-        <div style={{ marginTop: '0.25rem' }}>
-          <EnhancedSearch />
-        </div>
+        <EnhancedSearch />
 
         {/* ===== 3. ANCLAS (Noticias/Calendario) + RRSS — visible sin scroll ===== */}
-        <div style={{ marginTop: '0.75rem' }}>
-          <HomeAnchors />
-        </div>
+        <HomeAnchors />
 
         {/* ===== 5. MAGAZINE (Lo Más Visto) ===== */}
-        <div id="magazine-section" style={{ marginTop: '2rem' }}>
+        <div id="magazine-section">
           <TrendingMagazine articles={trendingArticles} />
         </div>
 
@@ -110,7 +106,7 @@ const MainContent = () => {
         </div>
 
         {/* Hero Section (Al final como banner) */}
-        <div style={{ marginTop: '2rem' }}>
+        <div style={{ marginTop: '2rem', display: 'none' }}>
           <HeroSection />
         </div>
 

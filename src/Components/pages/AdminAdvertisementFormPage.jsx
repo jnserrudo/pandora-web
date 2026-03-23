@@ -12,6 +12,7 @@ import { Camera, CheckCircle, Pause, Info, Upload, X } from 'lucide-react';
 import './CommerceFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
 // Las posiciones definen DÓNDE aparecerá la publicidad en la web
 const POSITION_INFO = {
@@ -290,39 +291,12 @@ const AdminAdvertisementFormPage = () => {
                   </label>
                 </>
               ) : (
-                <div className="image-preview-container">
-                  {uploading && (
-                    <div className="upload-overlay">
-                      <div className="spinner-sm"></div>
-                      <span>Subiendo imagen...</span>
-                    </div>
-                  )}
-                  <img 
-                    src={getAbsoluteImageUrl(formData.imageUrl)} 
-                    alt="Preview del banner"
-                  />
-                  <div className="image-preview-actions">
-                    <input 
-                      type="file" 
-                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                      onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, imageUrl: url })))} 
-                      style={{display:'none'}} 
-                      id="ad-img-change"
-                      disabled={uploading}
-                    />
-                    <label htmlFor="ad-img-change" className="btn-change-image">
-                      <Camera size={16} /> Cambiar imagen
-                    </label>
-                    <button 
-                      type="button" 
-                      className="btn-remove-image"
-                      onClick={handleRemoveImage}
-                      disabled={uploading}
-                    >
-                      <X size={16} /> Quitar
-                    </button>
-                  </div>
-                </div>
+                <ImageOverlayPreview
+                  imageUrl={getAbsoluteImageUrl(formData.imageUrl)}
+                  onUploadChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, imageUrl: url })))}
+                  onRemove={handleRemoveImage}
+                  uploading={uploading}
+                />
               )}
             </div>
             {uploadError && (

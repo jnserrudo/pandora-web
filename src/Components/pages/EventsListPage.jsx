@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { getEvents, getAbsoluteImageUrl } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import ScrollToTopButton from '../ScrollToTopButton/ScrollToTopButton';
-import { MapPin, Calendar, Clock } from 'lucide-react';
+import { MapPin, Calendar, Clock, Star } from 'lucide-react';
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import SEOManager from "../SEO/SEOManager";
@@ -66,7 +66,7 @@ const EventsListPage = () => {
               <span className="event-card-month">{month}</span>
             </div>
             {event.featured && (
-              <span className="event-featured-badge">⭐ DESTACADO</span>
+              <span className="event-featured-badge"><Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} /> DESTACADO</span>
             )}
           </div>
           <div className="event-card-content">
@@ -97,7 +97,7 @@ const EventsListPage = () => {
         {/* Sección Eventos Destacados */}
         {featuredEvents.length > 0 && (
           <section className="events-featured-section">
-            <h2 className="events-section-title">⭐ Eventos Destacados</h2>
+            <h2 className="events-section-title"><Star size={20} fill="#FFD700" style={{ display: 'inline-block', marginRight: '8px' }} /> Eventos Destacados</h2>
             <div className="events-grid events-grid--featured">
               {featuredEvents.map(renderEventCard)}
             </div>

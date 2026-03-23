@@ -12,6 +12,7 @@ import { Camera, Upload, X } from 'lucide-react';
 import './CommerceFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
 const AdminArticleFormPage = () => {
   const { id } = useParams();
@@ -241,34 +242,12 @@ const AdminArticleFormPage = () => {
                   </label>
                 </>
               ) : (
-                <div className="image-preview-container">
-                  {uploading && (
-                    <div className="upload-overlay">
-                      <div className="spinner-sm"></div>
-                      <span>Subiendo imagen...</span>
-                    </div>
-                  )}
-                  <img
-                    src={getAbsoluteImageUrl(formData.coverImage)}
-                    alt="Preview de portada"
-                  />
-                  <div className="image-preview-actions">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                      onChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, coverImage: url })))}
-                      style={{ display: 'none' }}
-                      id="news-img-change"
-                      disabled={uploading}
-                    />
-                    <label htmlFor="news-img-change" className="btn-change-image">
-                      <Camera size={16} /> Cambiar imagen
-                    </label>
-                    <button type="button" className="btn-remove-image" onClick={handleRemoveImage} disabled={uploading}>
-                      <X size={16} /> Quitar
-                    </button>
-                  </div>
-                </div>
+                <ImageOverlayPreview
+                  imageUrl={getAbsoluteImageUrl(formData.coverImage)}
+                  onUploadChange={(e) => fromInputEvent(e, (url) => setFormData(prev => ({ ...prev, coverImage: url })))}
+                  onRemove={handleRemoveImage}
+                  uploading={uploading}
+                />
               )}
             </div>
           </div>

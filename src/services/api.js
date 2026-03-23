@@ -48,10 +48,14 @@ axios.interceptors.response.use(
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           window.location.href = '/login?expired=true';
+          // Devolvemos una promesa que nunca se resuelve para evitar que los 
+          // componentes UI procesen respuestas fallidas mientras la app redirige.
+          return new Promise(() => {});
         }
       } else {
         localStorage.removeItem('token');
         window.location.href = '/login?expired=true';
+        return new Promise(() => {});
       }
     } 
     
@@ -59,6 +63,7 @@ axios.interceptors.response.use(
       console.warn("Permisos insuficientes (403).");
       if (window.location.pathname.startsWith('/admin')) {
         window.location.href = '/?auth_error=forbidden';
+        return new Promise(() => {});
       }
     }
 
@@ -82,6 +87,19 @@ export const getCommerces = async (filters = {}) => {
     return response.data;
   } catch (error) {
     console.error("Error fetching commerces:", error);
+    throw error;
+  }
+};
+
+// Obtiene TODOS los comercios (para admins)
+export const getAllCommerces = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/commerces`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all commerces:", error);
     throw error;
   }
 };

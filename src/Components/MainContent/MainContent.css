@@ -1,18 +1,20 @@
 /* src/components/MainContent/MainContent.css */
 .app-container {
-  padding: 4rem 0; /* Reducido para evitar mucho espacio arriba */
+  padding: 82px 0 0 0; /* navbar desktop: 46px logo + 2*0.6rem padding ≈ 82px */
+  overflow: visible !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .app-container {
-    padding: 5rem 0 2rem 0;
-    overflow-x: hidden;
+    padding: 98px 0 0 0; /* navbar tablet/mobile: 70px logo + 2*0.75rem padding ≈ 94px */
+    overflow: visible !important;
   }
 }
 
 @media (max-width: 480px) {
   .app-container {
-    padding: 4.5rem 0 1.5rem 0;
+    padding: 82px 0 0 0; /* navbar mobile small: 58px logo + 2*0.6rem padding ≈ 78px */
+    overflow: visible !important;
   }
 }
 
@@ -22,7 +24,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* ESPACIADO COMPACTO ENTRE SECCIONES */
+  gap: 0.25rem; /* ESPACIADO MÍNIMO ENTRE SECCIONES */
 }
 
 .home-section-wrapper {

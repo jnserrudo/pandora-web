@@ -160,15 +160,24 @@
 /* Estrella para días con eventos destacados */
 .featured-star {
   position: absolute;
-  top: 2px;
-  right: 3px;
-  font-size: 0.55rem;
+  top: 4px;
+  right: 4px;
+  font-size: 0.7rem;
   line-height: 1;
   pointer-events: none;
+  filter: drop-shadow(0 0 4px #FFD700);
+  animation: pulse-star 2s ease-in-out infinite;
+}
+
+@keyframes pulse-star {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
 }
 
 .calendar-day.has-featured {
-  border: 1px solid rgba(255, 215, 0, 0.35);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(138, 43, 226, 0.05));
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
 }
 
 
@@ -209,28 +218,37 @@
 
 /* Mini Event Card */
 .mini-event-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(13, 2, 24, 0.8), rgba(26, 11, 46, 0.6));
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-left: 3px solid var(--color-primary);
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--color-primary);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .mini-event-card:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(5px);
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(255, 20, 147, 0.15));
+  transform: translateX(8px) scale(1.02);
   border-left-color: var(--color-accent);
+  border-color: rgba(138, 43, 226, 0.4);
+  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3), 0 0 20px rgba(138, 43, 226, 0.2);
 }
 
 .mini-event-time {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 600;
-  min-width: 45px;
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 700;
+  min-width: 60px;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(255, 20, 147, 0.3));
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid rgba(138, 43, 226, 0.4);
 }
 
 .mini-event-info h4 {

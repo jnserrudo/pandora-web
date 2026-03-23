@@ -17,7 +17,9 @@ import {
   TrendingUp, 
   Users, 
   Eye, 
-  MousePointer2 
+  MousePointer2,
+  BarChart3,
+  Search
 } from 'lucide-react';
 import { getAdminStats } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -61,7 +63,7 @@ const AnalyticsPanel = ({ data, loading, error }) => {
   if (loading) return (
     <div className="analytics-panel loading-state">
       <div className="analytics-header">
-        <h2>📊 Analíticas del Sistema</h2>
+        <h2><BarChart3 size={20} style={{ display: 'inline-block', marginRight: '8px' }} /> Analíticas del Sistema</h2>
       </div>
       <div className="loading-placeholder">Cargando métricas de rendimiento...</div>
     </div>
@@ -72,7 +74,7 @@ const AnalyticsPanel = ({ data, loading, error }) => {
     <div className="analytics-panel">
       <div className="analytics-header">
         <div className="analytics-title-group">
-          <h2>📊 Rendimiento de Publicidades</h2>
+          <h2><BarChart3 size={20} style={{ display: 'inline-block', marginRight: '8px' }} /> Rendimiento de Publicidades</h2>
           <span className="analytics-subtitle">Métricas del sistema de anuncios</span>
         </div>
         <div className="analytics-period">Últimos 7 días</div>
@@ -169,7 +171,7 @@ const AnalyticsPanel = ({ data, loading, error }) => {
         </div>
 
         <div className="chart-container-premium full-width" style={{ gridColumn: 'span 2' }}>
-          <h3>🔍 Términos más buscados (Top 10)</h3>
+          <h3><Search size={18} style={{ display: 'inline-block', marginRight: '8px' }} /> Términos más buscados (Top 10)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={searchesData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />

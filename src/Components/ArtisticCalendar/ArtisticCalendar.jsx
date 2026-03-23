@@ -1,7 +1,7 @@
 // src/Components/ArtisticCalendar/ArtisticCalendar.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar } from 'lucide-react';
+import { Calendar, Star } from 'lucide-react';
 import { getEvents } from '../../services/api';
 import './ArtisticCalendar.css';
 
@@ -88,7 +88,7 @@ const ArtisticCalendar = () => {
         onClick={() => handleDateClick(day)}
       >
         <span className="day-number">{day}</span>
-        {hasFeatured && <span className="featured-star" title="Evento destacado">⭐</span>}
+        {hasFeatured && <span className="featured-star" title="Evento destacado"><Star size={12} fill="#FFD700" /></span>}
         {hasEvents && <div className="event-indicators">
           {dayEvents.slice(0, 3).map((_, idx) => (
             <span key={idx} className={`event-dot${dayEvents[idx]?.featured ? ' event-dot--featured' : ''}`}></span>
@@ -153,7 +153,7 @@ const ArtisticCalendar = () => {
                   </div>
                   <div className="mini-event-info">
                     <h4>
-                      {event.featured && <span style={{ color: '#FFD700', marginRight: '4px' }}>⭐</span>}
+                      {event.featured && <Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} />}
                       {event.name}
                     </h4>
                     <p>{event.commerce?.name || event.organizerName || 'Evento Especial'}</p>

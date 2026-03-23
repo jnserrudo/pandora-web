@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Plus, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
 import './CommerceProductManager.css';
+import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
 const CommerceProductManager = ({ commerceId, planLevel }) => {
     const { token } = useAuth();
@@ -136,16 +137,12 @@ const CommerceProductManager = ({ commerceId, planLevel }) => {
                             <label>Imagen del Producto *</label>
                             <div className="image-upload-area">
                                 {formData.imageUrl ? (
-                                    <div className="image-preview-container">
-                                        <img src={getAbsoluteImageUrl(formData.imageUrl)} alt="Preview" className="image-preview" />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
-                                            className="btn-remove-image"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
+                                    <ImageOverlayPreview
+                                        imageUrl={getAbsoluteImageUrl(formData.imageUrl)}
+                                        onUploadChange={handleImageUpload}
+                                        onRemove={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                                        uploading={uploading}
+                                    />
                                 ) : (
                                     <label className="upload-placeholder">
                                         <input type="file" accept="image/*" onChange={handleImageUpload} hidden disabled={!canAddProduct || uploading} />

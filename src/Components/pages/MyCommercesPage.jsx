@@ -28,6 +28,7 @@ import {
     MessageSquare,
     Trophy,
     Package,
+    Lightbulb,
     Settings,
     ExternalLink
 } from 'lucide-react';
@@ -45,6 +46,21 @@ const MyCommercesPage = () => {
   const [advisories, setAdvisories] = useState([]);
   const [advisoriesLoading, setAdvisoriesLoading] = useState(false);
   const [view, setView] = useState('GRID'); // 'GRID' | 'ADVISORIES' | 'FAQS' | 'PRODUCTS' | 'BRANCHES' | 'COMMENTS'
+
+  // Componente de header unificado para todas las secciones
+  const SectionHeader = ({ title, subtitle }) => (
+    <header className="view-sub-header">
+      <button className="btn-back-neo" onClick={() => setView('GRID')}>
+        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
+      </button>
+      {title && (
+        <div className="view-info">
+          <h2>{title}</h2>
+          {subtitle && <p>{subtitle}</p>}
+        </div>
+      )}
+    </header>
+  );
 
   useEffect(() => {
     const fetchMyCommerces = async () => {
@@ -254,63 +270,42 @@ const MyCommercesPage = () => {
             </>
         ) : view === 'FAQS' ? (
             <div className="faqs-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
-                <header className="view-sub-header">
-                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
-                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
-                    </button>
-                </header>
+                <SectionHeader 
+                    title={`Preguntas Frecuentes: ${selectedCommerce?.name}`}
+                    subtitle="Gestiona las preguntas más comunes sobre tu negocio."
+                />
                 <CommerceFAQManager commerceId={selectedCommerce?.id} />
             </div>
         ) : view === 'PRODUCTS' ? (
             <div className="products-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
-                <header className="view-sub-header">
-                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
-                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
-                    </button>
-                    <div className="view-info">
-                        <h2>Catálogo de <strong>{selectedCommerce?.name}</strong></h2>
-                        <p>Agrega, edita o elimina los productos que verán tus clientes.</p>
-                    </div>
-                </header>
+                <SectionHeader 
+                    title={<>Catálogo de <strong>{selectedCommerce?.name}</strong></>}
+                    subtitle="Agrega, edita o elimina los productos que verán tus clientes."
+                />
                 <CommerceProductManager commerceId={selectedCommerce?.id} planLevel={selectedCommerce?.planLevel} />
             </div>
         ) : view === 'BRANCHES' ? (
             <div className="branches-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
-                <header className="view-sub-header">
-                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
-                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
-                    </button>
-                    <div className="view-info">
-                        <h2>Gestión de Sucursales: <strong>{selectedCommerce?.name}</strong></h2>
-                        <p>Añade y administra otras ubicaciones físicas de tu negocio (Límite según tu plan).</p>
-                    </div>
-                </header>
+                <SectionHeader 
+                    title={<>Gestión de Sucursales: <strong>{selectedCommerce?.name}</strong></>}
+                    subtitle="Añade y administra otras ubicaciones físicas de tu negocio (Límite según tu plan)."
+                />
                 <CommerceBranchManager commerce={selectedCommerce} />
             </div>
         ) : view === 'COMMENTS' ? (
             <div className="feedback-view-container animate-fade-in" style={{ padding: '0 1rem' }}>
-                <header className="view-sub-header">
-                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
-                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
-                    </button>
-                    <div className="view-info">
-                        <h2>Bandeja de Reseñas: <strong>{selectedCommerce?.name}</strong></h2>
-                        <p>Visualiza lo que dicen tus clientes y envíales una respuesta oficial (Plan Plata+).</p>
-                    </div>
-                </header>
+                <SectionHeader 
+                    title={<>Bandeja de Reseñas: <strong>{selectedCommerce?.name}</strong></>}
+                    subtitle="Visualiza lo que dicen tus clientes y envíales una respuesta oficial (Plan Plata+)."
+                />
                 <CommerceFeedbackManager commerce={selectedCommerce} />
             </div>
         ) : (
             <div className="advisories-view-container animate-fade-in">
-                <header className="view-sub-header">
-                    <button className="btn-back-neo" onClick={() => setView('GRID')}>
-                        <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
-                    </button>
-                    <div className="view-info">
-                        <h2>Estrategias para <strong>{selectedCommerce?.name}</strong></h2>
-                        <p>Recomendaciones personalizadas del equipo de consultoría Pandora</p>
-                    </div>
-                </header>
+                <SectionHeader 
+                    title={<>Estrategias para <strong>{selectedCommerce?.name}</strong></>}
+                    subtitle="Recomendaciones personalizadas del equipo de consultoría Pandora"
+                />
 
                 <div className="advisories-content-layout">
                     {advisoriesLoading ? (
@@ -357,7 +352,7 @@ const MyCommercesPage = () => {
                             </div>
                         </div>
                         <div className="pro-tip">
-                            <h5>💡 Tip de Crecimiento</h5>
+                            <h5><Lightbulb size={16} style={{ display: 'inline-block', marginRight: '6px' }} /> Tip de Crecimiento</h5>
                             <p>Implementar al menos 2 asesorías al mes suele incrementar el CTR en un 15%.</p>
                         </div>
                     </div>

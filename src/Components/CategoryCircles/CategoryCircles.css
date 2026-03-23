@@ -1,17 +1,18 @@
 /* src/Components/CategoryCircles/CategoryCircles.css */
 
 .category-circles-section {
-  padding: 4rem 1rem;
+  padding: 0.25rem 0;
   text-align: center;
   position: relative;
   z-index: 10;
-  /* Fondo sutil para separar (opcional, ya el layout tiene fondo) */
+  overflow: hidden;
+  width: 100%;
 }
 
 .category-circles-title {
-  font-size: 3rem;
+  font-size: 1.8rem;
   color: var(--color-text, #fff);
-  margin-bottom: 3rem;
+  margin-bottom: 0.25rem;
   font-weight: 700;
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -26,7 +27,7 @@
   justify-content: flex-start; /* Alineado al inicio para el scroll */
   gap: 1.5rem;
   overflow-x: auto; /* Habilitar scroll horizontal */
-  padding: 1rem 2rem 2.5rem; /* Espacio para el glow y scrollbar */
+  padding: 0.5rem 2rem 1rem; /* Reducido para optimizar espacio vertical */
   scroll-snap-type: x mandatory;
   scrollbar-width: none; /* Ocultar scrollbar en Firefox */
   -ms-overflow-style: none; /* Ocultar en IE/Edge */
@@ -49,8 +50,8 @@
 /* Wrapper para animaciones de entrada */
 .category-circle-wrapper {
   position: relative;
-  width: 260px; /* Un poco más chicos para asegurar espacio */
-  height: 260px;
+  width: 200px; /* Reducido para optimizar espacio vertical */
+  height: 200px;
   flex: 0 0 auto;
   cursor: pointer;
   animation: floatIn 0.8s ease-out forwards;
@@ -117,7 +118,7 @@
 }
 
 .circle-title {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   color: #fff;
   font-weight: 600;
   text-shadow: 0 2px 4px rgba(0,0,0,0.8);

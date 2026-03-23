@@ -9,8 +9,9 @@ import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import MapPicker from '../ui/MapPicker';
-import { Camera, Upload, CheckCircle, FileText, X } from 'lucide-react';
+import { Camera, Upload, CheckCircle, FileText, X, Plus } from 'lucide-react';
 import './CommerceFormPage.css';
+import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
 const CommerceFormPage = () => {
   const { id } = useParams(); // Si existe ID, estamos editando
@@ -295,6 +296,11 @@ const CommerceFormPage = () => {
       
       <div className="commerce-form-container">
         <div className="form-header">
+          {isEditMode && (
+            <Link to="/my-commerces" className="btn-back-neo" style={{ marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+              <Plus size={20} style={{ transform: 'rotate(45deg)' }} /> Volver a mis comercios
+            </Link>
+          )}
           <h1>{isEditMode ? 'Editar Comercio' : 'Publicar mi Comercio'}</h1>
           <p>{isEditMode ? 'Actualiza la información visible' : 'Completa los datos para enviar tu propuesta a revisión'}</p>
         </div>
@@ -640,18 +646,16 @@ const CommerceFormPage = () => {
                 const imageUrl = getAbsoluteImageUrl(img);
                 
                 return (
-                  <div key={index} className="image-preview-item">
-                    <img src={imageUrl} alt={`Preview ${index}`} />
-                    <button 
-                      type="button" 
-                      className="remove-image-btn" 
-                      onClick={() => removeImage(index)}
-                      aria-label="Eliminar imagen"
-                    >
-                      <X size={14} />
-                    </button>
+                  <div key={index} className="relative">
+                    <ImageOverlayPreview
+                      imageUrl={imageUrl}
+                      onUploadChange={null}
+                      onRemove={() => removeImage(index)}
+                      uploading={false}
+                      imageContainerClassName="image-preview-item"
+                    />
                     {img === formData.coverImage && (
-                      <div className="cover-badge">
+                      <div className="cover-badge mt-2 absolute top-2 right-2">
                         Portada
                       </div>
                     )}

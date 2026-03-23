@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchGlobal } from '../../services/api';
+import { Calendar } from 'lucide-react';
 import './EnhancedSearch.css';
 
 const EnhancedSearch = () => {
@@ -146,7 +147,7 @@ const EnhancedSearch = () => {
           {results.events.length > 0 && (
             <div className="results-section">
               <h4 className="results-section-title">
-                <span className="section-icon">🎉</span>
+                <Calendar size={16} style={{ display: 'inline-block', marginRight: '6px' }} />
                 Eventos ({results.events.length})
               </h4>
               {results.events.slice(0, 3).map(event => (

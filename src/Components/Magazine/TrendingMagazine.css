@@ -1,8 +1,8 @@
 .trending-magazine-section {
-    padding: 3rem 0;
+    padding: 1rem 0;
     width: 100%;
     max-width: 1400px;
-    margin: 4rem auto;
+    margin: 0.5rem auto;
     background: rgba(20, 10, 30, 0.4);
     backdrop-filter: blur(20px);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -144,8 +144,8 @@
 
 @media (max-width: 768px) {
     .trending-magazine-section {
-        padding: 2rem 1rem;
-        margin: 2rem 0;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem 0;
     }
 
     .trending-header {

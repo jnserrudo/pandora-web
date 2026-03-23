@@ -143,6 +143,44 @@
   color: var(--color-primary);
 }
 
+/* Badge de evento destacado */
+.event-featured-badge {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  z-index: 10;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6); }
+}
+
+/* Tarjeta de evento destacado */
+.event-card--featured {
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(138, 43, 226, 0.05));
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.2);
+}
+
+.event-card--featured:hover {
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.2);
+}
+
 .events-featured-section {
   margin-bottom: 1rem;
 }

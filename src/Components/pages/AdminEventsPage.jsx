@@ -9,6 +9,7 @@ import {
   ChevronRight, 
   Plus,
   Eye,
+  Edit,
   Trash2,
   Clock,
   MapPin,
@@ -203,6 +204,9 @@ const AdminEventsPage = () => {
                         <div className="action-icons-group">
                           <Link to={`/event/${event.id}`} className="btn-action-premium view" title="Ver Evento">
                             <Eye size={18} />
+                          </Link>
+                          <Link to={`/events/${event.id}/edit`} className="btn-action-premium edit" title="Editar Evento">
+                            <Edit size={18} />
                           </Link>
                           {event.status === 'PENDING' && (
                             <>

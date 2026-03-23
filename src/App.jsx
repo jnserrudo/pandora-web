@@ -22,7 +22,8 @@ import "./App.css";
 import ProtectedRoute from "./Components/utils/ProtectedRoute";
 import MyCommercesPage from "./Components/pages/MyCommercesPage";
 import CommerceFormPage from "./Components/pages/CommerceFormPage";
-import EventFormPage from "./Components/pages/EventFormPage"; 
+import EventFormPage from "./Components/pages/EventFormPage";
+import EventEditPage from "./Components/pages/EventEditPage";
 import AdminArticlesPage from "./Components/pages/AdminArticlesPage";
 import AdminArticleFormPage from "./Components/pages/AdminArticleFormPage";
 import AdminAdvertisementsPage from "./Components/pages/AdminAdvertisementsPage";
@@ -104,6 +105,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
                 <EventFormPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/events/:id/edit" 
+            element={
+              <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+                <EventEditPage />
               </ProtectedRoute>
             } 
           />
