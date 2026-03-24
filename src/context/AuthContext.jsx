@@ -39,10 +39,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (identifier, password) => {
     const response = await api.loginUser(identifier, password);
-    localStorage.setItem('token', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    setToken(response.accessToken);
-    setRefreshToken(response.refreshToken);
+    setAuthData(response.accessToken, response.refreshToken);
+  };
+
+  const setAuthData = (accessToken, newRefreshToken) => {
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
+    setToken(accessToken);
+    setRefreshToken(newRefreshToken);
   };
   
   const logout = () => {
@@ -73,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     register,
     isAdmin, // Exportamos la función helper
     refreshProfile, // Exportamos refreshProfile
+    setAuthData, // Función utilitaria para componentes externos como AuthFormsContainer
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
