@@ -89,7 +89,15 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           setRequireOTP(true);
       }
     } catch (err) {
-      setError(err.message || 'Error de conexión con el backend.');
+      // Sanitize technical error messages so users never see raw browser errors
+      const rawMsg = err.message || '';
+      const isNetworkError = rawMsg === 'Failed to fetch' 
+        || rawMsg.includes('NetworkError') 
+        || rawMsg.includes('ERR_CONNECTION')
+        || rawMsg.includes('fetch');
+      setError(isNetworkError 
+        ? 'No se pudo conectar con el servidor. Verificá tu conexión a internet e intentá de nuevo.' 
+        : rawMsg || 'Ocurrió un error inesperado. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -109,7 +117,9 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           setRequireOTP(false);
           setIsLogin(true);
       } catch (err) {
-          showToast(err.message, 'error');
+          const rawMsg = err.message || '';
+          const isNetworkError = rawMsg === 'Failed to fetch' || rawMsg.includes('NetworkError') || rawMsg.includes('ERR_CONNECTION');
+          showToast(isNetworkError ? 'No se pudo conectar con el servidor. Intentá de nuevo.' : rawMsg || 'Error inesperado.', 'error');
       }
   };
 

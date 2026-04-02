@@ -105,7 +105,8 @@ const AdminPlansManagement = () => {
       await updatePlan(plan.id, payload, token);
       showToast(`Plan ${plan.name} actualizado correctamente.`, 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     } finally {
       setSaving(false);
     }
@@ -128,7 +129,8 @@ const AdminPlansManagement = () => {
       if (err.message.includes("Unique constraint failed") || err.message.includes("Coupon_code_key")) {
         showToast("Este código de cupón ya existe en el sistema (puede estar desactivado).", 'error');
       } else {
-        showToast(err.message, 'error');
+        const msg = err.message || '';
+        showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
       }
     } finally {
       setSaving(false);
@@ -141,7 +143,8 @@ const AdminPlansManagement = () => {
       setCoupons(coupons.map(c => c.id === coupon.id ? updated : c));
       showToast(`Cupón ${updated.isActive ? 'activado' : 'desactivado'}.`, 'info');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 
@@ -152,7 +155,8 @@ const AdminPlansManagement = () => {
       setCoupons(coupons.filter(c => c.id !== id));
       showToast("Cupón eliminado.", 'warning');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 

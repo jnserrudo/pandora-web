@@ -64,7 +64,8 @@ const CommerceFeedbackManager = ({ commerce }) => {
             setReplyText("");
         } catch (err) {
             console.error(err);
-            showToast(err.message || "Error al enviar la respuesta", "error");
+            const msg = err.message || "Error al enviar la respuesta";
+            showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, "error");
         }
     };
 

@@ -88,7 +88,8 @@ const CommerceProductManager = ({ commerceId, planLevel }) => {
             setFormData({ name: '', description: '', price: '', imageUrl: '' });
             await fetchProducts();
         } catch (error) {
-            showToast(error.message || "Error al agregar el producto", "error");
+            const msg = error.message || '';
+            showToast((msg === 'Failed to fetch' || msg.includes('NetworkError')) ? 'Error de conexión. Intentá de nuevo.' : msg || 'Error al agregar el producto', "error");
         } finally {
             setLoading(false);
         }

@@ -58,7 +58,8 @@ const AdminArticlesPage = () => {
       ));
       showToast("Estado de visibilidad actualizado.", 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 
@@ -77,7 +78,8 @@ const AdminArticlesPage = () => {
       ));
       showToast(`Noticia ${newStatus === 'PUBLISHED' ? 'publicada' : 'movida a borradores'}.`, 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 

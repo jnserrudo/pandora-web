@@ -321,13 +321,38 @@
 }
 
 @media (max-width: 768px) {
+  .admin-container {
+    padding: 6rem 1rem 3rem 1rem;
+  }
+  .admin-header-premium {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
   .hide-mobile {
     display: none;
   }
   .table-filters-premium {
     flex-direction: column;
+    padding: 1rem;
   }
   .search-bar-premium {
     max-width: 100%;
   }
+  .admin-table-premium th, .admin-table-premium td {
+    padding: 1rem;
+  }
+  .admin-title-group h1 {
+    font-size: 1.8rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
 }
+
+@media (max-width: 480px) {
+  .admin-title-group h1 {
+    font-size: 1.5rem;
+  }
+}
+

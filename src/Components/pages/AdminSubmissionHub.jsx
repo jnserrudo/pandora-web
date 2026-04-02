@@ -79,7 +79,8 @@ const AdminSubmissionHub = () => {
       setShowModal(false);
       showToast("Respuesta enviada correctamente.", 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 

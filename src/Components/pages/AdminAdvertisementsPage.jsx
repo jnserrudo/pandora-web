@@ -54,7 +54,8 @@ const AdminAdvertisementsPage = () => {
       fetchAdvertisements();
       showToast(`Campaña ${!currentStatus ? 'activada' : 'pausada'} correctamente.`, 'info');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 

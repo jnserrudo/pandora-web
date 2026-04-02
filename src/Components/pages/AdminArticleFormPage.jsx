@@ -137,8 +137,9 @@ const AdminArticleFormPage = () => {
       navigate('/admin/articles');
     } catch (error) {
       console.error('Error saving article:', error);
-      const msg = error.response?.data?.message || error.message || 'Error al guardar.';
-      showToast(msg, 'error');
+      const msg = error.response?.data?.message || error.message || '';
+      const isNetworkError = msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('ERR_CONNECTION');
+      showToast(isNetworkError ? 'Error de conexión con el servidor. Intentá de nuevo.' : msg || 'Error al guardar.', 'error');
     } finally {
       setLoading(false);
     }

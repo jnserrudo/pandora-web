@@ -154,7 +154,8 @@ const AdminAdvertisementFormPage = () => {
       navigate('/admin/advertisements');
     } catch (error) {
       console.error("Error saving ad:", error);
-      showToast(error.message || 'Error al guardar la publicidad.', 'error');
+      const msg = error.message || '';
+      showToast((msg === 'Failed to fetch' || msg.includes('NetworkError')) ? 'Error de conexión con el servidor.' : msg || 'Error al guardar la publicidad.', 'error');
     } finally {
       setLoading(false);
     }

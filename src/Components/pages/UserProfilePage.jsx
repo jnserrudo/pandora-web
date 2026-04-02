@@ -62,7 +62,8 @@ const UserProfilePage = () => {
       await refreshProfile();
       setEditingDni(false);
     } catch (err) {
-      setDniError(err.message);
+      const msg = err.message || '';
+      setDniError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg);
     } finally {
       setSavingDni(false);
     }

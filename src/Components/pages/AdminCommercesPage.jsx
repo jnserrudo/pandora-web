@@ -85,7 +85,9 @@ const AdminCommercesPage = () => {
       setShowModal(false);
       showToast(isApproved ? "Comercio aprobado exitosamente." : "Comercio rechazado correctamente.", isApproved ? 'success' : 'info');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      const isNetworkError = msg === 'Failed to fetch' || msg.includes('NetworkError');
+      showToast(isNetworkError ? 'Error de conexión con el servidor.' : msg, 'error');
     }
   };
 

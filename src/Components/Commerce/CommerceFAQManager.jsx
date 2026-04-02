@@ -50,7 +50,8 @@ const CommerceFAQManager = ({ commerceId }) => {
       setNewAnswer('');
       showToast("FAQ agregada correctamente", "success");
     } catch (error) {
-      showToast(error.message, "error");
+      const msg = error.message || '';
+      showToast((msg === 'Failed to fetch' || msg.includes('NetworkError')) ? 'Error de conexión. Intentá de nuevo.' : msg || 'Error al agregar FAQ.', "error");
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,8 @@ const CommerceFAQManager = ({ commerceId }) => {
       setEditingId(null);
       showToast("FAQ actualizada correctamente", "success");
     } catch (error) {
-      showToast(error.message, "error");
+      const msg = error.message || '';
+      showToast((msg === 'Failed to fetch' || msg.includes('NetworkError')) ? 'Error de conexión. Intentá de nuevo.' : msg || 'Error al actualizar FAQ.', "error");
     } finally {
       setLoading(false);
     }
@@ -86,7 +88,8 @@ const CommerceFAQManager = ({ commerceId }) => {
       setFaqs(faqs.filter(f => f.id !== faqId));
       showToast("FAQ eliminada", "success");
     } catch (error) {
-      showToast(error.message, "error");
+      const msg = error.message || '';
+      showToast((msg === 'Failed to fetch' || msg.includes('NetworkError')) ? 'Error de conexión. Intentá de nuevo.' : msg || 'Error al eliminar FAQ.', "error");
     } finally {
       setLoading(false);
     }

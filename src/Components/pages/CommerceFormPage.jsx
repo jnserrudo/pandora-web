@@ -273,7 +273,8 @@ const CommerceFormPage = () => {
       navigate('/my-commerces');
     } catch (err) {
       console.error("Error saving commerce:", err);
-      const msg = err.message || "Error al guardar el comercio.";
+      const rawMsg = err.message || "Error al guardar el comercio.";
+      const msg = rawMsg === 'Failed to fetch' || rawMsg.includes('Network') ? 'Error de conexión con el servidor.' : rawMsg;
       setError(msg);
       showToast(msg, 'error');
       setLoading(false);

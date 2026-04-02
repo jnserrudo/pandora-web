@@ -3,4 +3,6 @@
   display: grid; /* <-- CAMBIO A GRID */
   grid-template-rows: auto 1fr auto; /* <-- LA MAGIA: Header(auto), Main(todo el resto), Footer(auto) */
   min-height: 100vh; /* La base para que el grid tenga espacio para distribuir */
+  max-width: 100vw;
+  overflow-x: hidden;
 }

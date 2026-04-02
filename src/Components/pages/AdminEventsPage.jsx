@@ -62,7 +62,8 @@ const AdminEventsPage = () => {
       setEvents(prev => prev.map(e => e.id === id ? { ...e, status: 'APPROVED' } : e));
       showToast("Evento aprobado y publicado.", 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 
@@ -79,7 +80,8 @@ const AdminEventsPage = () => {
       setShowRejectModal(false);
       showToast("Solicitud rechazada. Se notificó al usuario.", 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 
@@ -90,7 +92,8 @@ const AdminEventsPage = () => {
       ));
       showToast("Estado del evento actualizado.", 'success');
     } catch (err) {
-      showToast(err.message, 'error');
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
 

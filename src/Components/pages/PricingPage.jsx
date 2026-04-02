@@ -90,7 +90,8 @@ const PricingPage = () => {
       setActiveCoupon(coupon);
       showToast(`¡Cupón aplicado! ${coupon.discountPercent}% de descuento.`, 'success');
     } catch (err) {
-      setCouponError(err.message);
+      const msg = err.message || '';
+      setCouponError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg);
       setActiveCoupon(null);
     } finally {
       setApplying(false);

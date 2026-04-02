@@ -141,7 +141,8 @@ const EventFormPage = () => {
       } 
     } catch (err) {
       console.error("Error creating event:", err);
-      setError(err.message || "Error al enviar la solicitud.");
+      const msg = err.message || '';
+      setError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de conexión con el servidor.' : msg || "Error al enviar la solicitud.");
       setLoading(false);
     }
   };

@@ -45,7 +45,8 @@ const CommerceCommentForm = ({ commerceId, commerceName, ownerId, onSuccess }) =
         onSuccess();
       }
     } catch (error) {
-      showToast(error.message || 'Error al enviar feedback', 'error');
+      const msg = error.message || '';
+      showToast((msg === 'Failed to fetch' || msg.includes('NetworkError')) ? 'Error de conexión. Intentá de nuevo.' : msg || 'Error al enviar feedback', 'error');
     } finally {
       setIsSubmitting(false);
     }

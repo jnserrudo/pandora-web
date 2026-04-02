@@ -81,7 +81,8 @@ const EventEditPage = () => {
 
       } catch (err) {
         console.error("Error cargando evento:", err);
-        setError(err.message || "Error al cargar el evento.");
+        const msg = err.message || '';
+        setError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de conexión con el servidor.' : msg || "Error al cargar el evento.");
       } finally {
         setLoading(false);
       }
@@ -147,7 +148,8 @@ const EventEditPage = () => {
       }
     } catch (err) {
       console.error("Error updating event:", err);
-      setError(err.message || "Error al actualizar el evento.");
+      const msg = err.message || '';
+      setError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de conexión con el servidor.' : msg || "Error al actualizar el evento.");
       setLoading(false);
     }
   };
