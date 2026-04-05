@@ -153,7 +153,7 @@ const MyCommercesPage = () => {
                     <div className="header-title-neo">
                         <div className="title-with-icon">
                             <Store className="title-icon" />
-                            <h1>Ecosistema de Negocios</h1>
+                            <h1>Mis Comercios</h1>
                         </div>
                         <p>Gestioná la presencia y el rendimiento de tus marcas en Pandora</p>
                     </div>
