@@ -35,6 +35,8 @@ import AdminSubmissionHub from "./Components/pages/AdminSubmissionHub";
 import AdminPlansManagement from "./Components/pages/AdminPlansManagement";
 import AdminCommerceDetailPage from "./Components/pages/AdminCommerceDetailPage";
 import AdminAuditPage from "./Components/pages/AdminAuditPage";
+import MyDashboardPage from "./Components/pages/MyDashboardPage";
+import AdminUsersPage from "./Components/pages/AdminUsersPage";
 
 function App() {
   return (
@@ -75,7 +77,17 @@ function App() {
             } 
           />
 
-          {/* 2. PROPIETARIOS (Gestión de Comercios) */}
+          {/* 2. DASHBOARD DE USUARIO */}
+          <Route 
+            path="/my-dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
+                <MyDashboardPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* 3. PROPIETARIOS (Gestión de Comercios) */}
           <Route 
             path="/my-commerces" 
             element={
@@ -223,6 +235,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminAuditPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/users" 
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminUsersPage />
               </ProtectedRoute>
             } 
           />

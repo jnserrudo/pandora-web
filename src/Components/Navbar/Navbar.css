@@ -13,7 +13,6 @@
   border-bottom: 1px solid rgba(138, 43, 226, 0.15);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 .navbar-container.scrolled {
@@ -42,7 +41,7 @@
 }
 
 .navbar-logo-img {
-  height: 46px;
+  height: 60px;
   width: auto;
   object-fit: contain;
   transition: all 0.4s ease;
@@ -53,7 +52,7 @@
 }
 
 .navbar-container.scrolled .navbar-logo-img {
-  height: 40px;
+  height: 50px;
 }
 
 .navbar-logo:hover {
@@ -556,27 +555,48 @@
   border: none;
   color: #fff;
   cursor: pointer;
-  z-index: 2000;
+  z-index: 10000;
+}
+
+.mobile-toggle.hidden {
+  display: none !important;
 }
 
 .mobile-menu {
   display: none;
   position: fixed;
   top: 0;
-  right: 0;
-  width: 100%;
+  left: 0;
+  width: 100vw;
   height: 100vh;
   background: rgba(13, 2, 24, 0.98);
   backdrop-filter: blur(20px);
-  z-index: 1500;
-  padding: 8rem 2rem;
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 9999;
+  padding: 5rem 2rem 2rem 2rem;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .mobile-menu.menu-open {
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.3s ease forwards;
+}
+
+.mobile-close-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10001;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes slideInRight {
@@ -641,10 +661,10 @@
     padding: 0.5rem 1.25rem;
   }
   .navbar-logo-img {
-    height: 70px;
+    height: 80px;
   }
   .navbar-container.scrolled .navbar-logo-img {
-    height: 50px;
+    height: 60px;
   }
 }
 
@@ -653,10 +673,10 @@
     padding: 0.6rem 1rem;
   }
   .navbar-logo-img {
-    height: 58px;
+    height: 70px;
   }
   .navbar-container.scrolled .navbar-logo-img {
-    height: 44px;
+    height: 55px;
   }
 }
 /* Badges de Identificación (Personas) */

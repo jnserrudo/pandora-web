@@ -15,9 +15,13 @@ import {
   MapPin,
   CheckCircle,
   XCircle,
-  Star
+  Star,
+  Zap,
+  Crown,
+  CreditCard,
+  ExternalLink
 } from 'lucide-react';
-import { getEvents, approveEvent, rejectEvent } from '../../services/api';
+import { getEvents, approveEvent, rejectEvent, validateEventPayment } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
@@ -38,6 +42,13 @@ const AdminEventsPage = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectNote, setRejectNote] = useState('');
+
+  // Modal de validación de pago
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentEvent, setPaymentEvent] = useState(null);
+  const [paymentNote, setPaymentNote] = useState('');
+  const [tierFilter, setTierFilter] = useState('ALL');
+  const [paymentFilter, setPaymentFilter] = useState('ALL');
 
   const fetchEvents = async () => {
     try {
@@ -97,6 +108,17 @@ const AdminEventsPage = () => {
     }
   };
 
+  const handleValidatePayment = async (paymentStatus) => {
+    try {
+      await validateEventPayment(paymentEvent.id, paymentStatus, paymentNote, token);
+      setEvents(prev => prev.map(e => e.id === paymentEvent.id ? { ...e, paymentStatus } : e));
+      setShowPaymentModal(false);
+      showToast(paymentStatus === 'VALIDATED' ? 'Pago validado correctamente.' : 'Pago rechazado. Se notificó al usuario.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Error al procesar la validación.', 'error');
+    }
+  };
+
   const statusLabel = (status) => {
     const map = {
       PENDING: { label: 'Pendiente', cls: 'draft' },
@@ -109,10 +131,25 @@ const AdminEventsPage = () => {
     return map[status] || { label: status || 'Sin estado', cls: 'draft' };
   };
 
+  const tierLabel = (tier) => {
+    if (tier === 3) return { label: 'PREMIUM', color: '#FFD700', icon: <Crown size={12} /> };
+    if (tier === 2) return { label: 'PLUS', color: '#38bdf8', icon: <Zap size={12} /> };
+    return { label: 'BÁSICO', color: '#a0a0c0', icon: null };
+  };
+
+  const paymentStatusLabel = (ps) => {
+    if (ps === 'VALIDATED') return { label: 'Validado', cls: 'active' };
+    if (ps === 'REJECTED') return { label: 'Rechazado', cls: 'inactive' };
+    if (ps === 'PENDING') return { label: 'Pago Pendiente', cls: 'draft' };
+    return null;
+  };
+
   const filteredEvents = events.filter(e => {
     const matchSearch = !searchTerm || (e.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = statusFilter === 'ALL' || e.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchTier = tierFilter === 'ALL' || String(e.eventTier || 1) === tierFilter;
+    const matchPayment = paymentFilter === 'ALL' || (e.eventTier > 1 && (e.paymentStatus || 'PENDING') === paymentFilter);
+    return matchSearch && matchStatus && matchTier && matchPayment;
   });
 
   return (
@@ -139,7 +176,7 @@ const AdminEventsPage = () => {
           <div className="hub-error-card">{error}</div>
         ) : (
           <div className="admin-table-wrapper-premium">
-            <div className="table-filters-premium">
+            <div className="table-filters-premium" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
               <div className="search-bar-premium">
                 <Search size={18} />
                 <input
@@ -149,11 +186,7 @@ const AdminEventsPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <select
-                className="btn-filter-premium"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
+              <select className="btn-filter-premium" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                 <option value="ALL">Todos los estados</option>
                 <option value="PENDING">Pendientes</option>
                 <option value="APPROVED">Aprobados</option>
@@ -162,13 +195,26 @@ const AdminEventsPage = () => {
                 <option value="CANCELLED">Cancelados</option>
                 <option value="FINISHED">Finalizados</option>
               </select>
+              <select className="btn-filter-premium" value={tierFilter} onChange={(e) => setTierFilter(e.target.value)}>
+                <option value="ALL">Todos los tiers</option>
+                <option value="1">Básico</option>
+                <option value="2">Plus</option>
+                <option value="3">Premium</option>
+              </select>
+              <select className="btn-filter-premium" value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)}>
+                <option value="ALL">Todos los pagos</option>
+                <option value="PENDING">Pago Pendiente</option>
+                <option value="VALIDATED">Pago Validado</option>
+                <option value="REJECTED">Pago Rechazado</option>
+              </select>
             </div>
 
             <table className="admin-table-premium">
               <thead>
                 <tr>
                   <th>EVENTO Y ORGANIZADOR</th>
-                  <th className="hide-mobile">FECHA INICIO</th>
+                  <th className="hide-mobile">FECHA</th>
+                  <th className="hide-mobile">TIER</th>
                   <th className="hide-mobile">ESTADO</th>
                   <th className="text-right">ACCIONES</th>
                 </tr>
@@ -176,6 +222,8 @@ const AdminEventsPage = () => {
               <tbody>
                 {filteredEvents.map((event) => {
                   const sl = statusLabel(event.status);
+                  const tl = tierLabel(event.eventTier || 1);
+                  const pl = event.eventTier > 1 ? paymentStatusLabel(event.paymentStatus || 'PENDING') : null;
                   return (
                     <tr key={event.id}>
                       <td>
@@ -201,6 +249,14 @@ const AdminEventsPage = () => {
                         </div>
                       </td>
                       <td className="hide-mobile">
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 700, background: `${tl.color}20`, color: tl.color, border: `1px solid ${tl.color}40` }}>
+                          {tl.icon} {tl.label}
+                        </span>
+                        {pl && (
+                          <span className={`badge-premium ${pl.cls}`} style={{ display: 'block', marginTop: '4px', fontSize: '0.7rem' }}>{pl.label}</span>
+                        )}
+                      </td>
+                      <td className="hide-mobile">
                         <span className={`badge-premium ${sl.cls}`}>{sl.label}</span>
                       </td>
                       <td className="text-right">
@@ -211,20 +267,27 @@ const AdminEventsPage = () => {
                           <Link to={`/events/${event.id}/edit`} className="btn-action-premium edit" title="Editar Evento">
                             <Edit size={18} />
                           </Link>
+                          {event.eventTier > 1 && (event.paymentStatus === 'PENDING' || !event.paymentStatus) && (
+                            <button
+                              onClick={() => { setPaymentEvent(event); setPaymentNote(''); setShowPaymentModal(true); }}
+                              className="btn-action-premium"
+                              title="Validar comprobante de pago"
+                              style={{ color: '#38bdf8', borderColor: 'rgba(56,189,248,0.3)' }}
+                            >
+                              <CreditCard size={18} />
+                            </button>
+                          )}
+                          {event.paymentProof && (
+                            <a href={event.paymentProof} target="_blank" rel="noreferrer" className="btn-action-premium view" title="Ver comprobante">
+                              <ExternalLink size={18} />
+                            </a>
+                          )}
                           {event.status === 'PENDING' && (
                             <>
-                              <button
-                                onClick={() => handleApprove(event.id)}
-                                className="btn-action-premium edit"
-                                title="Aprobar solicitud"
-                              >
+                              <button onClick={() => handleApprove(event.id)} className="btn-action-premium edit" title="Aprobar solicitud">
                                 <CheckCircle size={18} />
                               </button>
-                              <button
-                                onClick={() => openRejectModal(event.id)}
-                                className="btn-action-premium delete"
-                                title="Rechazar solicitud"
-                              >
+                              <button onClick={() => openRejectModal(event.id)} className="btn-action-premium delete" title="Rechazar solicitud">
                                 <XCircle size={18} />
                               </button>
                             </>
@@ -245,7 +308,7 @@ const AdminEventsPage = () => {
                 })}
                 {filteredEvents.length === 0 && (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.4)' }}>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.4)' }}>
                       No se encontraron eventos con los filtros aplicados.
                     </td>
                   </tr>
@@ -256,7 +319,7 @@ const AdminEventsPage = () => {
             <div className="table-footer-premium">
               <p>Total: {filteredEvents.length} de {events.length} eventos</p>
               <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
-                {events.filter(e => e.status === 'PENDING').length} solicitudes pendientes
+                {events.filter(e => e.status === 'PENDING').length} pendientes · {events.filter(e => e.eventTier > 1 && (!e.paymentStatus || e.paymentStatus === 'PENDING')).length} pagos por validar
               </p>
             </div>
           </div>
@@ -284,6 +347,46 @@ const AdminEventsPage = () => {
               <button className="btn-secondary" onClick={() => setShowRejectModal(false)}>Cancelar</button>
               <button className="btn-primary" onClick={handleReject} disabled={!rejectNote.trim()}>
                 Confirmar Rechazo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Validación de Pago */}
+      {showPaymentModal && paymentEvent && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <h2>Validar Comprobante de Pago</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Evento: <strong style={{ color: '#fff' }}>{paymentEvent.name}</strong> — Tier: <strong style={{ color: paymentEvent.eventTier === 3 ? '#FFD700' : '#38bdf8' }}>{paymentEvent.eventTier === 3 ? 'PREMIUM' : 'PLUS'}</strong>
+            </p>
+            {paymentEvent.paymentProof && (
+              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                <a href={paymentEvent.paymentProof} target="_blank" rel="noreferrer" style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem' }}>
+                  <ExternalLink size={14} /> Ver comprobante adjunto
+                </a>
+              </div>
+            )}
+            <div className="modal-form-group">
+              <label>Nota (opcional):</label>
+              <textarea
+                value={paymentNote}
+                onChange={(e) => setPaymentNote(e.target.value)}
+                placeholder="Ej. Transferencia verificada en cuenta bancaria..."
+                rows={3}
+              />
+            </div>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setShowPaymentModal(false)}>Cancelar</button>
+              <button
+                style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#f87171', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
+                onClick={() => handleValidatePayment('REJECTED')}
+              >
+                Rechazar Pago
+              </button>
+              <button className="btn-primary" onClick={() => handleValidatePayment('VALIDATED')}>
+                Validar Pago
               </button>
             </div>
           </div>

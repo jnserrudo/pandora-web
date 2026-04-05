@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import '../pages/AuthForm.css';
 
 const OTPVerification = ({ email, onVerify }) => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (element, index) => {
     if (isNaN(Number(element.value))) return;
@@ -67,6 +70,39 @@ const OTPVerification = ({ email, onVerify }) => {
         style={{ padding: '1.2rem', fontWeight: 'bold' }}
       >
         {isLoading ? 'Comprobando Identidad...' : 'Confirmar Código Maestro'}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => navigate('/login')}
+        disabled={isLoading}
+        style={{
+          marginTop: '1rem',
+          padding: '0.8rem',
+          background: 'transparent',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          color: 'rgba(255, 255, 255, 0.7)',
+          borderRadius: '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          fontSize: '0.95rem',
+          transition: 'all 0.3s ease',
+          width: '100%'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.borderColor = 'var(--color-primary)';
+          e.target.style.color = '#fff';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+          e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+        }}
+      >
+        <ArrowLeft size={18} />
+        Volver al Login
       </button>
     </div>
   );

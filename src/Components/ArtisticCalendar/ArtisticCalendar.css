@@ -157,6 +157,30 @@
   box-shadow: 0 0 5px #FFD700 !important;
 }
 
+.event-dot--premium {
+  background-color: #FFD700 !important;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.8) !important;
+}
+
+.event-dot--plus {
+  background-color: #38bdf8 !important;
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.7) !important;
+}
+
+/* Clase para días con eventos premium */
+.calendar-day.has-premium {
+  border-color: rgba(255, 215, 0, 0.35);
+}
+
+/* Icono de tier (premium/plus) en celda */
+.tier-star {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+}
+
 /* Estrella para días con eventos destacados */
 .featured-star {
   position: absolute;

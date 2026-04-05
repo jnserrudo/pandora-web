@@ -266,6 +266,10 @@ const Navbar = () => {
                       <User size={16} />
                       <span>Mi Perfil</span>
                     </Link>
+                    <Link to="/my-dashboard" className="dropdown-item" onClick={closeMenu}>
+                      <LayoutDashboard size={16} />
+                      <span>Mi Panel</span>
+                    </Link>
                     <Link to="/my-submissions" className="dropdown-item" onClick={closeMenu}>
                       <Inbox size={16} />
                       <span>Mis Mensajes</span>
@@ -288,56 +292,63 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Botón Móvil */}
-        <button className="mobile-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+        {/* Botón Móvil - solo hamburguesa */}
+        <button 
+          className={`mobile-toggle ${isMenuOpen ? 'hidden' : ''}`} 
+          onClick={() => setIsMenuOpen(true)}
+        >
+          <Menu size={28} />
         </button>
-
-         {/* Menú Móvil */}
-        <div className={`mobile-menu ${isMenuOpen ? 'menu-open' : ''}`}>
-          <div className="mobile-links">
-            <Link to="/magazine" onClick={closeMenu}>
-              Revista <span className="m-stat">({stats.articles})</span>
-            </Link>
-            <Link to="/events" onClick={closeMenu}>
-              Eventos <span className="m-stat">({stats.events})</span>
-            </Link>
-            <Link to="/commerces" onClick={closeMenu}>
-              Comercios <span className="m-stat">({stats.commerces})</span>
-            </Link>
-            <Link to="/pricing" onClick={closeMenu}>
-              Planes <span className="m-stat">({stats.plans})</span>
-            </Link>
-            
-            {isAuthenticated && (
-              <>
-                <div className="mobile-divider"></div>
-                {(user?.role === 'OWNER' || user?.role === 'ADMIN') && (
-                  <div className="mobile-mgmt-row">
-                    <Link to="/my-commerces" onClick={closeMenu}>Locales</Link>
-                    <Link to="/events/create" onClick={closeMenu}>+ Evento</Link>
-                  </div>
-                )}
-                {user?.role === 'ADMIN' && (
-                  <Link to="/admin/dashboard" className="mobile-admin-link" onClick={closeMenu}>Panel Admin</Link>
-                )}
-                <Link to="/profile" onClick={closeMenu}>Mi Perfil</Link>
-                <button onClick={handleLogout} className="mobile-logout-btn">Cerrar Sesión</button>
-              </>
-            )}
-
-            {!isAuthenticated && (
-              <>
-                <div className="mobile-divider"></div>
-                <div className="mobile-auth-row">
-                  <Link to="/login" onClick={closeMenu}>Ingresar</Link>
-                  <Link to="/register" className="m-register-btn" onClick={closeMenu}>Registrarse</Link>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
       </nav>
+
+      {/* Menú Móvil - fuera del nav para evitar overflow:hidden */}
+      <div className={`mobile-menu ${isMenuOpen ? 'menu-open' : ''}`}>
+        <button className="mobile-close-btn" onClick={closeMenu}>
+          <X size={28} />
+        </button>
+        <div className="mobile-links">
+          <Link to="/magazine" onClick={closeMenu}>
+            Revista <span className="m-stat">({stats.articles})</span>
+          </Link>
+          <Link to="/events" onClick={closeMenu}>
+            Eventos <span className="m-stat">({stats.events})</span>
+          </Link>
+          <Link to="/commerces" onClick={closeMenu}>
+            Comercios <span className="m-stat">({stats.commerces})</span>
+          </Link>
+          <Link to="/pricing" onClick={closeMenu}>
+            Planes <span className="m-stat">({stats.plans})</span>
+          </Link>
+          
+          {isAuthenticated && (
+            <>
+              <div className="mobile-divider"></div>
+              <Link to="/my-dashboard" onClick={closeMenu}>Mi Panel</Link>
+              {(user?.role === 'OWNER' || user?.role === 'ADMIN') && (
+                <div className="mobile-mgmt-row">
+                  <Link to="/my-commerces" onClick={closeMenu}>Locales</Link>
+                  <Link to="/events/create" onClick={closeMenu}>+ Evento</Link>
+                </div>
+              )}
+              {user?.role === 'ADMIN' && (
+                <Link to="/admin/dashboard" className="mobile-admin-link" onClick={closeMenu}>Panel Admin</Link>
+              )}
+              <Link to="/profile" onClick={closeMenu}>Mi Perfil</Link>
+              <button onClick={handleLogout} className="mobile-logout-btn">Cerrar Sesión</button>
+            </>
+          )}
+
+          {!isAuthenticated && (
+            <>
+              <div className="mobile-divider"></div>
+              <div className="mobile-auth-row">
+                <Link to="/login" onClick={closeMenu}>Ingresar</Link>
+                <Link to="/register" className="m-register-btn" onClick={closeMenu}>Registrarse</Link>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </header>
   );
 };

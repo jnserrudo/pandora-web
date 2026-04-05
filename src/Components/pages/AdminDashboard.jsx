@@ -103,6 +103,13 @@ const AdminDashboard = () => {
       link: '/admin/audit',
       icon: <Activity size={32} />,
       color: '#8A2BE2'
+    },
+    {
+      title: 'Usuarios',
+      description: 'Gestión de usuarios y su contenido asociado.',
+      link: '/admin/users',
+      icon: <UserCheck size={32} />,
+      color: '#38bdf8'
     }
   ];
 

@@ -1,7 +1,7 @@
 // src/pages/EventDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { MapPin, Crown, Zap, ExternalLink } from 'lucide-react';
 import { getEventById, getAbsoluteImageUrl } from '../../services/api';
 import MapView from '../ui/MapView';
 import './CommerceDetailPage.css'; 
@@ -45,6 +45,19 @@ const EventDetailPage = () => {
 
   const start = formatDateTime(event.startDate);
   const end = formatDateTime(event.endDate);
+  const tier = event.eventTier || 1;
+  const isPremium = tier === 3;
+  const isPlus = tier === 2;
+  const organizer = event.commerce?.name || event.organizerName || 'Organizador independiente';
+
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+    if (match) return `https://www.youtube.com/embed/${match[1]}`;
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    return null;
+  };
 
   return (
     <div className="detail-page-container">
@@ -52,12 +65,31 @@ const EventDetailPage = () => {
         className="detail-header" 
         style={{ backgroundImage: event.coverImage ? `url(${getAbsoluteImageUrl(event.coverImage)})` : 'none' }}
       >
-         {/* --- 3. AÑADIR EL BOTÓN DE VOLVER --- */}
-         <button onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
-          &larr; {/* Código HTML para una flecha a la izquierda */}
+        <button onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
+          &larr;
         </button>
         <div className="header-overlay">
+          {isPremium && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,#FFD700,#FFA500)', color: '#000', padding: '4px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+              <Crown size={13} /> EVENTO PREMIUM
+            </span>
+          )}
+          {isPlus && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg,#38bdf8,#0ea5e9)', color: '#fff', padding: '4px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+              <Zap size={13} /> EVENTO PLUS
+            </span>
+          )}
           <h1>{event.name}</h1>
+          {event.externalLink && (
+            <a
+              href={event.externalLink}
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '1rem', padding: '0.6rem 1.4rem', background: isPremium ? 'linear-gradient(135deg,#FFD700,#FFA500)' : 'linear-gradient(135deg,#38bdf8,#0ea5e9)', color: isPremium ? '#000' : '#fff', borderRadius: '25px', fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}
+            >
+              <ExternalLink size={16} /> Comprar Entradas / Ver más
+            </a>
+          )}
         </div>
       </header>
 
@@ -72,16 +104,16 @@ const EventDetailPage = () => {
               <strong>Finaliza:</strong> {end.date}<br/>a las {end.time}
             </div>
             <div className="info-item">
-              <strong>Lugar:</strong> {event.location || event.commerce.name}
+              <strong>Lugar:</strong> {event.location || organizer}
             </div>
             <div className="info-item">
-              <strong>Dirección:</strong> {event.address || event.commerce.address || "Ver mapa"}
+              <strong>Dirección:</strong> {event.address || event.commerce?.address || "Ver mapa"}
             </div>
             <div className="info-item">
-              <strong>Organiza:</strong> {event.commerce.name}
+              <strong>Organiza:</strong> {organizer}
             </div>
           </div>
-          
+
           {event.latitude && event.longitude && (
             <div className="event-detail-map" style={{ marginTop: '2rem' }}>
               <h3>Ubicación en el Mapa</h3>
@@ -93,6 +125,24 @@ const EventDetailPage = () => {
             <h3>Acerca de este evento</h3>
             <p>{event.description}</p>
           </div>
+
+          {/* Video promocional (Solo Premium) */}
+          {event.videoUrl && getYouTubeEmbedUrl(event.videoUrl) && (
+            <div style={{ marginTop: '2.5rem' }}>
+              <h3 style={{ color: '#FFD700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Crown size={18} /> Video Promocional
+              </h3>
+              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '16px', overflow: 'hidden', border: '2px solid rgba(255,215,0,0.3)' }}>
+                <iframe
+                  src={getYouTubeEmbedUrl(event.videoUrl)}
+                  title="Video del evento"
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          )}
         </section>
         
         {event.galleryImages && event.galleryImages.length > 0 && (

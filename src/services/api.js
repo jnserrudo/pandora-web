@@ -581,6 +581,75 @@ export const toggleEventStatus = async (id, isActive, token) => {
   }
 };
 
+export const validateEventPayment = async (id, paymentStatus, adminNote, token) => {
+  try {
+    const response = await axios.patch(`${API_URL}/events/${id}/validate-payment`, { paymentStatus, adminNote }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al validar el pago del evento.");
+  }
+};
+
+export const getMyEvents = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/events/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al obtener tus eventos.");
+  }
+};
+
+export const getMyAdvertisements = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/advertisements/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al obtener tus publicidades.");
+  }
+};
+
+// ==================== ADMIN - GESTIÓN DE USUARIOS ====================
+
+export const getAdminUsers = async (token, search = '') => {
+  try {
+    const url = search ? `${API_URL}/users?search=${encodeURIComponent(search)}` : `${API_URL}/users`;
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al obtener listado de usuarios.");
+  }
+};
+
+export const getAdminUserById = async (userId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al obtener datos del usuario.");
+  }
+};
+
+export const getAdminUserContent = async (userId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/users/${userId}/content`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error al obtener contenido del usuario.");
+  }
+};
+
 // 3. Subida de Archivos (General)
 
 export const uploadImage = async (file, token) => {

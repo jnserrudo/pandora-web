@@ -7,7 +7,8 @@ import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import { Camera, Upload, X, MapPin, Star } from 'lucide-react';
+import { Camera, Upload, X, MapPin, Star, Zap, Crown, CheckCircle, FileText, ExternalLink, Video } from 'lucide-react';
+import { uploadImage } from '../../services/api';
 import './CommerceFormPage.css';
 import './EventFormPage.css';
 import './AdminAdvertisementFormPage.css';
@@ -34,6 +35,10 @@ const EventEditPage = () => {
     longitude: null,
     coverImage: '',
     featured: false,
+    eventTier: 1,
+    paymentProof: '',
+    videoUrl: '',
+    externalLink: '',
   });
 
   const [commerces, setCommerces] = useState([]);
@@ -71,6 +76,10 @@ const EventEditPage = () => {
           longitude: eventData.longitude,
           coverImage: eventData.coverImage || '',
           featured: eventData.featured || false,
+          eventTier: eventData.eventTier || 1,
+          paymentProof: eventData.paymentProof || '',
+          videoUrl: eventData.videoUrl || '',
+          externalLink: eventData.externalLink || '',
         });
 
         // Cargar comercios según rol
@@ -133,6 +142,10 @@ const EventEditPage = () => {
         longitude: formData.longitude,
         coverImage: formData.coverImage,
         featured: formData.featured,
+        eventTier: formData.eventTier,
+        paymentProof: formData.paymentProof || null,
+        videoUrl: formData.videoUrl || null,
+        externalLink: formData.externalLink || null,
       };
 
       if (formData.commerceId) payload.commerceId = formData.commerceId;
@@ -482,19 +495,69 @@ const EventEditPage = () => {
               </div>
             </div>
 
-            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.15)', borderRadius: '10px' }}>
-              <input
-                type="checkbox"
-                id="featured-check"
-                name="featured"
-                checked={formData.featured}
-                onChange={handleChange}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#FFD700' }}
-              />
-              <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Star size={16} fill="#FFD700" /> Marcar como Evento Destacado
-              </label>
-            </div>
+            {/* Enlace externo para Plus y Premium */}
+            {formData.eventTier >= 2 && (
+              <div className="form-group">
+                <label><ExternalLink size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />Enlace Externo</label>
+                <input
+                  type="url"
+                  name="externalLink"
+                  value={formData.externalLink}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="https://entradas.com/mi-evento"
+                />
+              </div>
+            )}
+
+            {/* Video URL para Premium */}
+            {formData.eventTier === 3 && (
+              <div className="form-group">
+                <label><Video size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />Video Promocional (YouTube/Vimeo)</label>
+                <input
+                  type="url"
+                  name="videoUrl"
+                  value={formData.videoUrl}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+            )}
+
+            {/* Tier info badge (read-only para no-admin) */}
+            {!isAdmin && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px' }}>
+                {formData.eventTier === 3 && <Crown size={16} style={{ color: '#FFD700' }} />}
+                {formData.eventTier === 2 && <Zap size={16} style={{ color: '#38bdf8' }} />}
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                  Categoría actual: <strong style={{ color: formData.eventTier === 3 ? '#FFD700' : formData.eventTier === 2 ? '#38bdf8' : '#a0a0c0' }}>
+                    {formData.eventTier === 3 ? 'PREMIUM' : formData.eventTier === 2 ? 'PLUS' : 'BÁSICO'}
+                  </strong>
+                </span>
+                {formData.paymentProof && (
+                  <a href={formData.paymentProof} target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle size={13} /> Comprobante cargado
+                  </a>
+                )}
+              </div>
+            )}
+
+            {isAdmin && (
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.15)', borderRadius: '10px' }}>
+                <input
+                  type="checkbox"
+                  id="featured-check"
+                  name="featured"
+                  checked={formData.featured}
+                  onChange={handleChange}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#FFD700' }}
+                />
+                <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Star size={16} fill="#FFD700" /> Marcar como Evento Destacado
+                </label>
+              </div>
+            )}
 
             <div className="form-actions">
               <Link to={isAdmin ? "/admin/events" : "/events"} className="cancel-btn">Cancelar</Link>

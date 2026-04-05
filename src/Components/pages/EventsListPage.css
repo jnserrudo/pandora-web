@@ -143,6 +143,59 @@
   color: var(--color-primary);
 }
 
+/* Badge de tier de evento */
+.event-tier-badge {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.event-tier-badge--premium {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+}
+
+.event-tier-badge--plus {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+}
+
+/* Tarjeta Premium */
+.event-card--premium {
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.06), rgba(138, 43, 226, 0.06)) !important;
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.25);
+}
+
+.event-card--premium:hover {
+  border-color: rgba(255, 215, 0, 0.9);
+  box-shadow: 0 20px 40px rgba(255, 215, 0, 0.35), 0 0 30px rgba(255, 215, 0, 0.2);
+}
+
+/* Tarjeta Plus */
+.event-card--plus {
+  border: 2px solid rgba(56, 189, 248, 0.5);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.05), rgba(14, 165, 233, 0.05)) !important;
+  box-shadow: 0 8px 25px rgba(56, 189, 248, 0.2);
+}
+
+.event-card--plus:hover {
+  border-color: rgba(56, 189, 248, 0.8);
+  box-shadow: 0 20px 40px rgba(56, 189, 248, 0.3);
+}
+
 /* Badge de evento destacado */
 .event-featured-badge {
   position: absolute;

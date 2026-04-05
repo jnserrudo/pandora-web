@@ -7,13 +7,40 @@ import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import { Camera, Upload, X, MapPin, Star } from 'lucide-react';
+import { Camera, Upload, X, MapPin, Star, Zap, Crown, CheckCircle, FileText, ExternalLink, Video } from 'lucide-react';
 import './CommerceFormPage.css';
 import './EventFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import MapPicker from '../ui/MapPicker';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
+
+const EVENT_TIERS = [
+  {
+    level: 1,
+    name: 'Básico',
+    price: 'Gratuito',
+    color: '#a0a0c0',
+    icon: null,
+    features: ['Publicación en calendario', 'Nombre, fecha y lugar', 'Descripción breve', '1 imagen de portada', 'Aprobación en 72hs'],
+  },
+  {
+    level: 2,
+    name: 'Plus',
+    price: 'Consultar precio',
+    color: '#38bdf8',
+    icon: 'zap',
+    features: ['Todo lo de Básico', 'Badge PLUS distintivo', 'Hasta 5 imágenes extra', 'Enlace externo (entradas)', 'Prioridad en listados', 'Sección destacada en home'],
+  },
+  {
+    level: 3,
+    name: 'Premium',
+    price: 'Consultar precio',
+    color: '#FFD700',
+    icon: 'crown',
+    features: ['Todo lo de Plus', 'Badge PREMIUM dorado', 'Video promocional', 'Máxima prioridad siempre', 'Carrusel exclusivo en home', 'Publicidad en redes Pandora'],
+  },
+];
 
 const EventFormPage = () => {
   const navigate = useNavigate();
@@ -36,6 +63,10 @@ const EventFormPage = () => {
     longitude: null,
     coverImage: '',
     featured: false,
+    eventTier: 1,
+    paymentProof: '',
+    videoUrl: '',
+    externalLink: '',
   });
 
   const [myCommerces, setMyCommerces] = useState([]);
@@ -111,6 +142,11 @@ const EventFormPage = () => {
       return;
     }
 
+    if (formData.eventTier > 1 && !formData.paymentProof) {
+      showToast("Para planes Plus y Premium debés adjuntar el comprobante de pago.", 'warning');
+      return;
+    }
+
     setLoading(true);
     try {
       const fullAddress = formData.location ? `${formData.address} (${formData.location})` : formData.address;
@@ -124,7 +160,11 @@ const EventFormPage = () => {
         latitude: formData.latitude,
         longitude: formData.longitude,
         coverImage: formData.coverImage,
-        featured: formData.featured,
+        featured: formData.featured || formData.eventTier === 3,
+        eventTier: formData.eventTier,
+        paymentProof: formData.paymentProof || null,
+        videoUrl: formData.videoUrl || null,
+        externalLink: formData.externalLink || null,
       };
 
       if (formData.commerceId) payload.commerceId = formData.commerceId;
@@ -136,7 +176,8 @@ const EventFormPage = () => {
         showToast('Evento creado y publicado correctamente.', 'success');
         navigate('/admin/events');
       } else {
-        showToast('¡Solicitud de evento enviada! El equipo Pandora la revisará pronto.', 'success');
+        const tierName = EVENT_TIERS.find(t => t.level === formData.eventTier)?.name || 'Básico';
+        showToast(`¡Solicitud de evento ${tierName} enviada! El equipo Pandora la revisará pronto.`, 'success');
         navigate('/events');
       } 
     } catch (err) {
@@ -413,6 +454,61 @@ const EventFormPage = () => {
               <small className="field-hint">Marcá en el mapa si el evento es en un lugar distinto a la sede principal.</small>
             </div>
 
+            {/* Selector de Categoría / Tier */}
+            {!isAdmin && (
+              <div className="form-group">
+                <label>Categoría del Evento</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '0.5rem' }}>
+                  {EVENT_TIERS.map(tier => {
+                    const isSelected = formData.eventTier === tier.level;
+                    const tierIcon = tier.icon === 'zap' ? <Zap size={20} /> : tier.icon === 'crown' ? <Crown size={20} /> : null;
+                    return (
+                      <div
+                        key={tier.level}
+                        onClick={() => setFormData(prev => ({ ...prev, eventTier: tier.level }))}
+                        style={{
+                          border: `2px solid ${isSelected ? tier.color : 'rgba(255,255,255,0.1)'}`,
+                          borderRadius: '14px',
+                          padding: '1rem 0.75rem',
+                          cursor: 'pointer',
+                          background: isSelected ? `${tier.color}15` : 'rgba(255,255,255,0.02)',
+                          transition: 'all 0.25s ease',
+                          boxShadow: isSelected ? `0 0 15px ${tier.color}30` : 'none',
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {isSelected && (
+                          <span style={{ position: 'absolute', top: '8px', right: '8px' }}>
+                            <CheckCircle size={14} style={{ color: tier.color }} />
+                          </span>
+                        )}
+                        <div style={{ color: tier.color, marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {tierIcon}
+                          <strong style={{ fontSize: '0.95rem' }}>{tier.name}</strong>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: isSelected ? tier.color : 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: '0.5rem' }}>
+                          {tier.price}
+                        </div>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                          {tier.features.map((f, i) => (
+                            <li key={i} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', padding: '2px 0', display: 'flex', alignItems: 'flex-start', gap: '5px' }}>
+                              <span style={{ color: tier.color, flexShrink: 0 }}>✓</span> {f}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+                <small className="field-hint">
+                  {formData.eventTier === 1 && 'Publicación estándar, sin costo. Aprobación en 72hs.'}
+                  {formData.eventTier === 2 && 'Requiere pago previo. Adjuntá el comprobante al finalizar el formulario.'}
+                  {formData.eventTier === 3 && 'Máxima visibilidad con video y publicidad en redes. Requiere pago previo.'}
+                </small>
+              </div>
+            )}
+
             <div className="form-group">
               <label>Descripción <span className="required-tag">(Obligatorio)</span></label>
               <textarea 
@@ -464,19 +560,113 @@ const EventFormPage = () => {
               </div>
             </div>
 
-            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.15)', borderRadius: '10px' }}>
-              <input
-                type="checkbox"
-                id="featured-check"
-                name="featured"
-                checked={formData.featured}
-                onChange={handleChange}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#FFD700' }}
-              />
-              <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Star size={16} fill="#FFD700" /> Marcar como Evento Destacado
-              </label>
-            </div>
+            {/* Campos adicionales para Plus y Premium */}
+            {!isAdmin && formData.eventTier >= 2 && (
+              <div className="form-group">
+                <label><ExternalLink size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />Enlace Externo <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>(Entradas, reservas, web)</span></label>
+                <input
+                  type="url"
+                  name="externalLink"
+                  value={formData.externalLink}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="https://entradas.com/mi-evento"
+                />
+              </div>
+            )}
+
+            {!isAdmin && formData.eventTier === 3 && (
+              <div className="form-group">
+                <label><Video size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />Video Promocional <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>(YouTube o Vimeo)</span></label>
+                <input
+                  type="url"
+                  name="videoUrl"
+                  value={formData.videoUrl}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+            )}
+
+            {/* Comprobante de pago para Plus y Premium */}
+            {!isAdmin && formData.eventTier > 1 && (
+              <div className="form-group plan-payment-proof glass-morphism">
+                <div style={{
+                  background: 'rgba(138, 43, 226, 0.08)',
+                  border: '1px solid rgba(138, 43, 226, 0.25)',
+                  borderRadius: '12px',
+                  padding: '1rem 1.25rem',
+                  marginBottom: '1.25rem'
+                }}>
+                  <p style={{ color: '#c084fc', fontWeight: 700, marginBottom: '0.6rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    📤 Datos para la transferencia
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem', fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)' }}>
+                    <span><strong style={{ color: '#fff' }}>Banco:</strong> Banco Macro</span>
+                    <span><strong style={{ color: '#fff' }}>Titular:</strong> Pandora Salta</span>
+                    <span><strong style={{ color: '#fff' }}>CBU:</strong> 0850123456789012345678</span>
+                    <span><strong style={{ color: '#fff' }}>Alias:</strong> PANDORA.SALTA.PAY</span>
+                    <span><strong style={{ color: '#fff' }}>CUIT:</strong> 30-71234567-8</span>
+                  </div>
+                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', marginTop: '0.75rem' }}>
+                    Realizá la transferencia y luego adjuntá el comprobante. El equipo validará tu solicitud dentro de las 48hs hábiles.
+                  </p>
+                </div>
+                <label>Comprobante de Pago <span className="required-tag">(Obligatorio para Planes Plus y Premium)</span></label>
+                <div className="proof-upload-zone">
+                  <input
+                    type="file"
+                    id="event-payment-proof"
+                    accept="image/*,application/pdf"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      try {
+                        const res = await uploadImage(file, token);
+                        setFormData(prev => ({ ...prev, paymentProof: res.url }));
+                        showToast('Comprobante cargado correctamente.', 'success');
+                      } catch {
+                        showToast('Error al subir el comprobante.', 'error');
+                      }
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="event-payment-proof" className="proof-label">
+                    {formData.paymentProof ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4ade80' }}>
+                        <CheckCircle size={16} /> Comprobante Cargado
+                      </span>
+                    ) : (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FileText size={16} /> Subir Comprobante (JPG, PNG, PDF)
+                      </span>
+                    )}
+                  </label>
+                  {formData.paymentProof && (
+                    <div className="proof-preview">
+                      <a href={formData.paymentProof} target="_blank" rel="noreferrer">Ver archivo subido</a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {isAdmin && (
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.15)', borderRadius: '10px' }}>
+                <input
+                  type="checkbox"
+                  id="featured-check"
+                  name="featured"
+                  checked={formData.featured}
+                  onChange={handleChange}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#FFD700' }}
+                />
+                <label htmlFor="featured-check" style={{ cursor: 'pointer', color: '#FFD700', fontWeight: 600, fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Star size={16} fill="#FFD700" /> Marcar como Evento Destacado
+                </label>
+              </div>
+            )}
 
             <div className="form-actions">
               <Link to="/" className="cancel-btn">Cancelar</Link>
@@ -485,7 +675,7 @@ const EventFormPage = () => {
                 className="submit-btn" 
                 disabled={loading || uploading || !isFormValid}
               >
-                {loading ? 'Enviando solicitud...' : 'Enviar Solicitud de Evento'}
+                {loading ? 'Enviando solicitud...' : isAdmin ? 'Crear Evento' : `Enviar Solicitud ${formData.eventTier > 1 ? EVENT_TIERS.find(t=>t.level===formData.eventTier)?.name : ''}`}
               </button>
             </div>
 

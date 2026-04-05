@@ -1,7 +1,7 @@
 // src/Components/ArtisticCalendar/ArtisticCalendar.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Star } from 'lucide-react';
+import { Calendar, Star, Zap, Crown } from 'lucide-react';
 import { getEvents } from '../../services/api';
 import './ArtisticCalendar.css';
 
@@ -60,9 +60,9 @@ const ArtisticCalendar = () => {
     });
   };
 
-  const hasFeaturedEventOnDay = (day) => {
-    return getEventsForDay(day).some(e => e.featured);
-  };
+  const hasFeaturedEventOnDay = (day) => getEventsForDay(day).some(e => e.featured);
+  const hasPremiumEventOnDay = (day) => getEventsForDay(day).some(e => (e.eventTier || 1) === 3);
+  const hasPlusEventOnDay = (day) => getEventsForDay(day).some(e => (e.eventTier || 1) === 2);
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -81,18 +81,23 @@ const ArtisticCalendar = () => {
     const isToday = new Date().getDate() === day && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
 
     const hasFeatured = hasFeaturedEventOnDay(day);
+    const hasPremium = hasPremiumEventOnDay(day);
+    const hasPlus = hasPlusEventOnDay(day);
     calendarDays.push(
       <div 
         key={day} 
-        className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''} ${hasFeatured ? 'has-featured' : ''}`}
+        className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''} ${hasFeatured ? 'has-featured' : ''} ${hasPremium ? 'has-premium' : ''}`}
         onClick={() => handleDateClick(day)}
       >
         <span className="day-number">{day}</span>
-        {hasFeatured && <span className="featured-star" title="Evento destacado"><Star size={12} fill="#FFD700" /></span>}
+        {hasPremium && <span className="tier-star" title="Evento Premium"><Crown size={11} style={{ color: '#FFD700' }} /></span>}
+        {!hasPremium && hasPlus && <span className="tier-star" title="Evento Plus"><Zap size={11} style={{ color: '#38bdf8' }} /></span>}
+        {!hasPremium && !hasPlus && hasFeatured && <span className="featured-star" title="Evento destacado"><Star size={12} fill="#FFD700" /></span>}
         {hasEvents && <div className="event-indicators">
-          {dayEvents.slice(0, 3).map((_, idx) => (
-            <span key={idx} className={`event-dot${dayEvents[idx]?.featured ? ' event-dot--featured' : ''}`}></span>
-          ))}
+          {dayEvents.slice(0, 3).map((ev, idx) => {
+            const t = ev.eventTier || 1;
+            return <span key={idx} className={`event-dot${t === 3 ? ' event-dot--premium' : t === 2 ? ' event-dot--plus' : ev.featured ? ' event-dot--featured' : ''}`}></span>;
+          })}
         </div>}
       </div>
     );
@@ -142,25 +147,32 @@ const ArtisticCalendar = () => {
             {loading ? (
               <div className="details-loading">Buscando eventos...</div>
             ) : selectedDayEvents.length > 0 ? (
-              selectedDayEvents.map(event => (
-                <div 
-                  key={event.id} 
-                  className="mini-event-card"
-                  onClick={() => navigate(`/event/${event.id}`)}
-                >
-                  <div className="mini-event-time">
-                    {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              [...selectedDayEvents].sort((a, b) => (b.eventTier || 1) - (a.eventTier || 1)).map(event => {
+                const tier = event.eventTier || 1;
+                const borderColor = tier === 3 ? '#FFD700' : tier === 2 ? '#38bdf8' : event.featured ? '#FFD700' : 'transparent';
+                return (
+                  <div 
+                    key={event.id} 
+                    className="mini-event-card"
+                    onClick={() => navigate(`/event/${event.id}`)}
+                    style={{ borderLeft: `3px solid ${borderColor}` }}
+                  >
+                    <div className="mini-event-time">
+                      {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="mini-event-info">
+                      <h4>
+                        {tier === 3 && <Crown size={13} style={{ color: '#FFD700', display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />}
+                        {tier === 2 && <Zap size={13} style={{ color: '#38bdf8', display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />}
+                        {tier === 1 && event.featured && <Star size={13} fill="#FFD700" style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />}
+                        {event.name}
+                      </h4>
+                      <p>{event.commerce?.name || event.organizerName || 'Evento Especial'}</p>
+                    </div>
+                    <div className="mini-event-arrow">→</div>
                   </div>
-                  <div className="mini-event-info">
-                    <h4>
-                      {event.featured && <Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} />}
-                      {event.name}
-                    </h4>
-                    <p>{event.commerce?.name || event.organizerName || 'Evento Especial'}</p>
-                  </div>
-                  <div className="mini-event-arrow">→</div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="no-events-placeholder">
                 <div className="placeholder-icon"><Calendar size={48} className="opacity-20" /></div>

@@ -1,0 +1,35 @@
+/* src/Components/pages/MyDashboardPage.css */
+
+.my-dashboard-tab-row {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.my-dashboard-tab-row::-webkit-scrollbar {
+  display: none;
+}
+
+.my-dashboard-item-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  transition: border-color 0.2s ease;
+}
+
+.my-dashboard-item-row:hover {
+  border-color: rgba(138, 43, 226, 0.4);
+}
+
+@media (max-width: 600px) {
+  .my-dashboard-item-row {
+    flex-wrap: wrap;
+  }
+}
