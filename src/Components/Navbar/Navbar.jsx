@@ -12,7 +12,8 @@ import {
   LayoutDashboard,
   Bell,
   Inbox,
-  Ticket
+  Ticket,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -223,9 +224,9 @@ const Navbar = () => {
                       <Store size={20} />
                       <span>Mis Comercios</span>
                     </Link>
-                    <Link to="/events/create" className="management-link" title="Crear Evento">
-                      <PlusCircle size={20} />
-                      <span>Nuevo Evento</span>
+                    <Link to="/my-events" className="management-link" title="Mis Eventos">
+                      <Calendar size={20} />
+                      <span>Mis Eventos</span>
                     </Link>
                   </div>
                 ) : (
@@ -239,7 +240,7 @@ const Navbar = () => {
                 {/* Acceso Admin */}
                 {user?.role === 'ADMIN' && (
                   <Link to="/admin/dashboard" className="admin-access-btn" title="Panel de Administración">
-                    <LayoutDashboard size={20} />
+                    <ShieldCheck size={20} />
                     <span>Admin</span>
                   </Link>
                 )}
@@ -284,7 +285,6 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="auth-buttons">
-                <div className="visitor-badge">MODO VISITANTE</div>
                 <Link to="/login" className="login-button">Ingresar</Link>
                 <Link to="/register" className="register-button">Registrarse</Link>
               </div>
@@ -325,10 +325,10 @@ const Navbar = () => {
               <div className="mobile-divider"></div>
               <Link to="/my-dashboard" onClick={closeMenu}>Mi Panel</Link>
               {(user?.role === 'OWNER' || user?.role === 'ADMIN') && (
-                <div className="mobile-mgmt-row">
-                  <Link to="/my-commerces" onClick={closeMenu}>Locales</Link>
-                  <Link to="/events/create" onClick={closeMenu}>+ Evento</Link>
-                </div>
+                <>
+                  <Link to="/my-commerces" onClick={closeMenu}>Mis Comercios</Link>
+                  <Link to="/my-events" onClick={closeMenu}>Mis Eventos</Link>
+                </>
               )}
               {user?.role === 'ADMIN' && (
                 <Link to="/admin/dashboard" className="mobile-admin-link" onClick={closeMenu}>Panel Admin</Link>

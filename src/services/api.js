@@ -594,7 +594,7 @@ export const validateEventPayment = async (id, paymentStatus, adminNote, token) 
 
 export const getMyEvents = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/events/me`, {
+    const response = await axios.get(`${API_URL}/events/my-events`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;

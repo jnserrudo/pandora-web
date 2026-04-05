@@ -21,6 +21,7 @@ import "./App.css";
 // --- GESTIÓN Y PROTECCIÓN ---
 import ProtectedRoute from "./Components/utils/ProtectedRoute";
 import MyCommercesPage from "./Components/pages/MyCommercesPage";
+import MyEventsPage from "./Components/pages/MyEventsPage";
 import CommerceFormPage from "./Components/pages/CommerceFormPage";
 import EventFormPage from "./Components/pages/EventFormPage";
 import EventEditPage from "./Components/pages/EventEditPage";
@@ -87,12 +88,20 @@ function App() {
             } 
           />
 
-          {/* 3. PROPIETARIOS (Gestión de Comercios) */}
+          {/* 3. PROPIETARIOS (Gestión de Comercios y Eventos) */}
           <Route 
             path="/my-commerces" 
             element={
               <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
                 <MyCommercesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-events" 
+            element={
+              <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+                <MyEventsPage />
               </ProtectedRoute>
             } 
           />
