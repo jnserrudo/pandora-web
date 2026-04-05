@@ -4,12 +4,9 @@ import React, { useState, useEffect } from "react";
 import HeroSection from "../Hero/HeroSection";
 import CallToAction from "../CallToAction/CallToAction";
 import FeaturedCommerces from "../FeaturedCommerces/FeaturedCommerces";
-import EnhancedSearch from "../Search/EnhancedSearch";
-import CategoryCircles from "../CategoryCircles/CategoryCircles";
 import AdvertisementBanner from "../Advertisement/AdvertisementBanner";
 import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar";
 import TrendingMagazine from "../Magazine/TrendingMagazine";
-import HomeAnchors from "./HomeAnchors";
 import Ambassadors from "../Ambassadors/Ambassadors";
 import { getAdvertisements } from "../../services/AdvertisementService";
 import { getArticles } from "../../services/api";
@@ -39,20 +36,9 @@ const MainContent = () => {
   }, []);
 
   return (
-    <main className="app-container hub-layout">
+    <main>
       <div className="app-layout">
         
-        {/* ===== 1. CATEGORÍAS (Burbujas en carrusel) ===== */}
-        <div className="top-discovery-section">
-          <CategoryCircles />
-        </div>
-
-        {/* ===== 2. BUSCADOR ===== */}
-        <EnhancedSearch />
-
-        {/* ===== 3. ANCLAS (Noticias/Calendario) + RRSS — visible sin scroll ===== */}
-        <HomeAnchors />
-
         {/* ===== 5. MAGAZINE (Lo Más Visto) ===== */}
         <div id="magazine-section">
           <TrendingMagazine articles={trendingArticles} />
