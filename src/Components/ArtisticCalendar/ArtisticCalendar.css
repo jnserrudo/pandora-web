@@ -1,9 +1,9 @@
 /* src/Components/ArtisticCalendar/ArtisticCalendar.css */
 
 .artistic-calendar-section {
-  padding: 4rem 1rem;
+  padding: var(--space-section) var(--space-sm);
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--layout-max-width);
   margin: 0 auto;
   position: relative;
 }

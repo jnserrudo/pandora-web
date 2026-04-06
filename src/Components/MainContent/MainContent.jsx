@@ -45,31 +45,31 @@ const MainContent = () => {
         </div>
 
         {/* ===== 6. COMERCIOS ORO (Carrusel Mediano) ===== */}
-        <div id="featured-gold" style={{ marginTop: '2rem' }}>
+        <div id="featured-gold">
           <FeaturedCommerces 
-            title="Comercios Destacados" 
+            title="Comercios destacados" 
             variant="medium" 
             planLevel={3}
           />
         </div>
 
         {/* ===== 7. CALENDARIO DE EVENTOS ===== */}
-        <div id="calendar-section" style={{ marginTop: '3rem' }}>
-          <div className="section-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div id="calendar-section">
+          <div className="section-header" style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
              <h2 className="section-title-premium">
-               Calendario de <span className="text-accent">Eventos</span>
+               Calendario de <span className="text-accent">eventos</span>
              </h2>
           </div>
           <ArtisticCalendar />
         </div>
 
         {/* ===== EMBAJADORES ===== */}
-        <div style={{ marginTop: '3rem' }}>
+        <div>
           <Ambassadors />
         </div>
 
         {/* ===== 8. PUBLICIDADES (Carruseles Nativos) ===== */}
-        <div id="publicidades-section" style={{ marginTop: '3rem' }}>
+        <div id="publicidades-section">
           {commerceAds.length > 0 && (
             <div className="ads-carousel-wrapper">
                <div className="ads-horizontal-scroll">
@@ -83,8 +83,8 @@ const MainContent = () => {
           )}
         </div>
 
-        {/* Guía completa (Opcional, se mantiene por el usuario "no borrar nada") */}
-        <div id="all-commerces-section" style={{ marginTop: '4rem', paddingBottom: '2rem' }}>
+        {/* Guía completa */}
+        <div id="all-commerces-section">
           <FeaturedCommerces 
             title="Explorá nuestra guía completa" 
             variant="medium" 
@@ -92,12 +92,12 @@ const MainContent = () => {
         </div>
 
         {/* Hero Section (Al final como banner) */}
-        <div style={{ marginTop: '2rem', display: 'none' }}>
+        <div style={{ display: 'none' }}>
           <HeroSection />
         </div>
 
         {/* Footer / CTA Final */}
-        <div style={{ paddingBottom: '4rem' }}>
+        <div>
           <CallToAction />
         </div>
       </div>
@@ -106,3 +106,4 @@ const MainContent = () => {
 };
 
 export default MainContent;
+

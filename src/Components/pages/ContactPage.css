@@ -7,23 +7,23 @@
 }
 
 .contact-page-container {
-  max-width: 1400px;
+  max-width: var(--layout-max-width);
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: var(--layout-nav-offset) var(--layout-padding-x) var(--space-2xl);
   flex: 1;
 }
 
 /* Header */
 .contact-page-header {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: var(--space-2xl);
 }
 
 .contact-title {
-  font-size: 3rem;
+  font-size: var(--text-h1);
   font-weight: 700;
   color: var(--color-text, #f0e8ff);
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-sm);
   background: linear-gradient(135deg, var(--color-primary, #8a2be2), var(--color-accent, #ff00c8));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -55,7 +55,7 @@
   padding: 1.75rem;
   background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(199, 56, 221, 0.05));
   border: 1px solid rgba(138, 43, 226, 0.3);
-  border-radius: 12px;
+  border-radius: var(--radius-card-sm);
   transition: all 0.3s ease;
 }
 
@@ -88,9 +88,9 @@
   background: rgba(13, 2, 24, 0.6);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(138, 43, 226, 0.2);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   padding: 2.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-card);
 }
 
 .contact-form {
@@ -155,14 +155,14 @@
   padding: 1rem 2.5rem;
   background: linear-gradient(135deg, var(--color-primary, #8a2be2), var(--color-secondary, #c738dd));
   border: none;
-  border-radius: 30px;
+  border-radius: var(--radius-pill);
   color: #ffffff;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+  margin-top: var(--space-sm);
+  box-shadow: var(--shadow-glow);
 }
 
 .form-submit-btn:hover:not(:disabled) {

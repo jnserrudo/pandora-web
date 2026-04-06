@@ -12,7 +12,7 @@
 /* Hero Section */
 .pricing-hero {
   position: relative;
-  padding: 8rem 2rem 4rem;
+  padding: var(--layout-nav-offset) var(--layout-padding-x) var(--space-2xl);
   text-align: center;
   overflow: hidden;
 }
@@ -50,11 +50,11 @@
 }
 
 .pricing-hero-text h1 {
-  font-size: clamp(3rem, 7vw, 5rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 900;
   letter-spacing: -2px;
   line-height: 1;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-md);
   color: #fff;
 }
 
@@ -73,16 +73,16 @@
 
 /* Pricing Grid */
 .pricing-grid-container {
-  max-width: 1400px;
+  max-width: var(--layout-max-width);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--layout-padding-x);
 }
 
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 4rem;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
 }
 
 .pricing-card {
@@ -91,8 +91,8 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 32px;
-  padding: 3rem 2.5rem;
+  border-radius: var(--radius-card-lg);
+  padding: var(--space-xl) 2.5rem;
   display: flex;
   flex-direction: column;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);

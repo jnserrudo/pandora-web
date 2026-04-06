@@ -85,12 +85,11 @@
   background: rgba(13, 2, 24, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(138, 43, 226, 0.3);
-  border-radius: 16px;
+  border-radius: var(--radius-dropdown);
   max-height: 500px;
   overflow-y: auto;
   z-index: 1000;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
-              0 0 0 1px rgba(138, 43, 226, 0.2);
+  box-shadow: var(--shadow-card-hover);
   animation: slideDown 0.3s ease-out;
 }
 

@@ -20,6 +20,7 @@ import "./App.css";
 
 // --- GESTIÓN Y PROTECCIÓN ---
 import ProtectedRoute from "./Components/utils/ProtectedRoute";
+import ScrollToTop from "./Components/utils/ScrollToTop";
 import MyCommercesPage from "./Components/pages/MyCommercesPage";
 import MyEventsPage from "./Components/pages/MyEventsPage";
 import CommerceFormPage from "./Components/pages/CommerceFormPage";
@@ -43,6 +44,7 @@ function App() {
   return (
     <ToastProvider>
       <div className="app-wrapper">
+      <ScrollToTop />
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />

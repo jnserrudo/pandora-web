@@ -31,6 +31,43 @@
   --input: rgba(255, 255, 255, 0.05);
   --ring: var(--color-primary);
   --radius: 0.625rem;
+
+  /* ========== DESIGN SYSTEM TOKENS ========== */
+
+  /* Typography Scale */
+  --text-h1: 3rem;
+  --text-h2: 2rem;
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-small: 0.8rem;
+  --text-caption: 0.7rem;
+
+  /* Spacing Scale (8px base) */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-section: 4rem;
+
+  /* Layout */
+  --layout-max-width: 1400px;
+  --layout-padding-x: 2rem;
+  --layout-nav-offset: 140px;
+
+  /* Border Radius */
+  --radius-card: 16px;
+  --radius-card-sm: 12px;
+  --radius-card-lg: 24px;
+  --radius-pill: 50px;
+  --radius-input: 10px;
+  --radius-dropdown: 16px;
+
+  /* Box Shadows */
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 16px rgba(138, 43, 226, 0.2);
+  --shadow-glow: 0 0 20px rgba(138, 43, 226, 0.4);
 }
 
 .dark {
@@ -40,7 +77,8 @@
 }
 
 html, body, #root {
-  height: 100%;
+  min-height: 100vh;
+  width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
 }
