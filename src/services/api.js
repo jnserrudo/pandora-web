@@ -414,6 +414,22 @@ export const registerUser = async (name, username, email, password, dni = null) 
   }
 };
 
+/**
+ * Reenvía el código OTP a un usuario no verificado
+ * Útil cuando falla el envío inicial del email
+ */
+export const resendOTP = async (email) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/resend-otp`, { email });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || 
+      "Error al reenviar el código de verificación."
+    );
+  }
+};
+
 export const updateUserProfile = async (data, token) => {
   try {
     const response = await axios.patch(`${API_URL}/users/me`, data, {

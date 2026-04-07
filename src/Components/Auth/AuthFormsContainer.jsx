@@ -40,6 +40,9 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(true);
+  const [canResendOTP, setCanResendOTP] = useState(false);
+  const [debugOTP, setDebugOTP] = useState(null); // Nuevo: OTP de fallback cuando el email falla
 
   const API_URL = import.meta.env.VITE_API_URL_DEV || import.meta.env.VITE_API_URL_PROD || 'http://localhost:3000/api';
 
@@ -86,6 +89,23 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           navigate('/');
       } else {
           setRegisteredEmail(email);
+          // Manejar el estado del envío de email desde la respuesta del backend
+          const wasEmailSent = data.emailSent !== false;
+          setEmailSent(wasEmailSent);
+          setCanResendOTP(data.canResendOTP === true || !wasEmailSent);
+          
+          // Guardar OTP de debug si el email falló (fallback de verificación)
+          if (!wasEmailSent && data.debugOTP) {
+              setDebugOTP(data.debugOTP);
+              console.log('🔑 OTP de fallback disponible (email falló):', data.debugOTP);
+          } else {
+              setDebugOTP(null);
+          }
+          
+          // Mostrar mensaje diferente según si el email se envió o no
+          if (!wasEmailSent) {
+              showToast('Registro exitoso, pero hubo un problema enviando el email. Usá el código mostrado.', 'warning');
+          }
           setRequireOTP(true);
       }
     } catch (err) {
@@ -126,7 +146,13 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   if (requireOTP) {
       return (
           <div className="auth-container" style={{ minHeight: '100vh', display: 'flex' }}>
-             <OTPVerification email={registeredEmail} onVerify={handleVerifyOTP} />
+             <OTPVerification 
+               email={registeredEmail} 
+               onVerify={handleVerifyOTP} 
+               initialEmailSent={emailSent}
+               canResend={canResendOTP}
+               debugOTP={debugOTP}
+             />
           </div>
       );
   }
