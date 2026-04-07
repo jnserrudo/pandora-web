@@ -158,8 +158,8 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   }
 
   const isSubmitDisabled = loading || (isLogin 
-    ? (!identifier.trim() || !password) 
-    : (!name.trim() || !username.trim() || !email.trim() || !password || !dni.trim()));
+    ? (!identifier.trim() || !password || (requireCaptcha && !captchaToken)) 
+    : (!name.trim() || !username.trim() || !email.trim() || !password || !dni.trim() || !captchaToken));
 
   return (
     <div className="auth-container">
