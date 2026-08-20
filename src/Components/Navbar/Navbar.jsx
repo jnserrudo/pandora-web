@@ -22,10 +22,13 @@ import {
   markAllNotificationsAsRead 
 } from '../../services/NotificationService';
 import { getPublicStats } from '../../services/api'; 
+import { useToast } from '../../context/ToastContext'; 
+import { formatRoleLabel } from '../../utils/enumLabels.js';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout, loading, token } = useAuth(); // Added token
+  const { isAuthenticated, user, logout, loading, token } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -108,8 +111,9 @@ const Navbar = () => {
     try {
       await markAllNotificationsAsRead(token);
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      showToast("Notificaciones marcadas como leídas.", 'success');
     } catch (err) {
-      console.error("Error marking all as read:", err);
+      showToast("No se pudieron marcar las notificaciones.", 'error');
     }
   };
 
@@ -259,7 +263,7 @@ const Navbar = () => {
                   
                   <div className="profile-dropdown-content">
                     <div className="dropdown-user-header">
-                      <span className="user-role-badge">{user?.role}</span>
+                      <span className="user-role-badge">{formatRoleLabel(user?.role)}</span>
                       <span className="user-email">{user?.email}</span>
                     </div>
                     <div className="dropdown-divider"></div>

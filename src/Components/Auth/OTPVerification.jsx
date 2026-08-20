@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Mail, AlertCircle, CheckCircle } from 'lucide-react';
 import { resendOTP } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 import '../pages/AuthForm.css';
 
-const OTPVerification = ({ email, onVerify, initialEmailSent = true, canResend = false, debugOTP = null }) => {
+const OTPVerification = ({ email, onVerify, initialEmailSent = true, canResend = false }) => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -12,6 +13,7 @@ const OTPVerification = ({ email, onVerify, initialEmailSent = true, canResend =
   const [resendMessage, setResendMessage] = useState('');
   const [emailSent, setEmailSent] = useState(initialEmailSent);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleChange = (element, index) => {
     if (isNaN(Number(element.value))) return;
@@ -41,13 +43,12 @@ const OTPVerification = ({ email, onVerify, initialEmailSent = true, canResend =
       setResendStatus('success');
       setResendMessage(result.message || 'Código reenviado exitosamente. Revisá tu email.');
       setEmailSent(true);
+      showToast("Código reenviado. Revisá tu email.", 'success');
     } catch (error) {
       setResendStatus('error');
-      setResendMessage(
-        error.response?.data?.message || 
-        error.message || 
-        'No pudimos reenviar el código. Intentá nuevamente en unos momentos.'
-      );
+      const msg = error.response?.data?.message || error.message || 'No pudimos reenviar el código.';
+      setResendMessage(msg);
+      showToast(msg, 'error');
     } finally {
       setIsResending(false);
     }
@@ -86,55 +87,6 @@ const OTPVerification = ({ email, onVerify, initialEmailSent = true, canResend =
           </div>
         </div>
       )}
-
-      {/* Fallback deshabilitado para testing normal - se muestra solo el botón de reenvío */}
-      {/* 
-      {!emailSent && debugOTP && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%)',
-          border: '2px solid var(--color-primary)',
-          borderRadius: '16px',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          textAlign: 'center'
-        }}>
-          <p style={{ 
-            color: 'rgba(255, 255, 255, 0.8)', 
-            fontSize: '0.9rem', 
-            marginBottom: '1rem',
-            fontWeight: 500
-          }}>
-            🔑 Tu código de verificación (fallback):
-          </p>
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.5)',
-            borderRadius: '12px',
-            padding: '1rem 2rem',
-            display: 'inline-block',
-            border: '1px solid rgba(138, 43, 226, 0.5)'
-          }}>
-            <span style={{
-              fontSize: '2.5rem',
-              fontWeight: 'bold',
-              letterSpacing: '0.5rem',
-              color: '#fff',
-              fontFamily: 'monospace',
-              textShadow: '0 0 20px rgba(138, 43, 226, 0.8)'
-            }}>
-              {debugOTP}
-            </span>
-          </div>
-          <p style={{ 
-            color: 'rgba(255, 255, 255, 0.6)', 
-            fontSize: '0.8rem', 
-            marginTop: '1rem',
-            fontStyle: 'italic'
-          }}>
-            Ingresá este código en los casilleros de abajo
-          </p>
-        </div>
-      )}
-      */}
 
       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '2rem' }}>
         {otp.map((digit, index) => (

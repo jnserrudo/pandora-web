@@ -1,26 +1,51 @@
 // src/Components/pages/AdminCommercesPage.jsx
 import React, { useState, useEffect } from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
-import { 
-  CheckCircle, 
-  XCircle, 
-  ExternalLink, 
-  Search, 
+import {
+  CheckCircle,
+  XCircle,
+  ExternalLink,
+  Search,
   Filter,
   ChevronLeft,
-  ChevronRight,
   Store,
   Clock,
   ShieldCheck,
-  Building
+  Building,
+  Eye,
+  MapPin,
+  Phone,
+  Globe,
+  Mail,
+  User,
 } from 'lucide-react';
-import { getCommerces, updateCommerce, validateCommerce } from '../../services/api';
+import { getAllCommerces, validateCommerce, getAbsoluteImageUrl } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { formatPlanLevelLabel, formatStatusLabel } from '../../utils/enumLabels.js';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
 import './AdminArticlesPage.css';
+import './AdminCommercesPage.css';
+
+function galleryList(commerce) {
+  const raw = commerce?.galleryImages;
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.filter(Boolean).slice(0, 4);
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.filter(Boolean).slice(0, 4) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
 
 const AdminCommercesPage = () => {
   const { token, user: adminUser } = useAuth();
@@ -28,22 +53,24 @@ const AdminCommercesPage = () => {
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Estado para el modal de validación
+  const [processing, setProcessing] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [selectedCommerce, setSelectedCommerce] = useState(null);
   const [validationReason, setValidationReason] = useState('');
-  const [validationAction, setValidationAction] = useState(null); // 'APPROVE' | 'REJECT'
+  const [modalMode, setModalMode] = useState('REVIEW'); // REVIEW | DEACTIVATE
+  const [searchTerm, setSearchTerm] = useState('');
+  const [pendingOnly, setPendingOnly] = useState(false);
 
   const fetchCommerces = async () => {
     try {
       setLoading(true);
-      const data = await getCommerces(null);
-      setCommerces(data);
+      const data = await getAllCommerces(token);
+      setCommerces(data || []);
     } catch (err) {
-      console.error("Error fetching all commerces:", err);
-      showToast("Error cargando el listado de comercios.", 'error');
-      setError("Error cargando el listado de comercios.");
+      console.error('Error fetching all commerces:', err);
+      showToast('Error cargando el listado de comercios.', 'error');
+      setError('Error cargando el listado de comercios.');
     } finally {
       setLoading(false);
     }
@@ -53,43 +80,91 @@ const AdminCommercesPage = () => {
     fetchCommerces();
   }, [token]);
 
-  const openValidationModal = (commerce, action) => {
+  const openReviewModal = (commerce) => {
     setSelectedCommerce(commerce);
-    setValidationAction(action);
+    setModalMode('REVIEW');
     setValidationReason('');
     setShowModal(true);
   };
 
-  const handleProcessValidation = async () => {
-    if (!validationReason && validationAction === 'REJECT') {
-      showToast("Por favor, ingresa el motivo del rechazo.", 'warning');
+  const openDeactivateModal = (commerce) => {
+    setSelectedCommerce(commerce);
+    setModalMode('DEACTIVATE');
+    setValidationReason('');
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    if (processing) return;
+    setShowModal(false);
+    setSelectedCommerce(null);
+    setValidationReason('');
+  };
+
+  const handleProcessValidation = async (action) => {
+    if (action === 'REJECT' && !validationReason.trim()) {
+      showToast('Ingresá el motivo del rechazo.', 'warning');
       return;
     }
 
     try {
-      const isApproved = validationAction === 'APPROVE';
-      // Ahora usamos la función específica de validación
-      await validateCommerce(selectedCommerce.id, { 
-        status: isApproved ? 'ACTIVE' : 'REJECTED',
-        reason: validationReason,
-        adminId: adminUser?.id
-      }, token);
+      setProcessing(true);
+      const isApproved = action === 'APPROVE';
+      await validateCommerce(
+        selectedCommerce.id,
+        {
+          status: isApproved ? 'ACTIVE' : 'REJECTED',
+          reason: validationReason,
+          adminId: adminUser?.id,
+        },
+        token
+      );
 
-        setCommerces(prev => prev.map(c => 
-        c.id === selectedCommerce.id ? { 
-          ...c, 
-          status: isApproved ? 'ACTIVE' : 'REJECTED'
-        } : c
-      ));
-      
+      setCommerces((prev) =>
+        prev.map((c) =>
+          c.id === selectedCommerce.id
+            ? {
+                ...c,
+                status: isApproved ? 'ACTIVE' : 'REJECTED',
+                isActive: isApproved ? true : false,
+              }
+            : c
+        )
+      );
+
       setShowModal(false);
-      showToast(isApproved ? "Comercio aprobado exitosamente." : "Comercio rechazado correctamente.", isApproved ? 'success' : 'info');
+      showToast(
+        isApproved ? 'Comercio validado correctamente.' : 'Comercio rechazado correctamente.',
+        isApproved ? 'success' : 'info'
+      );
     } catch (err) {
       const msg = err.message || '';
       const isNetworkError = msg === 'Failed to fetch' || msg.includes('NetworkError');
       showToast(isNetworkError ? 'Error de conexión con el servidor.' : msg, 'error');
+    } finally {
+      setProcessing(false);
     }
   };
+
+  const statusBadgeClass = (status) => {
+    if (status === 'ACTIVE') return 'active';
+    if (status === 'REJECTED') return 'danger';
+    if (status === 'INACTIVE') return 'inactive';
+    return 'warning';
+  };
+
+  const visibleCommerces = commerces.filter((c) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term || c.name?.toLowerCase().includes(term);
+    const matchesPending = !pendingOnly || c.status === 'PENDING';
+    return matchesSearch && matchesPending;
+  });
+
+  const pagination = useAdminPagination(visibleCommerces, 10);
+  const thumbs = galleryList(selectedCommerce);
+  const cover = selectedCommerce?.coverImage
+    ? getAbsoluteImageUrl(selectedCommerce.coverImage)
+    : null;
 
   return (
     <div className="admin-wrapper hub-theme">
@@ -105,7 +180,7 @@ const AdminCommercesPage = () => {
           </div>
           <div className="stat-pill">
             <Clock size={18} />
-            <span>{commerces.filter(c => c.status === 'PENDING').length} Pendientes</span>
+            <span>{commerces.filter((c) => c.status === 'PENDING').length} Pendientes</span>
           </div>
         </header>
 
@@ -117,214 +192,297 @@ const AdminCommercesPage = () => {
           <div className="admin-table-wrapper-premium">
             <div className="table-filters-premium">
               <div className="search-bar-premium">
-                 <Search size={18} />
-                 <input type="text" placeholder="Buscar comercio por nombre o CUIT..." />
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Buscar comercio por nombre..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <button className="btn-filter-premium">
+              <button
+                className="btn-filter-premium"
+                type="button"
+                onClick={() => setPendingOnly((v) => !v)}
+              >
                 <Filter size={18} />
-                <span>Solo Pendientes</span>
+                <span>{pendingOnly ? 'Ver todos' : 'Solo pendientes'}</span>
               </button>
             </div>
 
             <table className="admin-table-premium">
               <thead>
                 <tr>
-                  <th>COMERCIO Y NIVEL</th>
-                  <th className="hide-mobile">CATEGORÍA</th>
-                  <th className="hide-mobile">ESTADO</th>
-                  <th className="hide-mobile">PÁGINA PANDORA</th>
-                  <th className="text-right">ACCIONES</th>
+                  <th className="col-main">COMERCIO Y NIVEL</th>
+                  <th className="hide-tablet col-meta">CATEGORÍA</th>
+                  <th className="hide-mobile col-status">ESTADO</th>
+                  <th className="hide-tablet col-meta">PÁGINA PANDORA</th>
+                  <th className="col-actions text-right">ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
-                {commerces.map((commerce) => (
-                  <tr key={commerce.id}>
-                    <td>
-                      <div className="row-main-info">
-                        <span className="row-title">{commerce.name}</span>
-                        <div className="row-subtitle-icon">
-                          <Building size={12} />
-                          <span>Nivel de Plan: {commerce.planLevel || 1}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="hide-mobile">
-                      <span className="row-meta">{commerce.category || 'General'}</span>
-                    </td>
-                    <td className="hide-mobile">
-                      <span className={`badge-premium ${commerce.status === 'ACTIVE' ? 'active' : (commerce.status === 'REJECTED' ? 'danger' : 'warning')}`}>
-                        {commerce.status === 'ACTIVE' ? 'Validado' : (commerce.status === 'REJECTED' ? 'Rechazado' : 'Pendiente')}
-                      </span>
-                    </td>
-                    <td className="hide-mobile">
-                       {commerce.isVerified ? (
-                         <span className="badge-premium active" style={{ color: '#FFD700', borderColor: '#FFD700' }}>
-                           <ShieldCheck size={12} style={{ marginRight: '5px' }} />
-                           Socio Pandora
-                         </span>
-                       ) : '-'}
-                    </td>
-                    <td className="text-right">
-                      <div className="action-icons-group">
-                        <Link to={`/admin/commerces/${commerce.id}/detail`} className="btn-action-premium view" title="Ver Feedback, Métricas y Detalles">
-                          <ExternalLink size={18} />
-                        </Link>
-                        
-                        {commerce.status === 'PENDING' && (
-                          <>
-                            <button 
-                              onClick={() => openValidationModal(commerce, 'APPROVE')} 
-                              className="btn-action-premium edit"
-                              title="Aprobar"
-                            >
-                              <CheckCircle size={18} />
-                            </button>
-                            <button 
-                              onClick={() => openValidationModal(commerce, 'REJECT')} 
-                              className="btn-action-premium delete"
-                              title="Rechazar"
-                            >
-                              <XCircle size={18} />
-                            </button>
-                          </>
-                        )}
-                        
-                        {commerce.status === 'ACTIVE' && (
-                          <button 
-                            onClick={() => openValidationModal(commerce, 'REJECT')} 
-                            className="btn-action-premium delete"
-                            title="Invalidar / Dar de baja"
-                          >
-                            <XCircle size={18} />
-                          </button>
-                        )}
-                      </div>
+                {visibleCommerces.length === 0 ? (
+                  <tr>
+                    <td colSpan={5}>
+                      No hay comercios con ese filtro. Cambiá la búsqueda o desactivá “solo pendientes”.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  pagination.pageItems.map((commerce) => (
+                    <tr key={commerce.id}>
+                      <td className="col-main">
+                        <div className="row-main-info">
+                          <span className="row-title">{commerce.name}</span>
+                          <div className="row-subtitle-icon">
+                            <Building size={12} />
+                            <span>Plan {formatPlanLevelLabel(commerce.planLevel)}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="hide-tablet col-meta">
+                        <span className="row-meta">{getCategoryDisplayName(commerce.category)}</span>
+                      </td>
+                      <td className="hide-mobile col-status">
+                        <span className={`badge-premium ${statusBadgeClass(commerce.status)}`}>
+                          {commerce.status === 'ACTIVE'
+                            ? 'Validado'
+                            : formatStatusLabel(commerce.status)}
+                        </span>
+                      </td>
+                      <td className="hide-tablet col-meta">
+                        {commerce.isVerified ? (
+                          <span
+                            className="badge-premium active"
+                            style={{ color: '#FFD700', borderColor: '#FFD700' }}
+                          >
+                            <ShieldCheck size={12} style={{ marginRight: '5px' }} />
+                            Socio Pandora
+                          </span>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td className="col-actions text-right">
+                        <AdminRowActionsMenu
+                          label={`Acciones de ${commerce.name}`}
+                          items={[
+                            {
+                              key: 'detail',
+                              label: 'Ver detalle completo',
+                              icon: ExternalLink,
+                              to: `/admin/commerces/${commerce.id}/detail`,
+                              tone: 'info',
+                            },
+                            commerce.status === 'PENDING'
+                              ? {
+                                  key: 'review',
+                                  label: 'Revisar y decidir',
+                                  icon: Eye,
+                                  onClick: () => openReviewModal(commerce),
+                                }
+                              : null,
+                            commerce.status === 'ACTIVE'
+                              ? {
+                                  key: 'deactivate',
+                                  label: 'Dar de baja',
+                                  icon: XCircle,
+                                  tone: 'danger',
+                                  onClick: () => openDeactivateModal(commerce),
+                                }
+                              : null,
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
 
-            <div className="table-footer-premium">
-              <p>Total de {commerces.length} comercios en el ecosistema</p>
-              <div className="pagination-group-premium">
-                 <button disabled className="btn-page"><ChevronLeft size={20} /></button>
-                 <button disabled className="btn-page active">1</button>
-                 <button disabled className="btn-page"><ChevronRight size={20} /></button>
-              </div>
-            </div>
+            <AdminTablePagination {...pagination} onPageSizeChange={pagination.setPageSize} />
           </div>
         )}
       </div>
 
-      {/* MODAL DE VALIDACIÓN */}
-      {showModal && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-content">
-            <h2>{validationAction === 'APPROVE' ? 'Aprobar Comercio' : 'Rechazar Solicitud'}</h2>
-            <p><strong>Comercio:</strong> {selectedCommerce?.name}</p>
-            
-            <div className="modal-form-group">
-              <label>Motivo o Nota del Administrador:</label>
-              <textarea 
-                value={validationReason}
-                onChange={(e) => setValidationReason(e.target.value)}
-                placeholder={validationAction === 'REJECT' ? "Escribe el motivo del rechazo para el usuario..." : "Nota interna opcional..."}
-                required={validationAction === 'REJECT'}
-              />
+      {showModal && selectedCommerce && (
+        <div className="commerce-review-overlay" onClick={closeModal} role="presentation">
+          <div
+            className="commerce-review-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="commerce-review-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="commerce-review-header">
+              <div>
+                <p className="commerce-review-kicker">
+                  {modalMode === 'DEACTIVATE' ? 'Dar de baja' : 'Revisión de solicitud'}
+                </p>
+                <h2 id="commerce-review-title">{selectedCommerce.name}</h2>
+              </div>
+              <span className={`badge-premium ${statusBadgeClass(selectedCommerce.status)}`}>
+                {formatStatusLabel(selectedCommerce.status)}
+              </span>
             </div>
 
-            <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
-              <button 
-                className={`btn-primary ${validationAction === 'REJECT' ? 'btn-danger' : ''}`}
-                onClick={handleProcessValidation}
+            <div className="commerce-review-scroll">
+              {(cover || thumbs.length > 0) && (
+                <div className="commerce-review-media">
+                  {cover && (
+                    <img
+                      className="commerce-review-cover"
+                      src={cover}
+                      alt=""
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  {thumbs.length > 0 && (
+                    <div className="commerce-review-thumbs">
+                      {thumbs.map((src, i) => (
+                        <img
+                          key={`${src}-${i}`}
+                          src={getAbsoluteImageUrl(src)}
+                          alt=""
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="commerce-review-grid">
+                <div className="commerce-review-block">
+                  <h3>Ficha</h3>
+                  <p>
+                    <Store size={14} /> {getCategoryDisplayName(selectedCommerce.category)}
+                  </p>
+                  <p>
+                    <Building size={14} /> Plan {formatPlanLevelLabel(selectedCommerce.planLevel)}
+                  </p>
+                  {selectedCommerce.address && (
+                    <p>
+                      <MapPin size={14} /> {selectedCommerce.address}
+                    </p>
+                  )}
+                </div>
+
+                <div className="commerce-review-block">
+                  <h3>Contacto</h3>
+                  {(selectedCommerce.phone || selectedCommerce.whatsapp) && (
+                    <p>
+                      <Phone size={14} /> {selectedCommerce.phone || selectedCommerce.whatsapp}
+                    </p>
+                  )}
+                  {selectedCommerce.website && (
+                    <p>
+                      <Globe size={14} /> {selectedCommerce.website}
+                    </p>
+                  )}
+                  {selectedCommerce.instagram && <p>IG: {selectedCommerce.instagram}</p>}
+                  {selectedCommerce.facebook && <p>FB: {selectedCommerce.facebook}</p>}
+                  {!selectedCommerce.phone &&
+                    !selectedCommerce.whatsapp &&
+                    !selectedCommerce.website &&
+                    !selectedCommerce.instagram &&
+                    !selectedCommerce.facebook && <p className="muted">Sin datos de contacto</p>}
+                </div>
+
+                <div className="commerce-review-block">
+                  <h3>Dueño</h3>
+                  {selectedCommerce.owner ? (
+                    <>
+                      <p>
+                        <User size={14} /> {selectedCommerce.owner.name || 'Sin nombre'}
+                      </p>
+                      <p>
+                        <Mail size={14} /> {selectedCommerce.owner.email || 'Sin email'}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="muted">Sin datos del dueño en este listado</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="commerce-review-desc">
+                <h3>Descripción</h3>
+                <p>
+                  {selectedCommerce.shortDescription ||
+                    selectedCommerce.description ||
+                    'Sin descripción cargada.'}
+                </p>
+              </div>
+
+              <div className="modal-form-group">
+                <label>
+                  {modalMode === 'DEACTIVATE' || modalMode === 'REVIEW'
+                    ? 'Motivo o nota del administrador'
+                    : 'Nota'}
+                </label>
+                <textarea
+                  value={validationReason}
+                  onChange={(e) => setValidationReason(e.target.value)}
+                  placeholder={
+                    modalMode === 'DEACTIVATE'
+                      ? 'Motivo de la baja (recomendado)...'
+                      : 'Obligatorio al rechazar; opcional al validar...'
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="commerce-review-footer">
+              <Link
+                to={`/admin/commerces/${selectedCommerce.id}/detail`}
+                className="btn-secondary commerce-detail-link"
               >
-                {validationAction === 'APPROVE' ? 'Aceptar y Validar' : 'Confirmar Rechazo'}
-              </button>
+                Ver detalle completo
+              </Link>
+              <div className="commerce-review-actions">
+                <button type="button" className="btn-secondary" onClick={closeModal} disabled={processing}>
+                  Cancelar
+                </button>
+                {modalMode === 'DEACTIVATE' ? (
+                  <button
+                    type="button"
+                    className="btn-primary btn-danger"
+                    disabled={processing}
+                    onClick={() => handleProcessValidation('REJECT')}
+                  >
+                    Confirmar baja
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-primary btn-danger"
+                      disabled={processing}
+                      onClick={() => handleProcessValidation('REJECT')}
+                    >
+                      <XCircle size={16} /> Rechazar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      disabled={processing}
+                      onClick={() => handleProcessValidation('APPROVE')}
+                    >
+                      <CheckCircle size={16} /> Validar
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
       <Footer />
-      
-      <style>{`
-        .admin-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.8);
-          backdrop-filter: blur(8px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 2000;
-        }
-        .admin-modal-content {
-          background: #1a1a2e;
-          padding: 2.5rem;
-          border-radius: 24px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          width: 90%;
-          max-width: 500px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        }
-        .admin-modal-content h2 {
-          margin-bottom: 1.5rem;
-          font-size: 1.5rem;
-          background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.6));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        .modal-form-group {
-          margin: 1.5rem 0;
-        }
-        .modal-form-group label {
-          display: block;
-          margin-bottom: 0.5rem;
-          color: rgba(255, 255, 255, 0.6);
-          font-size: 0.9rem;
-        }
-        .modal-form-group textarea {
-          width: 100%;
-          height: 100px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          padding: 1rem;
-          border-radius: 12px;
-          color: #fff;
-          resize: none;
-        }
-        .modal-actions {
-          display: flex;
-          gap: 1rem;
-          justify-content: flex-end;
-          margin-top: 2rem;
-        }
-        .btn-secondary {
-          background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: #fff;
-          padding: 0.8rem 1.5rem;
-          border-radius: 12px;
-          cursor: pointer;
-        }
-        .btn-primary {
-          background: var(--color-primary);
-          border: none;
-          color: #fff;
-          padding: 0.8rem 1.5rem;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 600;
-        }
-        .btn-danger {
-          background: #ff4d4d !important;
-        }
-      `}</style>
     </div>
   );
 };

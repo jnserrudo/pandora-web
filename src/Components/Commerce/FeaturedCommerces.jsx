@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
 import { getFeaturedCommerces, getAbsoluteImageUrl } from '../../services/api';
 import { Star, MapPin, ArrowRight } from 'lucide-react';
@@ -46,7 +47,7 @@ const FeaturedCommerces = () => {
                     className="card-image"
                 />
                 <div className="card-overlay">
-                    <span className="category-tag">{commerce.category.replace('_', ' ')}</span>
+                    <span className="category-tag">{getCategoryDisplayName(commerce.category)}</span>
                 </div>
                 {commerce.averageRating > 0 && (
                     <div className="rating-badge">

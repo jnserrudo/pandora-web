@@ -1,6 +1,7 @@
 .profile-wrapper {
   min-height: 100vh;
-  padding-top: 100px;
+  padding-top: var(--layout-nav-offset);
+  padding-bottom: var(--dock-safe-bottom, 5.5rem);
   background: radial-gradient(circle at top right, #1a0b2e 0%, #0d0218 100%);
   color: #fff;
 }

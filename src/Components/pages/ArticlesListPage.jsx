@@ -1,11 +1,14 @@
 // src/pages/ArticlesListPage.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
 import { getArticles, getAbsoluteImageUrl } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import { useToast } from '../../context/ToastContext';
+import { Calendar, User } from 'lucide-react';
 import './ArticlesListPage.css';
 
 const ArticlesListPage = () => {
@@ -14,6 +17,8 @@ const ArticlesListPage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [loadError, setLoadError] = useState(false);
+  const { showToast } = useToast();
   const observerTarget = useRef(null);
 
   const ARTICLES_PER_PAGE = 6;
@@ -26,7 +31,8 @@ const ArticlesListPage = () => {
         setArticles(fetchedArticles);
         setHasMore(meta.page < meta.totalPages);
       } catch (error) {
-        console.error("Failed to fetch articles", error);
+        setLoadError(true);
+        showToast("No se pudieron cargar las noticias. Probá de nuevo.", 'error');
       } finally {
         setLoading(false);
       }
@@ -68,7 +74,7 @@ const ArticlesListPage = () => {
       setPage(nextPage);
       setHasMore(meta.page < meta.totalPages);
     } catch (error) {
-      console.error("Failed to load more articles", error);
+      showToast("No se pudieron cargar más noticias.", 'error');
     } finally {
       setLoadingMore(false);
     }
@@ -94,25 +100,49 @@ const ArticlesListPage = () => {
 
         <div className="articles-grid">
           {articles.length > 0 ? (
-            articles.map(article => (
-              <Link to={`/article/${article.slug}`} key={article.id} className="article-card-link">
+            articles.map((article, index) => (
+              <Link
+                to={`/article/${article.slug}`}
+                key={article.id}
+                className={`article-card-link ${index === 0 ? 'featured' : ''}`}
+              >
                 <div className="article-card">
-                  <img 
-                    src={getAbsoluteImageUrl(article.coverImage)} 
-                    alt={article.title} 
-                    className="article-card-image" 
+                  <img
+                    src={getAbsoluteImageUrl(article.coverImage)}
+                    alt={article.title}
+                    className="article-card-image"
                     onError={handleImageError}
                   />
                   <div className="article-card-content">
-                    <span className="article-card-category">{article.category.name}</span>
+                    <span className="article-card-category">{getCategoryDisplayName(article.category?.name || article.category)}</span>
                     <h3 className="article-card-title">{article.title}</h3>
                     <p className="article-card-subtitle">{article.subtitle}</p>
+                    <div className="article-card-meta">
+                      <span>
+                        <User size={13} />
+                        {article.authorName || 'Redacción Pandora'}
+                      </span>
+                      {article.createdAt && (
+                        <span>
+                          <Calendar size={13} />
+                          {new Date(article.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>
             ))
+          ) : loadError ? (
+            <div className="no-results">
+              <p>No se pudieron cargar las noticias.</p>
+              <Link to="/">Volver al inicio</Link>
+            </div>
           ) : (
-            <p>No hay artículos disponibles en este momento.</p>
+            <div className="no-results">
+              <p>Todavía no hay artículos publicados.</p>
+              <Link to="/">Volvé al inicio</Link> para ver comercios y eventos.
+            </div>
           )}
         </div>
 

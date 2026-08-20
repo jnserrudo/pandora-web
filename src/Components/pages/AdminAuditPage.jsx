@@ -15,15 +15,22 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getAuditLogs } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import { formatEnumLabel } from '../../utils/enumLabels.js';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import './AdminAuditPage.css'; 
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
+import './AdminAuditPage.css';
+import './AdminArticlesPage.css'; 
 
 const AdminAuditPage = () => {
     const { token } = useAuth();
+    const { showToast } = useToast();
     const [logs, setLogs] = useState([]);
-    const [pagination, setPagination] = useState({});
+    const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
     const [loading, setLoading] = useState(true);
     const [selectedLog, setSelectedLog] = useState(null);
     const [showLogins, setShowLogins] = useState(false);
@@ -32,18 +39,18 @@ const AdminAuditPage = () => {
         const fetchLogs = async () => {
             try {
                 setLoading(true);
-                const data = await getAuditLogs(token);
-                setLogs(data.logs);
-                setPagination(data.meta);
+                const data = await getAuditLogs(token, page, pageSize);
+                setLogs(data.logs || []);
+                setPagination(data.meta || { page, limit: pageSize, total: 0, totalPages: 1 });
             } catch (error) {
-                console.error("Error loading logs:", error);
+                showToast("No se pudo cargar la auditoría.", 'error');
             } finally {
                 setLoading(false);
             }
         };
 
         if (token) fetchLogs();
-    }, [token]);
+    }, [token, page, pageSize]);
 
     const filteredLogs = logs.filter(log => showLogins || log.action !== 'LOGIN');
 
@@ -99,7 +106,9 @@ const AdminAuditPage = () => {
                                 />
                                 <span className="toggle-label">Mostrar Logins de Usuarios</span>
                             </label>
-                            <span className="results-count">Mostrando {filteredLogs.length} transacciones</span>
+                            <span className="results-count">
+                              Página {pagination.page || page} · {pagination.total || filteredLogs.length} registros
+                            </span>
                         </div>
 
                         <div className="admin-panel-card">
@@ -107,48 +116,100 @@ const AdminAuditPage = () => {
                                 <table className="admin-table-premium">
                                     <thead>
                                         <tr>
-                                            <th>FECHA</th>
-                                            <th>USUARIO</th>
-                                            <th>ACCIÓN</th>
-                                            <th>ENTIDAD</th>
-                                            <th className="text-right">DETALLES</th>
+                                            <th className="col-date">FECHA</th>
+                                            <th className="col-main">USUARIO</th>
+                                            <th className="col-status">ACCIÓN</th>
+                                            <th className="hide-tablet col-meta">ENTIDAD</th>
+                                            <th className="col-actions text-right">DETALLES</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredLogs.map((log) => (
+                                        {filteredLogs.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5}>No hay registros con este filtro.</td>
+                                            </tr>
+                                        ) : filteredLogs.map((log) => (
                                             <tr key={log.id}>
-                                                <td className="text-sm opacity-70">
+                                                <td className="col-date text-sm opacity-70">
                                                     {new Date(log.createdAt).toLocaleString()}
                                                 </td>
-                                                <td>
+                                                <td className="col-main">
                                                     <div className="user-info-inline">
                                                         <User size={14} className="opacity-50" />
                                                         <span>{log.user?.username || 'Sistema'}</span>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="col-status">
                                                     <span className={getActionBadgeClass(log.action)}>
-                                                        {log.action}
+                                                        {formatEnumLabel(log.action)}
                                                     </span>
                                                 </td>
-                                                <td>
+                                                <td className="hide-tablet col-meta">
                                                     <div className="entity-tag">
                                                         <Database size={14} />
-                                                        <span>{log.resourceType}: {log.resourceId}</span>
+                                                        <span>{formatEnumLabel(log.resourceType)}: {log.resourceId}</span>
                                                     </div>
                                                 </td>
-                                                <td className="text-right">
-                                                    <button 
-                                                        className="btn-action-premium view"
-                                                        onClick={() => setSelectedLog(log)}
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
+                                                <td className="col-actions text-right">
+                                                    <AdminRowActionsMenu
+                                                        label={`Detalle del log ${log.id}`}
+                                                        items={[
+                                                            {
+                                                                key: 'view',
+                                                                label: 'Ver detalle',
+                                                                icon: Eye,
+                                                                tone: 'info',
+                                                                onClick: () => setSelectedLog(log),
+                                                            },
+                                                        ]}
+                                                    />
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
+                                <div className="table-footer-premium admin-pagination-bar">
+                                  <div className="admin-pagination-meta">
+                                    <span>
+                                      Mostrando página {pagination.page || page} de {pagination.totalPages || 1}
+                                    </span>
+                                    <label className="admin-page-size">
+                                      Por página
+                                      <select
+                                        value={pageSize}
+                                        onChange={(e) => {
+                                          setPageSize(Number(e.target.value));
+                                          setPage(1);
+                                        }}
+                                      >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                      </select>
+                                    </label>
+                                  </div>
+                                  <div className="pagination-group-premium">
+                                    <button
+                                      type="button"
+                                      className="btn-page"
+                                      disabled={(pagination.page || page) <= 1}
+                                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    >
+                                      Anterior
+                                    </button>
+                                    <button type="button" className="btn-page active" disabled>
+                                      {pagination.page || page}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn-page"
+                                      disabled={(pagination.page || page) >= (pagination.totalPages || 1)}
+                                      onClick={() => setPage((p) => p + 1)}
+                                    >
+                                      Siguiente
+                                    </button>
+                                  </div>
+                                </div>
                             </div>
                         </div>
 
@@ -204,7 +265,7 @@ const AdminAuditPage = () => {
                                                 <div className="meta-icon"><Database size={16} /></div>
                                                 <div className="meta-content">
                                                     <label>Recurso Afectado</label>
-                                                    <span>{selectedLog.resourceType} (ID: {selectedLog.resourceId})</span>
+                                                    <span>{formatEnumLabel(selectedLog.resourceType)} (ID: {selectedLog.resourceId})</span>
                                                 </div>
                                             </div>
                                             <div className="meta-item">

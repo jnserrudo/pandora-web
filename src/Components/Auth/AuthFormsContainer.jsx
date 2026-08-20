@@ -36,13 +36,13 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   
   const [requireCaptcha, setRequireCaptcha] = useState(false);
   const [requireOTP, setRequireOTP] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
+  const skipCaptcha = import.meta.env.VITE_E2E === 'true';
+  const [captchaToken, setCaptchaToken] = useState(skipCaptcha ? 'test_token_for_automated_testing' : '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [emailSent, setEmailSent] = useState(true);
   const [canResendOTP, setCanResendOTP] = useState(false);
-  const [debugOTP, setDebugOTP] = useState(null); // Nuevo: OTP de fallback cuando el email falla
 
   const API_URL = import.meta.env.VITE_API_URL_DEV || import.meta.env.VITE_API_URL_PROD || 'http://localhost:3000/api';
 
@@ -66,13 +66,16 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
       const data = await res.json();
       
       if (!res.ok) {
+         const failMessage = data.message || 'No se pudo completar la solicitud.';
          if (res.status === 429) {
-             setError(data.message || 'Demasiadas peticiones. Intenta más tarde.');
+             setError(failMessage);
+             showToast(failMessage, 'error');
              return;
          }
          if (res.status === 403 && data.requireCaptcha) {
              setRequireCaptcha(true);
-             setError('Se requieren controles de seguridad extra. Por favor resuelve el captcha.');
+             setError('Se requieren controles de seguridad extra. Completá el captcha para seguir.');
+             showToast('Completá el captcha para continuar.', 'warning');
              return;
          }
          if (res.status === 403 && data.isVerified === false) {
@@ -80,11 +83,13 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
              setRequireOTP(true);
              return;
          }
-         throw new Error(data.message || 'Error en la solicitud');
+         setError(failMessage);
+         showToast(failMessage, 'error');
+         return;
       }
 
-      if (isLogin) {
-          showToast('Logueado en Pandora con éxito!', 'success');
+        if (isLogin) {
+          showToast('Sesión iniciada. Ya podés explorar y gestionar tu cuenta.', 'success');
           setAuthData(data.accessToken, data.refreshToken);
           navigate('/');
       } else {
@@ -93,18 +98,9 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           const wasEmailSent = data.emailSent !== false;
           setEmailSent(wasEmailSent);
           setCanResendOTP(data.canResendOTP === true || !wasEmailSent);
-          
-          // Guardar OTP de debug si el email falló (fallback de verificación)
-          if (!wasEmailSent && data.debugOTP) {
-              setDebugOTP(data.debugOTP);
-              console.log('🔑 OTP de fallback disponible (email falló):', data.debugOTP);
-          } else {
-              setDebugOTP(null);
-          }
-          
-          // Mostrar mensaje diferente según si el email se envió o no
+
           if (!wasEmailSent) {
-              showToast('Registro exitoso, pero hubo un problema enviando el email. Usá el código mostrado.', 'warning');
+              showToast('Registro exitoso, pero no pudimos enviar el email. Usá reenviar código o contactá a un admin.', 'warning');
           }
           setRequireOTP(true);
       }
@@ -115,9 +111,11 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
         || rawMsg.includes('NetworkError') 
         || rawMsg.includes('ERR_CONNECTION')
         || rawMsg.includes('fetch');
-      setError(isNetworkError 
-        ? 'No se pudo conectar con el servidor. Verificá tu conexión a internet e intentá de nuevo.' 
-        : rawMsg || 'Ocurrió un error inesperado. Intentá de nuevo.');
+      const friendly = isNetworkError 
+        ? 'No se pudo conectar con el servidor. Verificá tu conexión e intentá de nuevo.' 
+        : rawMsg || 'Ocurrió un error inesperado. Intentá de nuevo.';
+      setError(friendly);
+      showToast(friendly, 'error');
     } finally {
       setLoading(false);
     }
@@ -151,7 +149,6 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
                onVerify={handleVerifyOTP} 
                initialEmailSent={emailSent}
                canResend={canResendOTP}
-               debugOTP={debugOTP}
              />
           </div>
       );
@@ -167,7 +164,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
         <h2>{isLogin ? 'Bienvenido de vuelta' : 'Creá tu cuenta en Pandora'}</h2>
         <p>
           {isLogin 
-            ? 'Ingresá para gestionar tu cuenta' 
+            ? 'Usá tu email o tu nombre de usuario. Las dos formas son válidas.' 
             : 'Unite a la comunidad y descubrí todo lo que Pandora tiene para ofrecer.'}
         </p>
         
@@ -208,11 +205,13 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
 
         {isLogin && (
           <div className="input-group">
-            <label htmlFor="identifier">Email o Usuario</label>
+            <label htmlFor="identifier">Email o usuario</label>
             <input 
-              type="text" id="identifier" required
+              type="text" id="identifier" required autoComplete="username"
+              placeholder="admin@pandora.com o admin"
               value={identifier} onChange={e => setIdentifier(e.target.value)} 
             />
+            <small className="input-hint">Podés entrar con el correo o con el usuario, da igual.</small>
           </div>
         )}
 
@@ -224,8 +223,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           />
         </div>
 
-        {/* Captcha - Aparece obligatoriamente en registro y condicionalmente en Login */}
-        {(!isLogin || requireCaptcha) && (
+        {!skipCaptcha && (!isLogin || requireCaptcha) && (
           <div style={{ display: 'flex', justifyContent: 'center', margin: '15px 0' }}>
             <Turnstile 
               sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'} 
@@ -238,6 +236,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
         <button 
           type="submit" 
           className="auth-button"
+          data-testid="auth-submit"
           disabled={isSubmitDisabled}
         >
           {loading ? "Procesando..." : (isLogin ? "Ingresar" : "Crear Cuenta")}

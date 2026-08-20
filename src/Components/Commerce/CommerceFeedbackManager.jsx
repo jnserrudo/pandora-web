@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { API_URL, replyToCommerceComment } from '../../services/api';
+import { apiClient, replyToCommerceComment } from '../../services/api';
 import { MessageSquare, Star, ReplyAll, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import './CommerceFeedbackManager.css';
-import axios from 'axios';
 
 const CommerceFeedbackManager = ({ commerce }) => {
     const { token } = useAuth();
@@ -32,7 +31,7 @@ const CommerceFeedbackManager = ({ commerce }) => {
                 // Idealmente deberías pedir al arquitecto backend que habilite un GET /api/commerces/:id/my-comments para dueños.
                 // Por ahora, enviaremos la peticion a /api/commerces/:id que devuelve los comentarios publicos.
                 
-                const res = await axios.get(`${API_URL}/commerces/${commerce.id}`);
+                const res = await apiClient.get(`/commerces/${commerce.id}`);
                 // Aseguramos que los comentarios vengan ordenados por fecha
                 const sortedComments = (res.data.comments || []).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setComments(sortedComments);

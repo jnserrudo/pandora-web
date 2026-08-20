@@ -26,26 +26,41 @@
 }
 
 .back-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-primary);
-  opacity: 0.6;
+  color: #ffffff !important;
+  opacity: 1 !important;
   text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 800;
   margin-bottom: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   position: relative;
-  z-index: 1100; /* Por encima del Navbar fixed (1000) */
+  z-index: 1100;
   width: fit-content;
   pointer-events: auto;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.back-link svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  flex-shrink: 0;
 }
 
 .back-link:hover {
-  opacity: 1;
-  transform: translateX(-5px);
-  filter: drop-shadow(0 0 5px var(--color-primary));
+  opacity: 1 !important;
+  transform: translateX(-3px);
+  background: rgba(255, 255, 255, 0.24) !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  filter: none;
 }
 
 .admin-title-group h1 {
@@ -80,20 +95,31 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   backdrop-filter: blur(20px);
-  overflow: hidden;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 1100px) {
+  .admin-table-wrapper-premium {
+    overflow-x: hidden;
+  }
 }
 
 .table-filters-premium {
-  padding: 1.5rem 2rem;
+  padding: 1.25rem 1.35rem;
   display: flex;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
 }
 
 .search-bar-premium {
   flex: 1;
   max-width: 400px;
+  min-width: 160px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -153,24 +179,75 @@
 /* --- THE ACTUAL TABLE --- */
 .admin-table-premium {
   width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .admin-table-premium th {
-  padding: 1.5rem 2rem;
+  padding: 0.9rem 1rem;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.4);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .admin-table-premium td {
-  padding: 1.5rem 2rem;
+  padding: 0.9rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   transition: background 0.3s ease;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Column roles */
+.admin-table-premium .col-main {
+  width: auto;
+}
+
+.admin-table-premium .col-meta {
+  width: 8.5rem;
+}
+
+.admin-table-premium .col-status {
+  width: 7.5rem;
+}
+
+.admin-table-premium .col-date {
+  width: 7.25rem;
+}
+
+.admin-table-premium .col-actions,
+.admin-table-premium th.col-actions,
+.admin-table-premium td.col-actions {
+  width: 4.75rem;
+  text-align: right;
+  padding-left: 0.5rem;
+  padding-right: 0.85rem;
+  overflow: visible;
+}
+
+.admin-table-premium .text-right {
+  text-align: right;
+}
+
+.admin-table-premium .row-title,
+.admin-table-premium .row-meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.admin-table-premium .row-main-info {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .admin-table-premium tr:last-child td {
@@ -185,6 +262,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .row-title {
@@ -231,6 +309,21 @@
   border: 1px solid rgba(231, 76, 60, 0.3);
 }
 
+.badge-premium.inactive {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.article-row-title {
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 .text-right {
   text-align: right;
 }
@@ -271,13 +364,36 @@
 
 /* --- TABLE FOOTER PREMIUM --- */
 .table-footer-premium {
-  padding: 1.5rem 2rem;
+  padding: 1.1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   background: rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.65);
   font-size: 0.85rem;
+}
+
+.admin-pagination-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.admin-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.admin-page-size select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
 }
 
 .pagination-group-premium {
@@ -286,8 +402,9 @@
 }
 
 .btn-page {
-  width: 34px;
+  min-width: 34px;
   height: 34px;
+  padding: 0 0.7rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -297,6 +414,7 @@
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.82rem;
 }
 
 .btn-page:hover:not(:disabled) {
@@ -314,6 +432,12 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 1099px) {
+  .hide-tablet {
+    display: none !important;
+  }
+}
+
 @media (max-width: 900px) {
   .admin-title-group h1 {
     font-size: 2rem;
@@ -329,8 +453,9 @@
     align-items: flex-start;
     gap: 1rem;
   }
-  .hide-mobile {
-    display: none;
+  .hide-mobile,
+  .hide-tablet {
+    display: none !important;
   }
   .table-filters-premium {
     flex-direction: column;
@@ -339,8 +464,14 @@
   .search-bar-premium {
     max-width: 100%;
   }
-  .admin-table-premium th, .admin-table-premium td {
-    padding: 1rem;
+  .admin-table-premium th,
+  .admin-table-premium td {
+    padding: 0.85rem 0.75rem;
+  }
+  .admin-table-premium .col-meta,
+  .admin-table-premium .col-status,
+  .admin-table-premium .col-date {
+    width: 6.5rem;
   }
   .admin-title-group h1 {
     font-size: 1.8rem;
@@ -353,6 +484,13 @@
 @media (max-width: 480px) {
   .admin-title-group h1 {
     font-size: 1.5rem;
+  }
+
+  .admin-table-premium .col-actions,
+  .admin-table-premium th.col-actions,
+  .admin-table-premium td.col-actions {
+    width: 3.75rem;
+    padding-right: 0.6rem;
   }
 }
 

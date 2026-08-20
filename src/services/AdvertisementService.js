@@ -1,7 +1,6 @@
 // src/services/AdvertisementService.js
 // Servicio para gestión de publicidades (ABM)
-import axios from 'axios';
-import { API_URL } from './config';
+import { apiClient } from './api';
 
 /**
  * Obtiene todas las publicidades
@@ -18,9 +17,8 @@ export const getAdvertisements = async (filters = {}, adminMode = false) => {
     if (filters.isActive !== undefined) params.append('isActive', filters.isActive);
     if (adminMode) params.append('admin', 'true');
 
-    const url = `${API_URL}/advertisements${params.toString() ? `?${params.toString()}` : ''}`;
-    const response = await axios.get(url);
-    console.log('Advertisements response:', response.data);
+    const url = `/advertisements${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await apiClient.get(url);
 
     // En modo admin NUNCA usamos mock data — siempre mostramos lo real
     if (adminMode) {
@@ -49,7 +47,7 @@ export const getAdvertisements = async (filters = {}, adminMode = false) => {
 export const getAdvertisementById = async (id, adminMode = false) => {
   try {
     const suffix = adminMode ? '?admin=true' : '';
-    const response = await axios.get(`${API_URL}/advertisements/${id}${suffix}`);
+    const response = await apiClient.get(`/advertisements/${id}${suffix}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching advertisement ${id}:`, error);
@@ -65,9 +63,7 @@ export const getAdvertisementById = async (id, adminMode = false) => {
  */
 export const createAdvertisement = async (data, token) => {
   try {
-    const response = await axios.post(`${API_URL}/advertisements`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await apiClient.post('/advertisements', data);
     return response.data;
   } catch (error) {
     console.error('Error creating advertisement:', error);
@@ -84,9 +80,7 @@ export const createAdvertisement = async (data, token) => {
  */
 export const updateAdvertisement = async (id, data, token) => {
   try {
-    const response = await axios.put(`${API_URL}/advertisements/${id}`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await apiClient.put(`/advertisements/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`Error updating advertisement ${id}:`, error);
@@ -102,9 +96,7 @@ export const updateAdvertisement = async (id, data, token) => {
  */
 export const toggleAdvertisementStatus = async (id, isActive, token) => {
   try {
-    const response = await axios.put(`${API_URL}/advertisements/${id}`, { isActive }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await apiClient.put(`/advertisements/${id}`, { isActive });
     return response.data;
   } catch (error) {
     console.error(`Error toggling advertisement ${id}:`, error);
@@ -126,7 +118,7 @@ export const trackAdvertisement = async (id, type = 'impression') => {
   }
 
   try {
-    await axios.post(`${API_URL}/advertisements/${id}/track`, { type });
+    await apiClient.post(`/advertisements/${id}/track`, { type });
   } catch (error) {
     console.error(`Error tracking advertisement ${id}:`, error);
     // No lanzamos error, el tracking no debe interrumpir la UX

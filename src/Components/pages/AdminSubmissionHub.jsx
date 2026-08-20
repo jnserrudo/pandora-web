@@ -22,6 +22,9 @@ import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
+import { formatEnumLabel, formatStatusLabel } from '../../utils/enumLabels.js';
 import './AdminArticlesPage.css';
 
 const AdminSubmissionHub = () => {
@@ -30,7 +33,8 @@ const AdminSubmissionHub = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('ALL'); // ALL, PENDING, PLAN_UPGRADE, etc.
+  const [filter, setFilter] = useState('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Modal de respuesta
   const [showModal, setShowModal] = useState(false);
@@ -44,12 +48,9 @@ const AdminSubmissionHub = () => {
       const data = await getAdminSubmissions(token);
       setSubmissions(data);
     } catch (err) {
-      console.error("Error fetching submissions:", err);
-      // Fallback fallback
-      setSubmissions([
-        { id: 1, name: 'Juan Perez', type: 'PLAN_UPGRADE', message: 'Subir a nivel 4', status: 'PENDING', attachmentUrl: 'https://via.placeholder.com/300x400', createdAt: new Date() },
-        { id: 2, name: 'Empresa X', type: 'AD_PROPOSAL', message: 'Queremos banner en la home', status: 'PENDING', createdAt: new Date() }
-      ]);
+      showToast("No se pudo cargar el buzón.", 'error');
+      setError("No se pudo cargar el buzón.");
+      setSubmissions([]);
     } finally {
       setLoading(false);
     }
@@ -85,10 +86,28 @@ const AdminSubmissionHub = () => {
   };
 
   const filteredSubmissions = submissions.filter(s => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term
+      || s.name?.toLowerCase().includes(term)
+      || s.message?.toLowerCase().includes(term)
+      || s.user?.name?.toLowerCase().includes(term);
+    if (!matchesSearch) return false;
     if (filter === 'ALL') return true;
     if (filter === 'PENDING') return s.status === 'PENDING';
     return s.type === filter;
   });
+
+  const pagination = useAdminPagination(filteredSubmissions, 10);
+
+  const handleArchive = async (sub) => {
+    try {
+      await replyToSubmission(sub.id, { status: 'ARCHIVED', adminResponse: sub.adminResponse || 'Archivado' }, token);
+      setSubmissions((prev) => prev.map((s) => s.id === sub.id ? { ...s, status: 'ARCHIVED' } : s));
+      showToast("Solicitud archivada.", 'success');
+    } catch (err) {
+      showToast(err.message || "No se pudo archivar.", 'error');
+    }
+  };
 
   return (
     <div className="admin-wrapper hub-theme">
@@ -116,7 +135,12 @@ const AdminSubmissionHub = () => {
             <div className="table-filters-premium">
               <div className="search-bar-premium">
                  <Search size={18} />
-                 <input type="text" placeholder="Buscar por remitente o asunto..." />
+                 <input
+                   type="text"
+                   placeholder="Buscar por remitente o asunto..."
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
               </div>
               <div className="filter-group-premium">
                 <select value={filter} onChange={(e) => setFilter(e.target.value)} className="btn-filter-premium">
@@ -134,17 +158,21 @@ const AdminSubmissionHub = () => {
             <table className="admin-table-premium">
               <thead>
                 <tr>
-                  <th>REMITENTE Y TIPO</th>
-                  <th className="hide-mobile">MENSAJE</th>
-                  <th className="hide-mobile">ADJUNTO</th>
-                  <th className="hide-mobile">ESTADO</th>
-                  <th className="text-right">ACCIONES</th>
+                  <th className="col-main">REMITENTE Y TIPO</th>
+                  <th className="hide-tablet col-meta">MENSAJE</th>
+                  <th className="hide-tablet col-meta">ADJUNTO</th>
+                  <th className="hide-mobile col-status">ESTADO</th>
+                  <th className="col-actions text-right">ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredSubmissions.map((sub) => (
+                {filteredSubmissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={5}>{error || 'No hay solicitudes con ese filtro. Cambiá la búsqueda o el tipo.'}</td>
+                  </tr>
+                ) : pagination.pageItems.map((sub) => (
                   <tr key={sub.id}>
-                    <td>
+                    <td className="col-main">
                       <div className="row-main-info">
                         <span className="row-title">{sub.name || sub.user?.name || 'Usuario Pandora'}</span>
                         <div className="sub-type-badge">
@@ -154,46 +182,66 @@ const AdminSubmissionHub = () => {
                             sub.type === 'PLAN_UPGRADE' ? 'Pago / Plan' :
                             sub.type === 'AD_PROPOSAL' ? 'Publicidad' :
                             sub.type === 'MAGAZINE_PROPOSAL' ? 'Revista' :
-                            sub.type === 'CONTACT' ? 'Contacto' : sub.type
+                            sub.type === 'CONTACT' ? 'Contacto' : formatEnumLabel(sub.type)
                           }</span>
                         </div>
                       </div>
                     </td>
-                    <td className="hide-mobile">
+                    <td className="hide-tablet col-meta">
                       <div className="message-preview">
                         {sub.message?.substring(0, 50)}...
                       </div>
                     </td>
-                    <td className="hide-mobile">
+                    <td className="hide-tablet col-meta">
                       {sub.attachmentUrl ? (
-                         <a href={sub.attachmentUrl} target="_blank" rel="noreferrer" className="btn-action-premium view" title="Ver Adjunto">
-                           <Paperclip size={18} />
-                         </a>
-                      ) : '-'}
+                        <span className="row-meta" title="Tiene adjunto">
+                          <Paperclip size={16} style={{ verticalAlign: 'middle' }} /> Adjunto
+                        </span>
+                      ) : (
+                        '—'
+                      )}
                     </td>
-                    <td className="hide-mobile">
+                    <td className="hide-mobile col-status">
                       <span className={`badge-premium ${sub.status === 'PENDING' ? 'draft' : 'active'}`}>
-                        {sub.status}
+                        {formatStatusLabel(sub.status)}
                       </span>
                     </td>
-                    <td className="text-right">
-                      <div className="action-icons-group">
-                        <button onClick={() => openReplyModal(sub)} className="btn-action-premium edit" title="Responder / Resolver">
-                           <ArrowUpRight size={18} />
-                        </button>
-                        <button className="btn-action-premium delete" title="Archivar">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
+                      <td className="col-actions text-right">
+                        <AdminRowActionsMenu
+                          label={`Acciones de solicitud ${sub.id}`}
+                          items={[
+                            sub.attachmentUrl
+                              ? {
+                                  key: 'attach',
+                                  label: 'Ver adjunto',
+                                  icon: Paperclip,
+                                  href: sub.attachmentUrl,
+                                  target: '_blank',
+                                  tone: 'info',
+                                }
+                              : null,
+                            {
+                              key: 'reply',
+                              label: 'Responder / Resolver',
+                              icon: ArrowUpRight,
+                              onClick: () => openReplyModal(sub),
+                            },
+                            {
+                              key: 'archive',
+                              label: 'Archivar',
+                              icon: Trash2,
+                              tone: 'danger',
+                              onClick: () => handleArchive(sub),
+                            },
+                          ]}
+                        />
+                      </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <div className="table-footer-premium">
-               <p>Sistema de Gestión de Entradas Pandora {new Date().getFullYear()}</p>
-            </div>
+            <AdminTablePagination {...pagination} onPageSizeChange={pagination.setPageSize} />
           </div>
         )}
       </div>

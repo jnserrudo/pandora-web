@@ -57,7 +57,7 @@ const CategoryConfigPanel = () => {
   };
 
   const handleSave = () => {
-    showToast("Configuración de categorías guardada correctamente.", 'success');
+    showToast("Esta vista es un preview: el orden de categorías de la home todavía no se persiste en el servidor.", 'info');
   };
 
   return (
@@ -67,7 +67,7 @@ const CategoryConfigPanel = () => {
           <Settings2 size={24} className="accent-glow" />
           <div className="text">
             <h3>Gestión de Categorías Home</h3>
-            <p>Define el orden y visibilidad en la pantalla principal</p>
+            <p>Preview visual: el orden todavía no se guarda en el servidor.</p>
           </div>
         </div>
         <button className="btn-save-glow" onClick={handleSave}>

@@ -27,6 +27,8 @@ import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
 import './AdminArticlesPage.css';
 
 const AdminEventsPage = () => {
@@ -53,7 +55,7 @@ const AdminEventsPage = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const data = await getEvents(token);
+      const data = await getEvents(token, { includeAll: true });
       setEvents(data);
     } catch (err) {
       console.error("Error fetching events:", err);
@@ -152,6 +154,8 @@ const AdminEventsPage = () => {
     return matchSearch && matchStatus && matchTier && matchPayment;
   });
 
+  const pagination = useAdminPagination(filteredEvents, 10);
+
   return (
     <div className="admin-wrapper hub-theme">
       <Navbar />
@@ -196,7 +200,7 @@ const AdminEventsPage = () => {
                 <option value="FINISHED">Finalizados</option>
               </select>
               <select className="btn-filter-premium" value={tierFilter} onChange={(e) => setTierFilter(e.target.value)}>
-                <option value="ALL">Todos los tiers</option>
+                <option value="ALL">Todos los niveles</option>
                 <option value="1">Básico</option>
                 <option value="2">Plus</option>
                 <option value="3">Premium</option>
@@ -212,21 +216,21 @@ const AdminEventsPage = () => {
             <table className="admin-table-premium">
               <thead>
                 <tr>
-                  <th>EVENTO Y ORGANIZADOR</th>
-                  <th className="hide-mobile">FECHA</th>
-                  <th className="hide-mobile">TIER</th>
-                  <th className="hide-mobile">ESTADO</th>
-                  <th className="text-right">ACCIONES</th>
+                  <th className="col-main">EVENTO Y ORGANIZADOR</th>
+                  <th className="hide-mobile col-date">FECHA</th>
+                  <th className="hide-tablet col-meta">NIVEL</th>
+                  <th className="hide-mobile col-status">ESTADO</th>
+                  <th className="col-actions text-right">ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredEvents.map((event) => {
+                {pagination.pageItems.map((event) => {
                   const sl = statusLabel(event.status);
                   const tl = tierLabel(event.eventTier || 1);
                   const pl = event.eventTier > 1 ? paymentStatusLabel(event.paymentStatus || 'PENDING') : null;
                   return (
                     <tr key={event.id}>
-                      <td>
+                      <td className="col-main">
                         <div className="row-main-info">
                           <span className="row-title">
                             {event.featured && <Star size={13} style={{ color: '#FFD700', marginRight: 4, verticalAlign: 'middle' }} />}
@@ -238,7 +242,7 @@ const AdminEventsPage = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="hide-mobile">
+                      <td className="hide-mobile col-date">
                         <div className="row-meta-date">
                           <Clock size={14} />
                           <span>
@@ -248,7 +252,7 @@ const AdminEventsPage = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="hide-mobile">
+                      <td className="hide-tablet col-meta">
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 700, background: `${tl.color}20`, color: tl.color, border: `1px solid ${tl.color}40` }}>
                           {tl.icon} {tl.label}
                         </span>
@@ -256,52 +260,67 @@ const AdminEventsPage = () => {
                           <span className={`badge-premium ${pl.cls}`} style={{ display: 'block', marginTop: '4px', fontSize: '0.7rem' }}>{pl.label}</span>
                         )}
                       </td>
-                      <td className="hide-mobile">
+                      <td className="hide-mobile col-status">
                         <span className={`badge-premium ${sl.cls}`}>{sl.label}</span>
                       </td>
-                      <td className="text-right">
-                        <div className="action-icons-group">
-                          <Link to={`/event/${event.id}`} className="btn-action-premium view" title="Ver Evento">
-                            <Eye size={18} />
-                          </Link>
-                          <Link to={`/events/${event.id}/edit`} className="btn-action-premium edit" title="Editar Evento">
-                            <Edit size={18} />
-                          </Link>
-                          {event.eventTier > 1 && (event.paymentStatus === 'PENDING' || !event.paymentStatus) && (
-                            <button
-                              onClick={() => { setPaymentEvent(event); setPaymentNote(''); setShowPaymentModal(true); }}
-                              className="btn-action-premium"
-                              title="Validar comprobante de pago"
-                              style={{ color: '#38bdf8', borderColor: 'rgba(56,189,248,0.3)' }}
-                            >
-                              <CreditCard size={18} />
-                            </button>
-                          )}
-                          {event.paymentProof && (
-                            <a href={event.paymentProof} target="_blank" rel="noreferrer" className="btn-action-premium view" title="Ver comprobante">
-                              <ExternalLink size={18} />
-                            </a>
-                          )}
-                          {event.status === 'PENDING' && (
-                            <>
-                              <button onClick={() => handleApprove(event.id)} className="btn-action-premium edit" title="Aprobar solicitud">
-                                <CheckCircle size={18} />
-                              </button>
-                              <button onClick={() => openRejectModal(event.id)} className="btn-action-premium delete" title="Rechazar solicitud">
-                                <XCircle size={18} />
-                              </button>
-                            </>
-                          )}
-                          {event.status !== 'PENDING' && (
-                            <button
-                              onClick={() => handleToggleEvent(event.id, event.isActive !== false)}
-                              className={`btn-action-premium ${event.isActive !== false ? 'delete' : 'edit'}`}
-                              title={event.isActive !== false ? 'Desactivar' : 'Reactivar'}
-                            >
-                              {event.isActive !== false ? <Trash2 size={18} /> : <Plus size={18} />}
-                            </button>
-                          )}
-                        </div>
+                      <td className="col-actions text-right">
+                        <AdminRowActionsMenu
+                          label={`Acciones del evento ${event.name || event.id}`}
+                          items={[
+                            { key: 'view', label: 'Ver evento', icon: Eye, to: `/event/${event.id}`, tone: 'info' },
+                            { key: 'edit', label: 'Editar evento', icon: Edit, to: `/events/${event.id}/edit` },
+                            event.eventTier > 1 && (event.paymentStatus === 'PENDING' || !event.paymentStatus)
+                              ? {
+                                  key: 'pay',
+                                  label: 'Validar pago',
+                                  icon: CreditCard,
+                                  tone: 'info',
+                                  onClick: () => {
+                                    setPaymentEvent(event);
+                                    setPaymentNote('');
+                                    setShowPaymentModal(true);
+                                  },
+                                }
+                              : null,
+                            event.paymentProof
+                              ? {
+                                  key: 'proof',
+                                  label: 'Ver comprobante',
+                                  icon: ExternalLink,
+                                  href: event.paymentProof,
+                                  target: '_blank',
+                                  tone: 'info',
+                                }
+                              : null,
+                            event.status === 'PENDING'
+                              ? {
+                                  key: 'approve',
+                                  label: 'Aprobar solicitud',
+                                  icon: CheckCircle,
+                                  tone: 'success',
+                                  onClick: () => handleApprove(event.id),
+                                }
+                              : null,
+                            event.status === 'PENDING'
+                              ? {
+                                  key: 'reject',
+                                  label: 'Rechazar solicitud',
+                                  icon: XCircle,
+                                  tone: 'danger',
+                                  onClick: () => openRejectModal(event.id),
+                                }
+                              : null,
+                            event.status !== 'PENDING'
+                              ? {
+                                  key: 'toggle',
+                                  label: event.isActive !== false ? 'Desactivar' : 'Reactivar',
+                                  icon: event.isActive !== false ? Trash2 : Plus,
+                                  tone: event.isActive !== false ? 'danger' : 'success',
+                                  onClick: () => handleToggleEvent(event.id, event.isActive !== false),
+                                }
+                              : null,
+                          ]}
+                        />
                       </td>
                     </tr>
                   );
@@ -316,12 +335,10 @@ const AdminEventsPage = () => {
               </tbody>
             </table>
 
-            <div className="table-footer-premium">
-              <p>Total: {filteredEvents.length} de {events.length} eventos</p>
-              <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
-                {events.filter(e => e.status === 'PENDING').length} pendientes · {events.filter(e => e.eventTier > 1 && (!e.paymentStatus || e.paymentStatus === 'PENDING')).length} pagos por validar
-              </p>
-            </div>
+            <AdminTablePagination {...pagination} onPageSizeChange={pagination.setPageSize} />
+            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', margin: '0.5rem 0 0' }}>
+              {events.filter(e => e.status === 'PENDING').length} pendientes · {events.filter(e => e.eventTier > 1 && (!e.paymentStatus || e.paymentStatus === 'PENDING')).length} pagos por validar
+            </p>
           </div>
         )}
       </div>

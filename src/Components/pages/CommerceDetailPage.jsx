@@ -1,10 +1,12 @@
 // src/pages/CommerceDetailPage.jsx
 
 import React, { useState, useEffect } from "react";
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getCommerceById, getAbsoluteImageUrl, getCommerceFAQs } from "../../services/api";
+import { getCommerceById, getAbsoluteImageUrl, getCommerceFAQs, toggleFavorite, getMyFavorites } from "../../services/api";
 import { commerceAttributes } from "../../constants/commerceAttributes";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
 import { 
   Share2, 
   MapPin, 
@@ -15,11 +17,15 @@ import {
   MessageCircle,
   ArrowLeft, 
   Calendar,  
-  HelpCircle 
+  HelpCircle,
+  Heart
 } from 'lucide-react';
 import CommerceCommentForm from '../Commerce/CommerceCommentForm';
 import CommerceProducts from '../Commerce/CommerceProducts';
 import MapView from '../ui/MapView';
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import Navbar from '../Navbar/Navbar';
+import Footer from '../Footer/Footer';
 import "./CommerceDetailPage.css";
 
 const CommerceDetailPage = () => {
@@ -28,8 +34,10 @@ const CommerceDetailPage = () => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { token } = useAuth();
 
   useEffect(() => {
     window.scrollTo(0, 0); // Sube al inicio de la página al cargar
@@ -47,17 +55,34 @@ const CommerceDetailPage = () => {
             console.error("Error cargando FAQs:", err);
           }
         }
+        if (token) {
+          try {
+            const favs = await getMyFavorites(token);
+            setIsFavorite((favs || []).some((f) => String(f.resourceId) === String(id) && String(f.resourceType).toLowerCase() === 'commerce'));
+          } catch {
+            /* no bloquea el detalle */
+          }
+        }
       } catch (err) {
         setError("No se pudo encontrar el comercio.");
+        showToast("No se pudo cargar el comercio.", 'error');
       } finally {
         setLoading(false);
       }
     };
     fetchCommerce();
-  }, [id]);
+  }, [id, token]);
 
-  if (loading) return <div className="page-loader">Cargando...</div>;
-  if (error) return <div className="page-error-message">{error}</div>;
+  if (loading) return <LoadingSpinner fullscreen message="Cargando comercio..." />;
+  if (error) {
+    return (
+      <div className="detail-page-container">
+        <Navbar />
+        <div className="page-error-message">{error}</div>
+        <Footer />
+      </div>
+    );
+  }
   if (!commerce) return null;
 
   // Lógica para determinar la imagen de portada
@@ -77,7 +102,8 @@ const CommerceDetailPage = () => {
         });
       } catch (error) {
         if (error.name !== "AbortError") {
-          console.error('Error compartiendo', error);
+          showToast("No se pudo compartir. Copiamos el enlace.", 'info');
+          navigator.clipboard.writeText(window.location.href);
         }
       }
     } else {
@@ -86,27 +112,41 @@ const CommerceDetailPage = () => {
     }
   };
 
+  const handleFavorite = async () => {
+    if (!token) {
+      showToast("Iniciá sesión para guardar favoritos.", 'info');
+      return;
+    }
+    try {
+      const result = await toggleFavorite(id, 'commerce', token);
+      setIsFavorite(Boolean(result.favorited));
+      showToast(result.favorited ? "Guardado en favoritos." : "Quitado de favoritos.", 'success');
+    } catch (err) {
+      showToast(err.message || "No se pudo actualizar el favorito.", 'error');
+    }
+  };
+
   return (
     <div className="detail-page-container">
+      <Navbar />
+      <button type="button" onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
+        <ArrowLeft size={18} />
+      </button>
       <header
         className="detail-header"
         style={{ backgroundImage: coverImage ? `url(${getAbsoluteImageUrl(coverImage)})` : "none" }}
       >
-         {/* --- 3. AÑADIR EL BOTÓN DE VOLVER --- */}
-         <button onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
-          &larr; {/* Código HTML para una flecha a la izquierda */}
-        </button>
         <div className="header-overlay">
           <div className="flex gap-2 mb-2 flex-wrap">
             {commerce.categories && commerce.categories.length > 0 ? (
                commerce.categories.map(cat => (
                  <p key={cat.id} className="header-category" style={{margin:0}}>
-                   {cat.name.replace("_", " ")}
+                   {getCategoryDisplayName(cat.name)}
                  </p>
                ))
             ) : (
                <p className="header-category" style={{margin:0}}>
-                 {commerce.category ? commerce.category.replace("_", " ") : 'Comercio Local'}
+                 {getCategoryDisplayName(commerce.category)}
                </p>
             )}
           </div>
@@ -153,6 +193,12 @@ const CommerceDetailPage = () => {
               style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '50px', backgroundColor: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', transition: 'background 0.3s' }}
             >
               <Share2 size={18} /> Compartir
+            </button>
+            <button
+              onClick={handleFavorite}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '50px', backgroundColor: isFavorite ? 'rgba(255,20,147,0.2)' : 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}
+            >
+              <Heart size={18} fill={isFavorite ? '#FF1493' : 'none'} /> {isFavorite ? 'En favoritos' : 'Guardar'}
             </button>
             {commerce.phone && commerce.planLevel >= 2 && (
               <a 
@@ -293,6 +339,7 @@ const CommerceDetailPage = () => {
             />
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

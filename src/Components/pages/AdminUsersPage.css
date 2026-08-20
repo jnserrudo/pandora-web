@@ -1,0 +1,331 @@
+/* AdminUsersPage — drawer y acciones de gestión */
+
+/* Forzar contraste del volver (puede quedar tapado por estilos viejos/cache) */
+.admin-wrapper .back-link,
+.admin-wrapper.hub-theme .back-link {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  font-weight: 800;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+}
+
+.admin-wrapper .back-link svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.admin-users-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-users-drawer {
+  width: 100%;
+  max-width: 560px;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+  background: #0f0f1a;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-users-drawer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.admin-users-drawer-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.admin-users-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(138, 43, 226, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c4b5fd;
+  flex-shrink: 0;
+}
+
+.admin-users-drawer-identity h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.admin-users-drawer-identity p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  word-break: break-all;
+}
+
+.admin-users-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-users-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.admin-users-badge {
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-users-manage {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-users-manage-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-users-manage-row label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(240, 232, 255, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-users-role-select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.admin-users-role-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-users-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.admin-users-action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-users-action-btn.activate {
+  background: rgba(74, 222, 128, 0.14);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.admin-users-action-btn.activate:hover:not(:disabled) {
+  background: rgba(74, 222, 128, 0.22);
+}
+
+.admin-users-action-btn.deactivate {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.admin-users-action-btn.deactivate:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.2);
+}
+
+.admin-users-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-users-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+  font-size: 0.82rem;
+  margin-bottom: -1px;
+}
+
+.admin-users-tab.on {
+  color: #fff;
+  font-weight: 700;
+  border-bottom-color: #8a2be2;
+}
+
+.admin-users-tab-count {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+}
+
+.admin-users-tab.on .admin-users-tab-count {
+  background: #8a2be2;
+}
+
+.admin-users-empty {
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding: 2.5rem 1rem;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+
+.admin-users-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+
+.admin-users-item + .admin-users-item {
+  margin-top: 0.6rem;
+}
+
+.admin-users-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.admin-users-item-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.admin-users-item-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-users-mini-links {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admin-users-mini-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.admin-users-mini-links a.view {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+.admin-users-mini-links a.edit {
+  background: rgba(138, 43, 226, 0.15);
+  color: #a78bfa;
+}
+
+/* Iconos de tabla: activar vs desactivar se distinguen */
+.btn-action-premium.activate-user {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.btn-action-premium.activate-user:hover {
+  color: #4ade80;
+  border-color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.btn-action-premium.deactivate-user {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.btn-action-premium.deactivate-user:hover {
+  color: #f87171;
+  border-color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.admin-users-busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.admin-users-drawer .spinning,
+.action-icons-group .spinning {
+  animation: admin-users-spin 0.9s linear infinite;
+}
+
+@keyframes admin-users-spin {
+  to { transform: rotate(360deg); }
+}

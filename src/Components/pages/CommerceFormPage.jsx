@@ -10,6 +10,7 @@ import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import MapPicker from '../ui/MapPicker';
 import { Camera, Upload, CheckCircle, FileText, X, Plus } from 'lucide-react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import './CommerceFormPage.css';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
@@ -89,7 +90,8 @@ const CommerceFormPage = () => {
     externalLink: ''
   });
 
-  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(Boolean(isEditMode));
+  const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [submitted, setSubmitted] = useState(false);
@@ -100,7 +102,7 @@ const CommerceFormPage = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        setLoading(true);
+        setInitialLoading(true);
         // 1. Obtener categorías disponibles del servidor
         const cats = await getCategories();
         setAvailableCategories(cats);
@@ -134,8 +136,9 @@ const CommerceFormPage = () => {
       } catch (err) {
         console.error("Error cargando datos iniciales:", err);
         setError("Error al conectar con el servidor. Verifica las categorías.");
+        showToast("No se pudieron cargar los datos del formulario.", 'error');
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
 
@@ -250,7 +253,7 @@ const CommerceFormPage = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       // Limpiar payload: remover 'category' (Enum viejo) para usar solo 'categoryIds' (Relacional)
@@ -277,11 +280,11 @@ const CommerceFormPage = () => {
       const msg = rawMsg === 'Failed to fetch' || rawMsg.includes('Network') ? 'Error de conexión con el servidor.' : rawMsg;
       setError(msg);
       showToast(msg, 'error');
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  if (loading && isEditMode) {
+  if (initialLoading && isEditMode) {
     return (
       <div className="commerce-form-wrapper">
          <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
@@ -340,7 +343,7 @@ const CommerceFormPage = () => {
                       fontWeight: isSelected ? '500' : 'normal'
                     }}
                   >
-                    {cat.name}
+                    {getCategoryDisplayName(cat.name || cat.slug)}
                   </div>
                 );
               })}
@@ -494,7 +497,7 @@ const CommerceFormPage = () => {
                 marginBottom: '1.25rem'
               }}>
                 <p style={{ color: '#c084fc', fontWeight: 700, marginBottom: '0.6rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  📤 Datos para la transferencia
+                  <Upload size={16} /> Datos para la transferencia
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem', fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)' }}>
                   <span><strong style={{ color: '#fff' }}>Banco:</strong> Banco Macro</span>
@@ -671,9 +674,9 @@ const CommerceFormPage = () => {
             <button 
               type="submit" 
               className="submit-btn" 
-              disabled={loading || uploading}
+              disabled={submitting || uploading}
             >
-              {loading ? 'Enviando...' : (isEditMode ? 'Guardar Cambios' : 'Enviar Solicitud')}
+              {submitting ? 'Enviando...' : (isEditMode ? 'Guardar Cambios' : 'Enviar Solicitud')}
             </button>
           </div>
 

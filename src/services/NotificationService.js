@@ -1,14 +1,9 @@
 // src/services/NotificationService.js
-import axios from 'axios';
-import { API_URL } from './config';
+import { apiClient } from './api';
 
-const getHeaders = (token) => ({
-  headers: { Authorization: `Bearer ${token}` }
-});
-
-export const getNotifications = async (token) => {
+export const getNotifications = async () => {
   try {
-    const response = await axios.get(`${API_URL}/notifications`, getHeaders(token));
+    const response = await apiClient.get('/notifications');
     return response.data;
   } catch (error) {
     console.error("Error fetching notifications:", error);
@@ -16,12 +11,12 @@ export const getNotifications = async (token) => {
   }
 };
 
-export const markNotificationAsRead = async (id, token) => {
-  const response = await axios.patch(`${API_URL}/notifications/${id}/read`, {}, getHeaders(token));
+export const markNotificationAsRead = async (id) => {
+  const response = await apiClient.patch(`/notifications/${id}/read`);
   return response.data;
 };
 
-export const markAllNotificationsAsRead = async (token) => {
-  const response = await axios.patch(`${API_URL}/notifications/read-all`, {}, getHeaders(token));
+export const markAllNotificationsAsRead = async () => {
+  const response = await apiClient.patch('/notifications/read-all');
   return response.data;
 };

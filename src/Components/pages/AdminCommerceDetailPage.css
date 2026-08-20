@@ -8,7 +8,7 @@
 .admin-detail-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--layout-nav-offset) 2rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -16,7 +16,7 @@
 
 /* Header */
 .admin-detail-page .page-header {
-  margin-top: 4rem;
+  margin-top: 0;
   padding: 2rem;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);

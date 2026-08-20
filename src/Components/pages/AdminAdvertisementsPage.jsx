@@ -6,11 +6,9 @@ import {
   Search, 
   Filter, 
   ChevronLeft, 
-  ChevronRight, 
   Plus,
   Edit3,
   Trash2,
-  Calendar,
   Layers,
   Activity
 } from 'lucide-react';
@@ -20,6 +18,9 @@ import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
+import { formatEnumLabel } from '../../utils/enumLabels.js';
 import './AdminArticlesPage.css';
 
 const AdminAdvertisementsPage = () => {
@@ -28,20 +29,34 @@ const AdminAdvertisementsPage = () => {
   const [advertisements, setAdvertisements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeOnly, setActiveOnly] = useState(false);
 
   const fetchAdvertisements = async () => {
     try {
       setLoading(true);
       // adminMode=true: bypasses date filters and shows ALL ads
       const data = await getAdvertisements({}, true);
-      setAdvertisements(data);
+      setAdvertisements(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (err) {
-      console.error("Error fetching advertisements:", err);
       setError("Error cargando publicidades.");
+      setAdvertisements([]);
+      showToast("No se pudieron cargar las campañas.", 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  const visibleAds = advertisements.filter((ad) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term
+      || ad.title?.toLowerCase().includes(term)
+      || ad.position?.toLowerCase().includes(term);
+    return matchesSearch && (!activeOnly || ad.isActive);
+  });
+
+  const pagination = useAdminPagination(visibleAds, 10);
 
   useEffect(() => {
     fetchAdvertisements();
@@ -93,45 +108,59 @@ const AdminAdvertisementsPage = () => {
             <div className="table-filters-premium">
               <div className="search-bar-premium">
                  <Search size={18} />
-                 <input type="text" placeholder="Buscar por título o posición..." />
+                 <input
+                   type="text"
+                   placeholder="Buscar por título o posición..."
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
               </div>
-              <button className="btn-filter-premium">
+              <button
+                type="button"
+                className="btn-filter-premium"
+                onClick={() => setActiveOnly((prev) => !prev)}
+                aria-pressed={activeOnly}
+              >
                 <Filter size={18} />
-                <span>Activas</span>
+                <span>{activeOnly ? 'Todas' : 'Activas'}</span>
               </button>
             </div>
 
             <table className="admin-table-premium">
               <thead>
                 <tr>
-                  <th>TÍTULO Y POSICIÓN</th>
-                  <th className="hide-mobile">TIPO</th>
-                  <th className="hide-mobile">ESTADO</th>
-                  <th className="hide-mobile">VIGENCIA</th>
-                  <th className="text-right">ACCIONES</th>
+                  <th className="col-main">TÍTULO Y POSICIÓN</th>
+                  <th className="hide-tablet col-meta">TIPO</th>
+                  <th className="hide-mobile col-status">ESTADO</th>
+                  <th className="hide-tablet col-date">VIGENCIA</th>
+                  <th className="col-actions text-right">ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
-                {advertisements.map((ad) => (
+                {visibleAds.length === 0 ? (
+                  <tr>
+                    <td colSpan={5}>No hay campañas con ese filtro. Cambiá la búsqueda o mirá todas.</td>
+                  </tr>
+                ) : pagination.pageItems.map((ad) => (
                   <tr key={ad.id}>
-                    <td>
+                    <td className="col-main">
                       <div className="row-main-info">
                         <span className="row-title">{ad.title}</span>
                         <div className="row-subtitle-icon">
                           <Layers size={12} />
-                          <span>{ad.position}</span>
+                          <span>{formatEnumLabel(ad.position, ad.position)}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="hide-mobile">
-                      <span className="row-meta">{ad.category || 'General'}</span>
+                    <td className="hide-tablet col-meta">
+                      <span className="row-meta">{formatEnumLabel(ad.category, 'General')}</span>
                     </td>
-                    <td className="hide-mobile">
+                    <td className="hide-mobile col-status">
                       <span className={`badge-premium ${ad.isActive ? 'active' : 'draft'}`}>
                         {ad.isActive ? 'Activa' : 'Pausada'}
                       </span>
                     </td>
-                    <td className="hide-mobile">
+                    <td className="hide-tablet col-date">
                       <div className="row-meta-date-group">
                          <small>Desde: {new Date(ad.startDate).toLocaleDateString()}</small>
                          <small>Hasta: {
@@ -141,33 +170,32 @@ const AdminAdvertisementsPage = () => {
                          }</small>
                       </div>
                     </td>
-                    <td className="text-right">
-                      <div className="action-icons-group">
-                        <Link to={`/admin/advertisements/edit/${ad.id}`} className="btn-action-premium edit" title="Editar">
-                          <Edit3 size={18} />
-                        </Link>
-                        <button 
-                          onClick={() => handleToggleStatus(ad.id, ad.isActive)} 
-                          className={`btn-action-premium ${ad.isActive ? 'delete' : 'edit'}`} 
-                          title={ad.isActive ? "Pausar" : "Activar"}
-                        >
-                          {ad.isActive ? <Trash2 size={18} /> : <Activity size={18} />}
-                        </button>
-                      </div>
-                    </td>
+                      <td className="col-actions text-right">
+                        <AdminRowActionsMenu
+                          label={`Acciones de ${ad.title || ad.id}`}
+                          items={[
+                            {
+                              key: 'edit',
+                              label: 'Editar',
+                              icon: Edit3,
+                              to: `/admin/advertisements/edit/${ad.id}`,
+                            },
+                            {
+                              key: 'toggle',
+                              label: ad.isActive ? 'Pausar' : 'Activar',
+                              icon: ad.isActive ? Trash2 : Activity,
+                              tone: ad.isActive ? 'danger' : 'success',
+                              onClick: () => handleToggleStatus(ad.id, ad.isActive),
+                            },
+                          ]}
+                        />
+                      </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <div className="table-footer-premium">
-              <p>Total: {advertisements.length} campañas registradas</p>
-              <div className="pagination-group-premium">
-                 <button disabled className="btn-page"><ChevronLeft size={20} /></button>
-                 <button disabled className="btn-page active">1</button>
-                 <button disabled className="btn-page"><ChevronRight size={20} /></button>
-              </div>
-            </div>
+            <AdminTablePagination {...pagination} onPageSizeChange={pagination.setPageSize} />
           </div>
         )}
       </div>

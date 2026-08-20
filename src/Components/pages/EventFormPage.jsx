@@ -13,6 +13,7 @@ import './EventFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import MapPicker from '../ui/MapPicker';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
 const EVENT_TIERS = [
@@ -73,7 +74,8 @@ const EventFormPage = () => {
   const [allCommerces, setAllCommerces] = useState([]);
   const [commerceSearch, setCommerceSearch] = useState('');
   const [showCommerceDropdown, setShowCommerceDropdown] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loadingCommerces, setLoadingCommerces] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const { uploading, fromInputEvent } = useImageUpload();
   const handleRemoveImage = () => setFormData(prev => ({ ...prev, coverImage: '' }));
@@ -95,13 +97,13 @@ const EventFormPage = () => {
           }
         }
       } catch (err) {
-        console.error("Error cargando comercios:", err);
+        showToast("No se pudieron cargar tus comercios.", 'error');
       } finally {
-        setLoading(false);
+        setLoadingCommerces(false);
       }
     };
     if (token) fetchCommerces();
-    else setLoading(false);
+    else setLoadingCommerces(false);
   }, [token, isAdmin]);
 
   const handleChange = (e) => {
@@ -147,7 +149,7 @@ const EventFormPage = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       const fullAddress = formData.location ? `${formData.address} (${formData.location})` : formData.address;
 
@@ -183,13 +185,15 @@ const EventFormPage = () => {
     } catch (err) {
       console.error("Error creating event:", err);
       const msg = err.message || '';
-      setError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de conexión con el servidor.' : msg || "Error al enviar la solicitud.");
-      setLoading(false);
+      const friendly = msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de conexión con el servidor.' : msg || "Error al enviar la solicitud.";
+      setError(friendly);
+      showToast(friendly, 'error');
+      setSubmitting(false);
     }
   };
 
-  if (loading && !error) {
-     return <div className="event-form-wrapper"><LoadingSpinner message="Cargando..." /></div>;
+  if (loadingCommerces) {
+     return <div className="event-form-wrapper"><LoadingSpinner message="Cargando comercios..." /></div>;
   }
 
   return (
@@ -260,7 +264,7 @@ const EventFormPage = () => {
                             >
                               <div style={{ color: '#fff', fontWeight: 500 }}>{c.name}</div>
                               <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-                                {c.category || 'Sin categoría'}
+                                {getCategoryDisplayName(c.category)}
                               </div>
                             </div>
                           ))}
@@ -493,7 +497,7 @@ const EventFormPage = () => {
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                           {tier.features.map((f, i) => (
                             <li key={i} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', padding: '2px 0', display: 'flex', alignItems: 'flex-start', gap: '5px' }}>
-                              <span style={{ color: tier.color, flexShrink: 0 }}>✓</span> {f}
+                              <CheckCircle size={14} style={{ color: tier.color, flexShrink: 0 }} /> {f}
                             </li>
                           ))}
                         </ul>
@@ -600,7 +604,7 @@ const EventFormPage = () => {
                   marginBottom: '1.25rem'
                 }}>
                   <p style={{ color: '#c084fc', fontWeight: 700, marginBottom: '0.6rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    📤 Datos para la transferencia
+                    <Upload size={16} /> Datos para la transferencia
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem', fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)' }}>
                     <span><strong style={{ color: '#fff' }}>Banco:</strong> Banco Macro</span>
@@ -673,9 +677,9 @@ const EventFormPage = () => {
               <button 
                 type="submit" 
                 className="submit-btn" 
-                disabled={loading || uploading || !isFormValid}
+                disabled={submitting || uploading || !isFormValid}
               >
-                {loading ? 'Enviando solicitud...' : isAdmin ? 'Crear Evento' : `Enviar Solicitud ${formData.eventTier > 1 ? EVENT_TIERS.find(t=>t.level===formData.eventTier)?.name : ''}`}
+                {submitting ? 'Enviando solicitud...' : isAdmin ? 'Crear Evento' : `Enviar Solicitud ${formData.eventTier > 1 ? EVENT_TIERS.find(t=>t.level===formData.eventTier)?.name : ''}`}
               </button>
             </div>
 

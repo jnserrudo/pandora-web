@@ -4,16 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getEvents, getAbsoluteImageUrl } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import ScrollToTopButton from '../ScrollToTopButton/ScrollToTopButton';
-import { MapPin, Star, Zap, Crown } from 'lucide-react';
+import { MapPin, Star, Zap, Crown, ExternalLink } from 'lucide-react';
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import SEOManager from "../SEO/SEOManager";
+import { useToast } from '../../context/ToastContext';
 import './EventsListPage.css';
 
 const EventsListPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tierFilter, setTierFilter] = useState('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loadError, setLoadError] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,8 +25,11 @@ const EventsListPage = () => {
       setLoading(true);
       try {
         const data = await getEvents();
-        const visible = data.filter(e => 
-          !e.status || e.status === 'APPROVED' || e.status === 'SCHEDULED'
+        const visible = (data || []).filter((e) =>
+          e &&
+          e.isActive !== false &&
+          (!e.status || e.status === 'SCHEDULED') &&
+          e.paymentStatus !== 'REJECTED'
         );
         // Ordenar: Premium (3) > Plus (2) > Básico (1), luego por fecha
         const sorted = [...visible].sort((a, b) => {
@@ -32,7 +39,8 @@ const EventsListPage = () => {
         });
         setEvents(sorted);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        setLoadError(true);
+        showToast("No se pudo cargar la agenda.", 'error');
       } finally {
         setLoading(false);
       }
@@ -40,9 +48,18 @@ const EventsListPage = () => {
     fetchEvents();
   }, []);
 
-  const premiumEvents = events.filter(e => (e.eventTier || 1) === 3);
-  const plusEvents = events.filter(e => (e.eventTier || 1) === 2);
-  const basicEvents = events.filter(e => (e.eventTier || 1) === 1);
+  // Apply filters
+  const filteredEvents = events.filter(event => {
+    const matchesTier = tierFilter === 'ALL' || (event.eventTier || 1) === parseInt(tierFilter);
+    const matchesSearch = !searchTerm || 
+      (event.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (event.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesTier && matchesSearch;
+  });
+
+  const premiumEvents = filteredEvents.filter(e => (e.eventTier || 1) === 3);
+  const plusEvents = filteredEvents.filter(e => (e.eventTier || 1) === 2);
+  const basicEvents = filteredEvents.filter(e => (e.eventTier || 1) === 1);
 
   const handleImageError = (e) => {
     e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop';
@@ -97,6 +114,13 @@ const EventsListPage = () => {
           </div>
           <div className="event-card-content">
             <h3 className="event-card-title">{event.name}</h3>
+            <div className="event-card-meta">
+              {event.externalLink && (
+                <span className="external-link-indicator">
+                  <ExternalLink size={12} /> Entradas / más info
+                </span>
+              )}
+            </div>
             <p className="event-card-location">
               <MapPin size={14} className="icon-loc" />
               {event.address || event.commerce?.name || event.organizerName || 'Salta'}
@@ -119,6 +143,36 @@ const EventsListPage = () => {
           <h1>Agenda de Eventos</h1>
           <p>Descubre todo lo que está pasando en la ciudad.</p>
         </header>
+
+        {/* Event Filters */}
+        <div className="events-filters">
+          <div className="filter-group">
+            <label htmlFor="tier-filter">Filtrar por nivel:</label>
+            <select 
+              id="tier-filter"
+              value={tierFilter} 
+              onChange={(e) => setTierFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="ALL">Todos</option>
+              <option value="3">Premium</option>
+              <option value="2">Plus</option>
+              <option value="1">Básico</option>
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label htmlFor="search-filter">Buscar eventos:</label>
+            <input
+              id="search-filter"
+              type="text"
+              placeholder="Buscar por nombre o descripción..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="filter-input"
+            />
+          </div>
+        </div>
 
         {/* Eventos Premium */}
         {premiumEvents.length > 0 && (
@@ -146,24 +200,33 @@ const EventsListPage = () => {
           </section>
         )}
 
-        {/* Todos los Eventos (básicos) */}
-        <section>
-          {(premiumEvents.length > 0 || plusEvents.length > 0) && (
-            <h2 className="events-section-title" style={{ marginTop: '3rem' }}>Todos los Eventos</h2>
-          )}
-          <div className="events-grid events-grid--five">
-            {basicEvents.length > 0 ? (
-              basicEvents.map(renderEventCard)
+        {basicEvents.length > 0 && (
+          <section>
+            {(premiumEvents.length > 0 || plusEvents.length > 0) && (
+              <h2 className="events-section-title" style={{ marginTop: '3rem' }}>Otros eventos</h2>
+            )}
+            <div className="events-grid">
+              {basicEvents.map(renderEventCard)}
+            </div>
+          </section>
+        )}
+
+        {filteredEvents.length === 0 && (
+          <div className="no-results-message">
+            {loadError ? (
+              <p>No se pudo cargar la agenda. Probá recargar.</p>
+            ) : events.length === 0 ? (
+              <>
+                <p>No hay eventos programados por el momento.</p>
+                <p>Volvé al <Link to="/">inicio</Link> o mirá los <Link to="/commerces">comercios</Link>.</p>
+              </>
             ) : (
-              events.length === 0 && (
-                <p className="no-results-message">No hay eventos programados por el momento. ¡Volvé pronto!</p>
-              )
+              <p>No hay eventos con esos filtros. Probá otra búsqueda o nivel.</p>
             )}
           </div>
-        </section>
+        )}
       </div>
       <Footer />
-      <ScrollToTopButton />
     </div>
   );
 };

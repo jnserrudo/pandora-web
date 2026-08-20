@@ -1,5 +1,6 @@
 // src/Components/pages/AdminArticlesPage.jsx
 import React, { useState, useEffect } from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
 import { getAdminArticles } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -19,6 +20,8 @@ import {
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
 import './AdminArticlesPage.css';
 
 const AdminArticlesPage = () => {
@@ -27,6 +30,7 @@ const AdminArticlesPage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -36,8 +40,8 @@ const AdminArticlesPage = () => {
         const items = Array.isArray(data) ? data : (data.articles || []);
         setArticles(items);
       } catch (err) {
-        console.error("Error fetching admin articles:", err);
         setError("Error cargando artículos. Verifica que tengas permisos de administrador.");
+        showToast("No se pudieron cargar las noticias.", 'error');
       } finally {
         setLoading(false);
       }
@@ -83,6 +87,17 @@ const AdminArticlesPage = () => {
     }
   };
 
+  const filteredArticles = articles.filter((article) => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return true;
+    const categoryName = (article.category && typeof article.category === 'object')
+      ? article.category.name
+      : (typeof article.category === 'string' ? article.category : '');
+    return article.title?.toLowerCase().includes(term) || String(categoryName).toLowerCase().includes(term);
+  });
+
+  const pagination = useAdminPagination(filteredArticles, 10);
+
   return (
     <div className="admin-wrapper">
       <Navbar />
@@ -117,72 +132,87 @@ const AdminArticlesPage = () => {
             <div className="table-filters-premium">
               <div className="search-bar-premium">
                  <Search size={18} />
-                 <input type="text" placeholder="Buscar por título o categoría..." />
+                 <input
+                   type="text"
+                   placeholder="Buscar por título o categoría..."
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
               </div>
             </div>
             <table className="admin-table-premium">
               <thead>
                 <tr>
-                  <th>Título</th>
-                  <th className="hide-mobile">Categoría</th>
-                  <th>Estado</th>
-                  <th className="hide-mobile">Fecha</th>
-                  <th>Acciones</th>
+                  <th className="col-main">Título</th>
+                  <th className="hide-tablet col-meta">Categoría</th>
+                  <th className="col-status">Estado</th>
+                  <th className="hide-mobile col-date">Fecha</th>
+                  <th className="col-actions text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {articles.map((article) => {
-                  const categoryName = (article.category && typeof article.category === 'object') 
+                {filteredArticles.length === 0 ? (
+                  <tr>
+                    <td colSpan={5}>No hay noticias con esa búsqueda. Probá otro título o categoría.</td>
+                  </tr>
+                ) : pagination.pageItems.map((article) => {
+                  const categoryName = getCategoryDisplayName(
+                    (article.category && typeof article.category === 'object') 
                     ? article.category.name 
-                    : (typeof article.category === 'string' ? article.category : 'General');
+                    : (typeof article.category === 'string' ? article.category : 'General')
+                  );
 
                   return (
                     <tr key={article._id || article.id}>
-                      <td>
+                      <td className="col-main">
                         <div className="article-row-title">{article.title}</div>
                       </td>
-                      <td className="hide-mobile">
+                      <td className="hide-tablet col-meta">
                         <span className="category-tag">
                           {categoryName}
                         </span>
                       </td>
-                      <td>
+                      <td className="col-status">
                         <span className={`badge-premium ${article.status === 'PUBLISHED' ? 'active' : 'draft'}`}>
                           {article.status === 'PUBLISHED' ? 'Publicado' : 'Borrador'}
                         </span>
                       </td>
-                      <td className="hide-mobile">
+                      <td className="hide-mobile col-date">
                         {new Date(article.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="text-right">
-                        <div className="action-icons-group">
-                          <button 
-                             className={`btn-action-premium ${article.status === 'PUBLISHED' ? 'view' : 'publish'}`} 
-                             onClick={() => handleTogglePublishStatus(article.id, article.status)}
-                             title={article.status === 'PUBLISHED' ? "Pasar a Borrador" : "Publicar"}
-                          >
-                             {article.status === 'PUBLISHED' ? <EyeOff size={18} /> : <Eye size={18} />}
-                          </button>
-                          <Link to={`/admin/articles/edit/${article.id}`} className="btn-action-premium edit" title="Editar">
-                             <Edit3 size={18} />
-                          </Link>
-                          <button 
-                             className={`btn-action-premium delete`} 
-                             onClick={() => handleToggleStatus(article.id, article.isActive)}
-                             title="Eliminar"
-                          >
-                             <Trash2 size={18} />
-                          </button>
-                        </div>
+                      <td className="col-actions text-right">
+                        <AdminRowActionsMenu
+                          label={`Acciones de ${article.title}`}
+                          items={[
+                            {
+                              key: 'publish',
+                              label: article.status === 'PUBLISHED' ? 'Pasar a borrador' : 'Publicar',
+                              icon: article.status === 'PUBLISHED' ? EyeOff : Eye,
+                              tone: article.status === 'PUBLISHED' ? 'info' : 'success',
+                              onClick: () => handleTogglePublishStatus(article.id, article.status),
+                            },
+                            {
+                              key: 'edit',
+                              label: 'Editar',
+                              icon: Edit3,
+                              to: `/admin/articles/edit/${article.id}`,
+                            },
+                            {
+                              key: 'delete',
+                              label: 'Eliminar',
+                              icon: Trash2,
+                              tone: 'danger',
+                              onClick: () => handleToggleStatus(article.id, article.isActive),
+                            },
+                          ]}
+                        />
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-            <div className="table-footer-premium">
-               <p>Sistema de Gestión de Magazine Pandora {new Date().getFullYear()}</p>
-            </div>
+            <AdminTablePagination {...pagination} onPageSizeChange={pagination.setPageSize} />
           </div>
         )}
       </div>

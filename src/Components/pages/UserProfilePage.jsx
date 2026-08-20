@@ -13,15 +13,20 @@ import {
   X,
   CreditCard
 } from 'lucide-react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getMyFavorites, getAbsoluteImageUrl, updateUserProfile } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { useToast } from '../../context/ToastContext';
+import { formatRoleLabel } from '../../utils/enumLabels.js';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
   const { user, token, logout, refreshProfile } = useAuth();
+  const { showToast } = useToast();
   const [favorites, setFavorites] = React.useState([]);
   const [loadingFavs, setLoadingFavs] = React.useState(true);
 
@@ -41,7 +46,7 @@ const UserProfilePage = () => {
           const data = await getMyFavorites(token);
           setFavorites(data);
         } catch (err) {
-          console.error("Error fetching favorites:", err);
+          showToast("No se pudieron cargar tus favoritos.", 'error');
         } finally {
           setLoadingFavs(false);
         }
@@ -61,9 +66,12 @@ const UserProfilePage = () => {
       await updateUserProfile({ dni: dniValue.trim() }, token);
       await refreshProfile();
       setEditingDni(false);
+      showToast("DNI actualizado.", 'success');
     } catch (err) {
       const msg = err.message || '';
-      setDniError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg);
+      const friendly = msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg;
+      setDniError(friendly);
+      showToast(friendly, 'error');
     } finally {
       setSavingDni(false);
     }
@@ -71,6 +79,7 @@ const UserProfilePage = () => {
 
   const handleLogout = () => {
     logout();
+    showToast("Sesión cerrada.", 'info');
     window.location.href = '/';
   };
 
@@ -88,7 +97,7 @@ const UserProfilePage = () => {
           <div className="profile-info-main">
             <div className="profile-role-badge">
               <Shield size={14} />
-              <span>{user?.role || 'USUARIO'}</span>
+              <span>{formatRoleLabel(user?.role)}</span>
             </div>
             <h1>{user?.name || user?.username}</h1>
             <p className="profile-tagline">Miembro de la comunidad Pandora</p>
@@ -122,11 +131,11 @@ const UserProfilePage = () => {
           </div>
           
           {loadingFavs ? (
-            <div className="favs-loader">Buscando tus favoritos...</div>
+            <LoadingSpinner message="Buscando tus favoritos..." />
           ) : favorites.length === 0 ? (
             <div className="empty-favorites-state">
-              <p>Aún no tienes comercios favoritos.</p>
-              <Link to="/commerces" className="btn-explore">Explorar Comercios</Link>
+              <p>Aún no tenés comercios favoritos.</p>
+              <Link to="/commerces" className="btn-explore">Explorar comercios</Link>
             </div>
           ) : (
             <div className="favorites-grid-mini">
@@ -138,7 +147,7 @@ const UserProfilePage = () => {
                   />
                   <div className="fav-mini-info">
                     <h4>{fav.commerce?.name}</h4>
-                    <span>{fav.commerce?.category?.replace('_', ' ')}</span>
+                    <span>{getCategoryDisplayName(fav.commerce?.category)}</span>
                   </div>
                 </Link>
               ))}

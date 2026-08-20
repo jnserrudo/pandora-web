@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
   // Helper para verificar si el usuario es administrador
   const isAdmin = () => {
-    return user?.role === 'ADMIN' || user?.role === 'admin';
+    return user?.role === 'ADMIN';
   };
 
   const value = {

@@ -6,6 +6,8 @@ import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import { MapPin, Search } from 'lucide-react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
+import { useToast } from '../../context/ToastContext';
 import './CommercesListPage.css';
 
 const CommercesListPage = () => {
@@ -17,13 +19,10 @@ const CommercesListPage = () => {
   const [activeCategory, setActiveCategory] = useState(categoryParam || 'ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
+  const [loadError, setLoadError] = useState(false);
+  const { showToast } = useToast();
 
-  const categoryNames = {
-    'ALL': 'Todos',
-    'VIDA_NOCTURNA': 'Vida Nocturna',
-    'GASTRONOMIA': 'Gastronomía',
-    'SALAS_Y_TEATRO': 'Salas y Teatro'
-  };
+  const categoryKeys = ['ALL', 'VIDA_NOCTURNA', 'GASTRONOMIA', 'SALAS_Y_TEATRO'];
 
   useEffect(() => {
     const fetchCommerces = async () => {
@@ -32,7 +31,8 @@ const CommercesListPage = () => {
         const data = await getCommerces();
         setAllCommerces(data);
       } catch (error) {
-        console.error("Error cargando comercios:", error);
+        setLoadError(true);
+        showToast("No se pudieron cargar los comercios.", 'error');
       } finally {
         setLoading(false);
       }
@@ -96,20 +96,20 @@ const CommercesListPage = () => {
               className="commerces-sort-select"
             >
               <option value="recent">Más recientes</option>
-              <option value="az">A → Z</option>
-              <option value="za">Z → A</option>
+              <option value="az">A a Z</option>
+              <option value="za">Z a A</option>
               <option value="plan">Por plan</option>
             </select>
           </div>
           
           <div className="category-filters">
-            {Object.keys(categoryNames).map(catKey => (
+            {categoryKeys.map(catKey => (
               <button
                 key={catKey}
                 className={`filter-btn ${activeCategory === catKey ? 'active' : ''}`}
                 onClick={() => setActiveCategory(catKey)}
               >
-                {categoryNames[catKey]}
+                {getCategoryDisplayName(catKey)}
               </button>
             ))}
           </div>
@@ -139,7 +139,7 @@ const CommercesListPage = () => {
                           onError={handleImageError}
                         />
                         <span className="card-category-badge">
-                          {categoryNames[commerce.category] || commerce.category}
+                          {getCategoryDisplayName(commerce.category)}
                         </span>
                       </div>
                       <div className="card-content">
@@ -159,7 +159,14 @@ const CommercesListPage = () => {
                 ))
               ) : (
                 <div className="no-results">
-                  <p>No se encontraron comercios{searchTerm ? ` para "${searchTerm}"` : ' en esta categoría'}.</p>
+                  {loadError ? (
+                    <p>No se pudieron cargar los locales. Revisá tu conexión.</p>
+                  ) : (
+                    <>
+                      <p>No se encontraron comercios{searchTerm ? ` para "${searchTerm}"` : ' en esta categoría'}.</p>
+                      <p>Probá otro filtro o <Link to="/commerces/create">sumá tu comercio</Link>.</p>
+                    </>
+                  )}
                 </div>
               )}
             </div>

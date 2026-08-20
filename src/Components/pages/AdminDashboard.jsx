@@ -45,7 +45,7 @@ const AdminDashboard = () => {
         console.error("Error fetching dashboard stats:", err);
         // The global interceptor handles total failures, but we might want local feedback too
         setStatsError(err?.message || 'Error cargando estadísticas del dashboard.');
-        // Avoid toast here if the interceptor is already redirecting or notifying
+        showToast(err?.message || 'Error cargando estadísticas del dashboard.', 'error');
       } finally {
         setStatsLoading(false);
       }
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
           <CategoryConfigPanel />
         </section>
 
-        {/* IA Moderation Guard (Stub) */}
+        {/* IA Moderation Guard */}
         <section className="admin-section">
           <IAModerationStub />
         </section>
@@ -160,7 +160,7 @@ const AdminDashboard = () => {
                   <p>{module.description}</p>
                 </div>
                 <div className="hub-card-footer">
-                  <span>GESTIONAR</span>
+                  <span>Entrar</span>
                   <ArrowRight size={16} />
                 </div>
               </div>

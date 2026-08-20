@@ -1,5 +1,6 @@
 // src/Components/pages/MyCommercesPage.jsx
 import React, { useState, useEffect } from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
 import { 
     getMyCommerces, 
@@ -190,7 +191,7 @@ const MyCommercesPage = () => {
                                 
                                 <div className="card-body">
                                     <div className="card-top-info">
-                                        <span className="card-category">{commerce.category?.replace('_', ' ')}</span>
+                                        <span className="card-category">{getCategoryDisplayName(commerce.category)}</span>
                                         <span className={`status-pill ${commerce.status?.toLowerCase()}`}>
                                             {commerce.status === 'PENDING' ? 'En Revisión' : 
                                              commerce.status === 'ACTIVE' ? 'Publicado' : 'Rechazado'}

@@ -55,6 +55,16 @@
   --layout-max-width: 1400px;
   --layout-padding-x: 2rem;
   --layout-nav-offset: 140px;
+  --navbar-clearance: 5.5rem;
+  --back-top: calc(var(--layout-nav-offset) - 2rem);
+
+  /* Floating dock: assistant FAB + scroll-to-top share this corner */
+  --fab-size: 56px;
+  --fab-right: 1.25rem;
+  --fab-bottom: 1.25rem;
+  --fab-gap: 0.85rem;
+  --dock-safe-right: calc(var(--fab-right) + var(--fab-size) + var(--fab-gap));
+  --dock-safe-bottom: calc(var(--fab-bottom) + var(--fab-size) + 1.5rem);
 
   /* Border Radius */
   --radius-card: 16px;
@@ -73,7 +83,6 @@
 .dark {
   --background: #060110;
   --foreground: #f0e8ff;
-  /* (Omitir el resto por ahora para simplificar o usar los mismos si no hay toggle de tema real) */
 }
 
 html, body, #root {
@@ -96,6 +105,21 @@ body {
   color: var(--color-text);
   position: relative;
   min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --navbar-clearance: 6.75rem;
+    --back-top: calc(var(--navbar-clearance) + 0.5rem);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --fab-size: 52px;
+    --fab-right: 0.85rem;
+    --fab-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 button, input, select, textarea, optgroup {
@@ -200,4 +224,15 @@ body::after {
   filter: blur(0);
   transform: scale(1);
   transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass shared utilities (used by forms, pricing, toasts, admin) */
+.glass-morphism,
+.glass-panel {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }

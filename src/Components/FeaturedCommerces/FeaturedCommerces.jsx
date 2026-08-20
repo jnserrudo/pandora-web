@@ -1,6 +1,7 @@
 // src/Components/FeaturedCommerces/FeaturedCommerces.jsx
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { getCategoryDisplayName } from "../../utils/categoryUtils.js";
 import { Link } from "react-router-dom";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { getCommerces, toggleFavorite, getAbsoluteImageUrl } from "../../services/api";
@@ -37,7 +38,7 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
            }
         }
       } catch (error) {
-        console.error("Error fetching commerces:", error);
+        showToast("No se pudieron cargar los locales destacados.", 'error');
       } finally {
         setLoading(false);
       }
@@ -59,8 +60,9 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
           ? { ...c, isFavorite: !c.isFavorite } 
           : c
       ));
+      showToast("Favoritos actualizados.", 'success');
     } catch (err) {
-      console.error("Error toggling favorite:", err);
+      showToast(err.message || "No se pudo actualizar el favorito.", 'error');
     }
   };
 
@@ -109,8 +111,8 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
               maxWidth: '800px',
               border: '1px solid rgba(255,255,255,0.05)'
           }}>
-              <p>No hay locales disponibles actualmente</p>
-              <small style={{ opacity: 0.5 }}>{planLevel ? `Plan: ${planLevel}` : 'Todos los planes'}</small>
+              <p>Todavía no hay locales destacados en este bloque.</p>
+              <small style={{ opacity: 0.5 }}><Link to="/commerces">Ver todos los comercios</Link></small>
           </div>
       ) : (
         <div
@@ -149,7 +151,7 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
 
                   <div className="commerce-card-overlay">
                     <h3 className="commerce-card-name">{commerce.name}</h3>
-                    <span className="commerce-card-category">{commerce.category}</span>
+                    <span className="commerce-card-category">{getCategoryDisplayName(commerce.category)}</span>
                   </div>
                 </div>
               </Link>

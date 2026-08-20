@@ -1,8 +1,7 @@
 // src/Components/pages/AdminArticleFormPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { uploadImage, API_URL, getAbsoluteImageUrl } from '../../services/api';
-import axios from 'axios';
+import { uploadImage, API_URL, getAbsoluteImageUrl, apiClient } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
@@ -13,6 +12,7 @@ import './CommerceFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 
 const AdminArticleFormPage = () => {
   const { id } = useParams();
@@ -42,7 +42,7 @@ const AdminArticleFormPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get(`${API_URL}/articles/categories`);
+        const res = await apiClient.get('/articles/categories');
         setCategories(res.data);
         // Pre-seleccionar primera categoría si no hay ninguna seleccionada
         if (res.data.length > 0 && !formData.categoryId) {
@@ -62,9 +62,7 @@ const AdminArticleFormPage = () => {
       const fetchArticle = async () => {
         setLoading(true);
         try {
-          const res = await axios.get(`${API_URL}/articles/manage/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await apiClient.get(`/articles/manage/${id}`);
           const data = res.data;
           setFormData({
             title: data.title || '',
@@ -128,10 +126,10 @@ const AdminArticleFormPage = () => {
       };
 
       if (isEditMode) {
-        await axios.put(`${API_URL}/articles/${id}`, payload, { headers });
+        await apiClient.put(`/articles/${id}`, payload);
         showToast('Noticia actualizada correctamente.', 'success');
       } else {
-        await axios.post(`${API_URL}/articles`, payload, { headers });
+        await apiClient.post('/articles', payload);
         showToast('Noticia publicada con éxito.', 'success');
       }
       navigate('/admin/articles');
@@ -178,7 +176,7 @@ const AdminArticleFormPage = () => {
             <select name="categoryId" value={formData.categoryId} onChange={handleChange} className="form-control" required>
               <option value="">— Seleccioná una categoría —</option>
               {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option key={cat.id} value={cat.id}>{getCategoryDisplayName(cat.name || cat.slug)}</option>
               ))}
             </select>
             <small className="field-hint">Las categorías disponibles se cargan desde el sistema.</small>

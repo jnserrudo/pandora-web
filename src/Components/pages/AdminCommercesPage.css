@@ -1,0 +1,232 @@
+/* AdminCommercesPage — modal de revisión */
+
+.commerce-review-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.commerce-review-modal {
+  width: min(860px, 100%);
+  max-height: min(92vh, 900px);
+  display: flex;
+  flex-direction: column;
+  background: #15101f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.commerce-review-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem 1.4rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.commerce-review-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(240, 232, 255, 0.5);
+}
+
+.commerce-review-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #fff;
+}
+
+.commerce-review-scroll {
+  overflow-y: auto;
+  padding: 1.1rem 1.4rem;
+  flex: 1;
+}
+
+.commerce-review-media {
+  margin-bottom: 1rem;
+}
+
+.commerce-review-cover {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.commerce-review-thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.commerce-review-thumbs img {
+  width: 100%;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.commerce-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.commerce-review-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 0.85rem;
+}
+
+.commerce-review-block h3,
+.commerce-review-desc h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(240, 232, 255, 0.55);
+}
+
+.commerce-review-block p {
+  margin: 0 0 0.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  word-break: break-word;
+}
+
+.commerce-review-block p.muted,
+.commerce-review-desc .muted {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.commerce-review-desc {
+  margin-bottom: 1rem;
+}
+
+.commerce-review-desc p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.5;
+  font-size: 0.92rem;
+  max-height: 8rem;
+  overflow: auto;
+}
+
+.commerce-review-modal .modal-form-group {
+  margin: 0;
+}
+
+.commerce-review-modal .modal-form-group label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.86rem;
+}
+
+.commerce-review-modal .modal-form-group textarea {
+  width: 100%;
+  min-height: 90px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  color: #fff;
+  resize: vertical;
+}
+
+.commerce-review-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 1rem 1.4rem 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.commerce-review-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.commerce-review-modal .btn-secondary,
+.commerce-review-modal .btn-primary {
+  border-radius: 12px;
+  padding: 0.7rem 1.1rem;
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.commerce-review-modal .btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  text-decoration: none;
+}
+
+.commerce-review-modal .btn-primary {
+  background: var(--color-primary, #8a2be2);
+  border: none;
+  color: #fff;
+}
+
+.commerce-review-modal .btn-danger {
+  background: #e11d48 !important;
+}
+
+.commerce-review-modal .btn-primary:disabled,
+.commerce-review-modal .btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 800px) {
+  .commerce-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .commerce-review-thumbs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .commerce-review-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .commerce-review-actions {
+    margin-left: 0;
+  }
+
+  .commerce-review-actions .btn-primary,
+  .commerce-review-actions .btn-secondary,
+  .commerce-detail-link {
+    flex: 1;
+    justify-content: center;
+  }
+}

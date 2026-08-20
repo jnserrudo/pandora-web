@@ -2,7 +2,8 @@
 import React, { useEffect } from 'react';
 import { trackAdvertisement } from '../../services/AdvertisementService';
 import { getAbsoluteImageUrl } from '../../services/api';
-import { Store, Megaphone, Star } from 'lucide-react';
+import { Store, Megaphone, Star, ArrowRight } from 'lucide-react';
+import { formatEnumLabel } from '../../utils/enumLabels.js';
 import './AdvertisementCard.css';
 
 const AdvertisementCard = ({ advertisement }) => {
@@ -46,9 +47,12 @@ const AdvertisementCard = ({ advertisement }) => {
         
         {/* Floating badge */}
         <div className="ad-card-badge">
-          {advertisement.category === 'commerce' && <><Store size={14} style={{ display: 'inline-block', marginRight: '4px' }} /> Comercio</>}
-          {advertisement.category === 'external' && <><Megaphone size={14} style={{ display: 'inline-block', marginRight: '4px' }} /> Publicidad</>}
-          {advertisement.category === 'sponsor' && <><Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} /> Sponsor</>}
+          {['commerce', 'COMMERCE'].includes(advertisement.category) && <><Store size={14} style={{ display: 'inline-block', marginRight: '4px' }} /> Comercio</>}
+          {['external', 'EXTERNAL'].includes(advertisement.category) && <><Megaphone size={14} style={{ display: 'inline-block', marginRight: '4px' }} /> Externo</>}
+          {['sponsor', 'SPONSOR'].includes(advertisement.category) && <><Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} /> Sponsor</>}
+          {!advertisement.category || !['commerce', 'COMMERCE', 'external', 'EXTERNAL', 'sponsor', 'SPONSOR'].includes(advertisement.category)
+            ? formatEnumLabel(advertisement.category)
+            : null}
         </div>
       </div>
 
@@ -58,7 +62,7 @@ const AdvertisementCard = ({ advertisement }) => {
         
         <div className="ad-card-footer">
           <span className="ad-card-cta">Conocer más</span>
-          <div className="ad-card-arrow">→</div>
+          <div className="ad-card-arrow" aria-hidden="true"><ArrowRight size={16} /></div>
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import './CommerceFormPage.css';
 import './EventFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import MapPicker from '../ui/MapPicker';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
@@ -254,7 +255,7 @@ const EventEditPage = () => {
                             >
                               <div style={{ color: '#fff', fontWeight: 500 }}>{c.name}</div>
                               <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-                                {c.category || 'Sin categoría'}
+                                {getCategoryDisplayName(c.category)}
                               </div>
                             </div>
                           ))}

@@ -1,8 +1,9 @@
 // src/components/Search/Search.jsx
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Asumiendo que usas React Router para la navegación
+import { Link } from "react-router-dom";
 import { searchGlobal } from "../../services/api";
+import { ArrowRight } from "lucide-react";
 import "./Search.css";
 
 // --- NUEVO COMPONENTE HIJO PARA RENDERIZAR CADA RESULTADO ---
@@ -38,7 +39,7 @@ const ResultItem = ({ item }) => {
         <div className={`item-type ${item.type}`}>{typeLabel}</div>
         <h4 className="item-name">{title}</h4>
         <p className="item-description">{description.substring(0, 120)}...</p>
-        <span className="item-cta">Ver más →</span>
+        <span className="item-cta">Ver más <ArrowRight size={14} /></span>
       </div>
     </Link>
   );

@@ -2,12 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { API_URL } from '../../services/api';
+import { apiClient } from '../../services/api';
 import { PlusCircle, MapPin, Phone, Trash2, Home, AlertCircle } from 'lucide-react';
 import MapPicker from '../ui/MapPicker';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import './CommerceBranchManager.css';
-import axios from 'axios';
 
 const CommerceBranchManager = ({ commerce }) => {
     const { token } = useAuth();
@@ -45,7 +44,7 @@ const CommerceBranchManager = ({ commerce }) => {
 
     const fetchBranches = async () => {
         try {
-            const res = await axios.get(`${API_URL}/commerces/${commerce.id}/branches`);
+            const res = await apiClient.get(`/commerces/${commerce.id}/branches`);
             setBranches(res.data);
         } catch (err) {
             console.error("Error fetching branches:", err);
@@ -73,9 +72,7 @@ const CommerceBranchManager = ({ commerce }) => {
 
         setLoading(true);
         try {
-            await axios.post(`${API_URL}/commerces/${commerce.id}/branches`, newBranch, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await apiClient.post(`/commerces/${commerce.id}/branches`, newBranch);
             showToast("Sucursal agregada con éxito", "success");
             setNewBranch({ name: '', address: '', phone: '', latitude: null, longitude: null });
             setShowAddForm(false);
@@ -105,9 +102,7 @@ const CommerceBranchManager = ({ commerce }) => {
         const { branchId } = confirmModal;
         setLoading(true);
         try {
-            await axios.delete(`${API_URL}/branches/${branchId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await apiClient.delete(`/branches/${branchId}`);
             showToast("Sucursal eliminada", "success");
             setConfirmModal({ isOpen: false, branchId: null, isMain: false });
             fetchBranches();

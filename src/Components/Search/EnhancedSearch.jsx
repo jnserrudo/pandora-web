@@ -1,8 +1,10 @@
 // src/Components/Search/EnhancedSearch.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { useNavigate } from 'react-router-dom';
 import { searchGlobal } from '../../services/api';
-import { Calendar } from 'lucide-react';
+import { Calendar, Store, Newspaper, X, Search, ArrowRight } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 import './EnhancedSearch.css';
 
 const EnhancedSearch = () => {
@@ -12,6 +14,7 @@ const EnhancedSearch = () => {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const debounceTimer = useRef(null);
 
   // Close results when clicking outside
@@ -52,7 +55,7 @@ const EnhancedSearch = () => {
           import('../../services/api').then(m => m.logSearch(query));
         }
       } catch (error) {
-        console.error('Search error:', error);
+        showToast("No se pudo buscar. Probá de nuevo.", 'error');
       } finally {
         setIsSearching(false);
       }
@@ -83,10 +86,7 @@ const EnhancedSearch = () => {
   return (
     <div className="enhanced-search-container" ref={searchRef}>
       <div className="search-input-wrapper">
-        <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.35-4.35"/>
-        </svg>
+        <Search className="search-icon" size={18} />
         
         <input
           type="text"
@@ -110,7 +110,7 @@ const EnhancedSearch = () => {
             }}
             aria-label="Limpiar búsqueda"
           >
-            ✕
+            <X size={14} />
           </button>
         )}
       </div>
@@ -122,7 +122,7 @@ const EnhancedSearch = () => {
           {results.commerces.length > 0 && (
             <div className="results-section">
               <h4 className="results-section-title">
-                <span className="section-icon">🏪</span>
+                <Store size={14} className="section-icon" />
                 Comercios ({results.commerces.length})
               </h4>
               {results.commerces.slice(0, 3).map(commerce => (
@@ -133,11 +133,9 @@ const EnhancedSearch = () => {
                 >
                   <div className="result-info">
                     <span className="result-name">{commerce.name}</span>
-                    <span className="result-category">{commerce.category}</span>
+                    <span className="result-category">{getCategoryDisplayName(commerce.category)}</span>
                   </div>
-                  <svg className="result-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
+                  <ArrowRight className="result-arrow" size={16} />
                 </div>
               ))}
             </div>
@@ -160,9 +158,7 @@ const EnhancedSearch = () => {
                     <span className="result-name">{event.name}</span>
                     <span className="result-category">{event.commerce?.name}</span>
                   </div>
-                  <svg className="result-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
+                  <ArrowRight className="result-arrow" size={16} />
                 </div>
               ))}
             </div>
@@ -172,7 +168,7 @@ const EnhancedSearch = () => {
           {results.articles.length > 0 && (
             <div className="results-section">
               <h4 className="results-section-title">
-                <span className="section-icon">📰</span>
+                <Newspaper size={14} className="section-icon" />
                 Noticias ({results.articles.length})
               </h4>
               {results.articles.slice(0, 3).map(article => (
@@ -183,11 +179,9 @@ const EnhancedSearch = () => {
                 >
                   <div className="result-info">
                     <span className="result-name">{article.title}</span>
-                    <span className="result-category">{article.category?.name}</span>
+                    <span className="result-category">{getCategoryDisplayName(article.category?.name || article.category)}</span>
                   </div>
-                  <svg className="result-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
+                  <ArrowRight className="result-arrow" size={16} />
                 </div>
               ))}
             </div>
@@ -203,7 +197,8 @@ const EnhancedSearch = () => {
       {showResults && query.trim().length >= 2 && totalResults === 0 && !isSearching && (
         <div className="search-results-dropdown">
           <div className="no-results">
-            <p>No se encontraron resultados para "{query}"</p>
+            <p>No se encontraron resultados para "{query}".</p>
+            <p>Probá otra palabra o andá a Comercios / Eventos / Revista.</p>
           </div>
         </div>
       )}

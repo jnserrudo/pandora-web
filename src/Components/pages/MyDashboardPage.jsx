@@ -1,5 +1,6 @@
 // src/Components/pages/MyDashboardPage.jsx
 import React, { useState, useEffect } from 'react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
 import {
   Store,
@@ -51,7 +52,7 @@ const MyDashboardPage = () => {
         // Advertisements optional — skip if endpoint not ready
         getMyAdvertisements(token).then(setAdvertisements).catch(() => {});
       } catch (err) {
-        console.error('Error cargando dashboard:', err);
+        showToast("No se pudo cargar tu panel.", 'error');
       } finally {
         setLoading(false);
       }
@@ -277,7 +278,7 @@ const MyDashboardPage = () => {
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)' }}>
-                                {commerce.category || 'Sin categoría'}
+                                {getCategoryDisplayName(commerce.category)}
                               </span>
                               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, background: `${sb.color}20`, color: sb.color }}>
                                 {sb.icon} {sb.label}

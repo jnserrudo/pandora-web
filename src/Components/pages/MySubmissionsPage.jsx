@@ -14,13 +14,16 @@ import {
 } from 'lucide-react';
 import { getMySubmissions } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { formatEnumLabel } from '../../utils/enumLabels.js';
 import './UserProfilePage.css'; // Reutilizamos base de estilos de perfil
 
 const MySubmissionsPage = () => {
   const { token } = useAuth();
+  const { showToast } = useToast();
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,13 +35,9 @@ const MySubmissionsPage = () => {
         const data = await getMySubmissions(token);
         setSubmissions(data);
       } catch (err) {
-        console.error("Error fetching submissions:", err);
         setError("No pudimos cargar tus solicitudes.");
-        // Fallback mock para visualización inicial
-        setSubmissions([
-          { id: 1, type: 'PLAN_UPGRADE', status: 'PENDING', message: 'Solicitud de Plan Elite para mi café.', createdAt: new Date(), attachmentUrl: '#' },
-          { id: 2, type: 'CONTACT', status: 'RESPONDED', message: 'Duda sobre banners.', adminResponse: 'Hola! Ya están activos tus banners.', createdAt: new Date() }
-        ]);
+        setSubmissions([]);
+        showToast("No pudimos cargar tus solicitudes.", 'error');
       } finally {
         setLoading(false);
       }
@@ -52,7 +51,7 @@ const MySubmissionsPage = () => {
       case 'RESPONDED': return <span className="status-badge success"><CheckCircle2 size={14} /> Respondido</span>;
       case 'APPROVED': return <span className="status-badge success"><CheckCircle2 size={14} /> Aprobado</span>;
       case 'REJECTED': return <span className="status-badge danger"><XCircle size={14} /> Rechazado</span>;
-      default: return <span className="status-badge">{status}</span>;
+      default: return <span className="status-badge">{formatEnumLabel(status, status)}</span>;
     }
   };
 

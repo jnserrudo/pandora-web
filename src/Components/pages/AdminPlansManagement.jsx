@@ -1,36 +1,39 @@
 // src/Components/pages/AdminPlansManagement.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  ChevronLeft, 
-  Settings, 
-  Plus, 
-  Save, 
-  Ticket, 
+import {
+  ChevronLeft,
+  Plus,
+  Save,
   Trash2,
   DollarSign,
   Tag,
-  XCircle,
   CheckCircle,
   TrendingUp,
-  Eye,
   EyeOff,
-  Save as InfoIcon
+  Search,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  getPlans, 
-  updatePlan, 
+import {
+  getPlans,
+  updatePlan,
   getPaymentHistory,
   getCoupons,
   createCoupon,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
 } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
+import {
+  formatPaymentMethodLabel,
+  formatPlanLevelLabel,
+} from '../../utils/enumLabels.js';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
+import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
 import './AdminArticlesPage.css';
 import './AdminPlansManagement.css';
 
@@ -43,48 +46,55 @@ const AdminPlansManagement = () => {
   const [newCoupon, setNewCoupon] = useState({ code: '', discountPercent: '', expiresAt: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [couponSearch, setCouponSearch] = useState('');
+  const [historySearch, setHistorySearch] = useState('');
+  const [methodFilter, setMethodFilter] = useState('ALL');
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      
-      // Pre-definimos los 4 niveles base para asegurar que siempre se vean (y se puedan crear vía upsert)
+
       const baselinePlans = [
-        { level: 1, name: "ECO", price: 0, description: "Básico y esencial" },
-        { level: 2, name: "BOOST", price: 1500, description: "Visibilidad mejorada" },
-        { level: 3, name: "PREMIUM", price: 3500, description: "Bestseller profesional" },
-        { level: 4, name: "ELITE", price: 6000, description: "Socio estratégico" }
+        { level: 1, name: 'Gratuito', price: 0, description: 'Básico y esencial' },
+        { level: 2, name: 'Plus', price: 1500, description: 'Visibilidad mejorada' },
+        { level: 3, name: 'Premium', price: 3500, description: 'Presencia profesional' },
+        { level: 4, name: 'Elite', price: 6000, description: 'Socio estratégico' },
       ];
 
       try {
         const plansData = await getPlans(token);
-        
-        // Mapeamos los niveles base, pero si ya existen en la DB (plansData), usamos esos datos (ID, precio real, etc)
-        const mergedPlans = baselinePlans.map(base => {
-          const existing = plansData?.find(p => p.level === base.level);
-          return existing ? { ...base, ...existing } : { ...base, id: `new-${base.level}` };
+        const mergedPlans = baselinePlans.map((base) => {
+          const existing = plansData?.find((p) => p.level === base.level);
+          if (existing) {
+            return {
+              ...base,
+              ...existing,
+              name: existing.name || formatPlanLevelLabel(existing.level, base.name),
+            };
+          }
+          return { ...base, id: `new-${base.level}` };
         });
-
         setPlans(mergedPlans);
       } catch (err) {
-        console.error("Error fetching plans:", err);
-        // Si falla la API por completo, al menos mostramos la plantilla para que el admin intente guardar/crear
-        setPlans(baselinePlans.map(base => ({ ...base, id: `fallback-${base.level}` })));
+        console.error('Error fetching plans:', err);
+        setPlans(baselinePlans.map((base) => ({ ...base, id: `fallback-${base.level}` })));
       }
 
-      // Other data
       try {
         const historyData = await getPaymentHistory(token);
         setHistory(historyData || []);
-      } catch (err) { console.error("Error history:", err); }
+      } catch (err) {
+        console.error('Error history:', err);
+      }
 
       try {
         const couponsData = await getCoupons(token, true);
         setCoupons(couponsData || []);
-      } catch (err) { console.error("Error coupons:", err); }
-
+      } catch (err) {
+        console.error('Error coupons:', err);
+      }
     } catch (err) {
-      console.error("General fetch error:", err);
+      console.error('General fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -95,7 +105,7 @@ const AdminPlansManagement = () => {
   }, [token]);
 
   const handlePlanChange = (id, field, value) => {
-    setPlans(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+    setPlans((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
   };
 
   const handleSavePlan = async (plan) => {
@@ -103,7 +113,8 @@ const AdminPlansManagement = () => {
     try {
       const payload = { ...plan, price: parseFloat(plan.price) || 0 };
       await updatePlan(plan.id, payload, token);
-      showToast(`Plan ${plan.name} actualizado correctamente.`, 'success');
+      showToast(`Plan ${plan.name} guardado correctamente.`, 'success');
+      await fetchData();
     } catch (err) {
       const msg = err.message || '';
       showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
@@ -116,18 +127,20 @@ const AdminPlansManagement = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { 
-        ...newCoupon, 
-        discountPercent: parseInt(newCoupon.discountPercent) || 0 
+      const payload = {
+        ...newCoupon,
+        discountPercent: parseInt(newCoupon.discountPercent, 10) || 0,
       };
       const created = await createCoupon(payload, token);
       setCoupons([created, ...coupons]);
       setNewCoupon({ code: '', discountPercent: '', expiresAt: '' });
-      showToast("Cupón creado con éxito.", 'success');
+      showToast('Cupón creado con éxito.', 'success');
     } catch (err) {
-      // Manejo amigable de errores de base de datos (Unique Constraint)
-      if (err.message.includes("Unique constraint failed") || err.message.includes("Coupon_code_key")) {
-        showToast("Este código de cupón ya existe en el sistema (puede estar desactivado).", 'error');
+      if (
+        err.message?.includes('Unique constraint failed') ||
+        err.message?.includes('Coupon_code_key')
+      ) {
+        showToast('Este código de cupón ya existe (puede estar desactivado).', 'error');
       } else {
         const msg = err.message || '';
         showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
@@ -140,7 +153,7 @@ const AdminPlansManagement = () => {
   const handleToggleCoupon = async (coupon) => {
     try {
       const updated = await updateCoupon(coupon.id, { isActive: !coupon.isActive }, token);
-      setCoupons(coupons.map(c => c.id === coupon.id ? updated : c));
+      setCoupons(coupons.map((c) => (c.id === coupon.id ? updated : c)));
       showToast(`Cupón ${updated.isActive ? 'activado' : 'desactivado'}.`, 'info');
     } catch (err) {
       const msg = err.message || '';
@@ -149,16 +162,43 @@ const AdminPlansManagement = () => {
   };
 
   const handleDeleteCoupon = async (id) => {
-    // if (!window.confirm("¿Eliminar este cupón permanentemente?")) return;
+    if (!window.confirm('¿Eliminar este cupón de forma permanente?')) return;
     try {
       await deleteCoupon(id, token);
-      setCoupons(coupons.filter(c => c.id !== id));
-      showToast("Cupón eliminado.", 'warning');
+      setCoupons(coupons.filter((c) => c.id !== id));
+      showToast('Cupón eliminado.', 'warning');
     } catch (err) {
       const msg = err.message || '';
       showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
     }
   };
+
+  const filteredCoupons = useMemo(() => {
+    const q = couponSearch.trim().toLowerCase();
+    if (!q) return coupons;
+    return coupons.filter((c) => (c.code || '').toLowerCase().includes(q));
+  }, [coupons, couponSearch]);
+
+  const filteredHistory = useMemo(() => {
+    const q = historySearch.trim().toLowerCase();
+    return history.filter((h) => {
+      const matchMethod = methodFilter === 'ALL' || (h.method || '') === methodFilter;
+      const matchSearch =
+        !q ||
+        (h.commerce?.name || '').toLowerCase().includes(q) ||
+        (h.couponUsed || '').toLowerCase().includes(q) ||
+        formatPaymentMethodLabel(h.method).toLowerCase().includes(q);
+      return matchMethod && matchSearch;
+    });
+  }, [history, historySearch, methodFilter]);
+
+  const couponPagination = useAdminPagination(filteredCoupons, 10);
+  const historyPagination = useAdminPagination(filteredHistory, 10);
+
+  const methodOptions = useMemo(() => {
+    const set = new Set(history.map((h) => h.method).filter(Boolean));
+    return ['ALL', ...Array.from(set)];
+  }, [history]);
 
   return (
     <div className="admin-wrapper hub-theme">
@@ -168,10 +208,10 @@ const AdminPlansManagement = () => {
           <div className="admin-title-group">
             <Link to="/admin/dashboard" className="back-link">
               <ChevronLeft size={20} />
-              <span>Volver al Panel Administrativo</span>
+              <span>Volver al Panel</span>
             </Link>
             <h1>Gestión de Negocio</h1>
-            <p>Ajustá tarifas, gestioná promociones y auditá ingresos globales.</p>
+            <p>Ajustá tarifas, gestioná promociones y auditá ingresos.</p>
           </div>
         </header>
 
@@ -179,8 +219,6 @@ const AdminPlansManagement = () => {
           <LoadingSpinner message="Cargando motor de finanzas..." />
         ) : (
           <div className="plans-management-container">
-            
-            {/* 1. Gestión de Precios */}
             <section className="admin-panel-card">
               <div className="panel-header-premium">
                 <div className="panel-title-group">
@@ -188,53 +226,58 @@ const AdminPlansManagement = () => {
                     <DollarSign size={24} />
                   </div>
                   <div>
-                    <h2>Tarifario de Niveles</h2>
-                    <p>Actualizá los precios mensuales de cada plan de comercio.</p>
+                    <h2>Tarifario de niveles</h2>
+                    <p>Actualizá nombre, descripción y precio mensual de cada plan.</p>
                   </div>
                 </div>
               </div>
 
               <div className="plans-editor-grid">
-                {plans.map(plan => (
+                {plans.map((plan) => (
                   <div key={plan.id} className="plan-premium-card">
                     <div className="plan-card-header">
-                       <div className="plan-level-tag">
-                          Nivel 
-                          <input 
-                            type="number" 
-                            className="level-input-inline"
-                            value={plan.level} 
-                            onChange={(e) => handlePlanChange(plan.id, 'level', parseInt(e.target.value) || 0)}
-                          />
-                       </div>
-                       <input 
-                         type="text" 
-                         className="plan-name-input"
-                         value={plan.name} 
-                         onChange={(e) => handlePlanChange(plan.id, 'name', e.target.value)}
-                         placeholder="Nombre del plan"
-                       />
-                       <textarea 
-                         className="plan-desc-input"
-                         value={plan.description} 
-                         onChange={(e) => handlePlanChange(plan.id, 'description', e.target.value)}
-                         placeholder="Breve descripción..."
-                       />
+                      <div className="plan-level-tag">
+                        Nivel
+                        <input
+                          type="number"
+                          className="level-input-inline"
+                          value={plan.level}
+                          onChange={(e) =>
+                            handlePlanChange(plan.id, 'level', parseInt(e.target.value, 10) || 0)
+                          }
+                          aria-label={`Nivel del plan ${plan.name}`}
+                        />
+                        <span className="plan-level-hint">{formatPlanLevelLabel(plan.level)}</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="plan-name-input"
+                        value={plan.name}
+                        onChange={(e) => handlePlanChange(plan.id, 'name', e.target.value)}
+                        placeholder="Nombre del plan"
+                      />
+                      <textarea
+                        className="plan-desc-input"
+                        value={plan.description || ''}
+                        onChange={(e) => handlePlanChange(plan.id, 'description', e.target.value)}
+                        placeholder="Breve descripción..."
+                      />
                     </div>
-                    
+
                     <div className="plan-price-editor">
                       <span className="symbol">$</span>
-                      <input 
-                        type="number" 
-                        value={plan.price} 
+                      <input
+                        type="number"
+                        value={plan.price}
                         onChange={(e) => handlePlanChange(plan.id, 'price', e.target.value)}
                         placeholder="0"
                       />
-                      <button 
-                        onClick={() => handleSavePlan(plan)} 
-                        className="btn-plan-save" 
+                      <button
+                        type="button"
+                        onClick={() => handleSavePlan(plan)}
+                        className="btn-plan-save"
                         disabled={saving}
-                        title="Guardar cambios (Upsert)"
+                        title="Guardar cambios del plan"
                       >
                         <Save size={18} />
                       </button>
@@ -244,7 +287,6 @@ const AdminPlansManagement = () => {
               </div>
             </section>
 
-            {/* 2. Cupones y Descuentos */}
             <section className="admin-panel-card">
               <div className="panel-header-premium">
                 <div className="panel-title-group">
@@ -252,7 +294,7 @@ const AdminPlansManagement = () => {
                     <Tag size={24} />
                   </div>
                   <div>
-                    <h2>Cupones de Descuento</h2>
+                    <h2>Cupones de descuento</h2>
                     <p>Creá códigos promocionales para captar nuevos comercios.</p>
                   </div>
                 </div>
@@ -262,84 +304,122 @@ const AdminPlansManagement = () => {
                 <form onSubmit={handleCreateCoupon} className="coupon-form-premium">
                   <div className="input-group-premium">
                     <label>Código</label>
-                    <input 
-                      type="text" 
-                      placeholder="PANDORA2025" 
+                    <input
+                      type="text"
+                      placeholder="PANDORA2026"
                       value={newCoupon.code}
-                      onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
+                      onChange={(e) =>
+                        setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })
+                      }
                       required
                     />
                   </div>
                   <div className="input-group-premium">
                     <label>% Porcentaje</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       placeholder="0"
                       value={newCoupon.discountPercent}
-                      onChange={(e) => setNewCoupon({...newCoupon, discountPercent: e.target.value})}
-                      max="100" min="0"
+                      onChange={(e) =>
+                        setNewCoupon({ ...newCoupon, discountPercent: e.target.value })
+                      }
+                      max="100"
+                      min="0"
                       required
                     />
                   </div>
                   <div className="input-group-premium">
-                    <label>Expira (Opcional)</label>
-                    <input 
-                      type="date" 
+                    <label>Expira (opcional)</label>
+                    <input
+                      type="date"
                       value={newCoupon.expiresAt}
-                      onChange={(e) => setNewCoupon({...newCoupon, expiresAt: e.target.value})}
+                      onChange={(e) => setNewCoupon({ ...newCoupon, expiresAt: e.target.value })}
                     />
                   </div>
                   <button type="submit" className="btn-create-coupon-premium" disabled={saving}>
                     <Plus size={20} />
-                    <span>Crear Cupón</span>
+                    <span>Crear cupón</span>
                   </button>
                 </form>
 
-                <div className="admin-table-wrapper-premium">
+                <div className="admin-table-wrapper-premium plans-table-block">
+                  <div className="table-filters-premium">
+                    <div className="search-bar-premium">
+                      <Search size={18} />
+                      <input
+                        type="search"
+                        placeholder="Buscar cupón por código..."
+                        value={couponSearch}
+                        onChange={(e) => setCouponSearch(e.target.value)}
+                      />
+                    </div>
+                  </div>
                   <table className="admin-table-premium">
                     <thead>
                       <tr>
-                        <th>CÓDIGO</th>
-                        <th>%</th>
-                        <th>EXPIRACIÓN</th>
-                        <th className="text-right">ESTADO / ACCIÓN</th>
+                        <th className="col-main">CÓDIGO</th>
+                        <th className="col-meta">%</th>
+                        <th className="hide-mobile col-date">EXPIRACIÓN</th>
+                        <th className="col-status">ESTADO</th>
+                        <th className="col-actions text-right">ACCIONES</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {coupons.length === 0 ? (
-                        <tr><td colSpan="4" className="text-center" style={{opacity: 0.5, padding: '3rem'}}>No hay cupones registrados.</td></tr>
+                      {filteredCoupons.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="text-center plans-empty-cell">
+                            No hay cupones con ese criterio.
+                          </td>
+                        </tr>
                       ) : (
-                        coupons.map((c) => (
+                        couponPagination.pageItems.map((c) => (
                           <tr key={c.id} className={!c.isActive ? 'row-disabled' : ''}>
-                            <td style={{fontWeight: 800, color: c.isActive ? 'var(--color-primary)' : 'inherit'}}>
-                              {c.code}
+                            <td className="col-main plans-code-cell">{c.code}</td>
+                            <td className="col-meta">{c.discountPercent}%</td>
+                            <td className="hide-mobile col-date">
+                              {c.expiresAt
+                                ? new Date(c.expiresAt).toLocaleDateString('es-AR')
+                                : 'Sin vencimiento'}
                             </td>
-                            <td>{c.discountPercent}%</td>
-                            <td>{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : '∞'}</td>
-                            <td className="text-right">
-                              <div className="action-icons-group">
-                                <button 
-                                  onClick={() => handleToggleCoupon(c)} 
-                                  className={`btn-action-premium ${c.isActive ? 'edit' : 'view'}`}
-                                  title={c.isActive ? 'Desactivar' : 'Activar'}
-                                >
-                                  {c.isActive ? <EyeOff size={16} /> : <CheckCircle size={16} />}
-                                </button>
-                                <button onClick={() => handleDeleteCoupon(c.id)} className="btn-action-premium delete">
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
+                            <td className="col-status">
+                              <span className={`badge-premium ${c.isActive ? 'active' : 'inactive'}`}>
+                                {c.isActive ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </td>
+                            <td className="col-actions text-right">
+                              <AdminRowActionsMenu
+                                label={`Acciones del cupón ${c.code}`}
+                                items={[
+                                  {
+                                    key: 'toggle',
+                                    label: c.isActive ? 'Desactivar cupón' : 'Activar cupón',
+                                    icon: c.isActive ? EyeOff : CheckCircle,
+                                    tone: c.isActive ? 'info' : 'success',
+                                    onClick: () => handleToggleCoupon(c),
+                                  },
+                                  {
+                                    key: 'delete',
+                                    label: 'Eliminar cupón',
+                                    icon: Trash2,
+                                    tone: 'danger',
+                                    onClick: () => handleDeleteCoupon(c.id),
+                                  },
+                                ]}
+                              />
                             </td>
                           </tr>
                         ))
                       )}
                     </tbody>
                   </table>
+                  <AdminTablePagination
+                    {...couponPagination}
+                    onPageSizeChange={couponPagination.setPageSize}
+                  />
                 </div>
               </div>
             </section>
 
-            {/* 3. Auditoría de Cobros */}
             <section className="admin-panel-card">
               <div className="panel-header-premium">
                 <div className="panel-title-group">
@@ -347,42 +427,109 @@ const AdminPlansManagement = () => {
                     <TrendingUp size={24} />
                   </div>
                   <div>
-                    <h2>Auditoría de Cobros</h2>
-                    <p>Registro histórico de transacciones realizadas en la plataforma.</p>
+                    <h2>Auditoría de cobros</h2>
+                    <p>Historial de cambios de plan y pagos registrados.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="admin-table-wrapper-premium">
+              <div className="admin-table-wrapper-premium plans-table-block">
+                <div className="table-filters-premium">
+                  <div className="search-bar-premium">
+                    <Search size={18} />
+                    <input
+                      type="search"
+                      placeholder="Buscar comercio, cupón o método..."
+                      value={historySearch}
+                      onChange={(e) => setHistorySearch(e.target.value)}
+                    />
+                  </div>
+                  <select
+                    className="plans-method-filter"
+                    value={methodFilter}
+                    onChange={(e) => setMethodFilter(e.target.value)}
+                    aria-label="Filtrar por método de pago"
+                  >
+                    {methodOptions.map((m) => (
+                      <option key={m} value={m}>
+                        {m === 'ALL' ? 'Todos los métodos' : formatPaymentMethodLabel(m)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <table className="admin-table-premium">
                   <thead>
                     <tr>
-                      <th>COMERCIO</th>
-                      <th>PLAN DESTINO</th>
-                      <th>MONTO</th>
-                      <th>MÉTODO DE PAGO</th>
+                      <th className="col-main">COMERCIO</th>
+                      <th className="col-meta">CAMBIO</th>
+                      <th className="col-meta">MONTO</th>
+                      <th className="hide-mobile col-status">MÉTODO</th>
+                      <th className="hide-tablet col-meta">CUPÓN</th>
+                      <th className="hide-tablet col-date">FECHA</th>
+                      <th className="col-actions text-right">COMPROBANTE</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {history.length === 0 ? (
-                      <tr><td colSpan="4" className="text-center" style={{opacity: 0.5, padding: '3rem'}}>No se registran transacciones.</td></tr>
+                    {filteredHistory.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="text-center plans-empty-cell">
+                          No hay cobros con ese filtro.
+                        </td>
+                      </tr>
                     ) : (
-                      history.map((h) => (
+                      historyPagination.pageItems.map((h) => (
                         <tr key={h.id}>
-                          <td className="row-title">{h.commerce?.name || 'Comercio'}</td>
-                          <td>Nivel {h.newLevel}</td>
-                          <td style={{color: '#2ecc71', fontWeight: 800}}>${h.totalPaid}</td>
-                          <td>
-                            <span className="badge-premium active">{h.method}</span>
+                          <td className="col-main row-title">{h.commerce?.name || 'Comercio'}</td>
+                          <td className="col-meta">
+                            {formatPlanLevelLabel(h.oldLevel)} → {formatPlanLevelLabel(h.newLevel)}
+                          </td>
+                          <td className="col-meta plans-amount">${h.totalPaid}</td>
+                          <td className="hide-mobile col-status">
+                            <span className="badge-premium active">
+                              {formatPaymentMethodLabel(h.method)}
+                            </span>
+                          </td>
+                          <td className="hide-tablet col-meta">{h.couponUsed || '—'}</td>
+                          <td className="hide-tablet col-date">
+                            {h.createdAt
+                              ? new Date(h.createdAt).toLocaleString('es-AR', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                })
+                              : '—'}
+                          </td>
+                          <td className="col-actions text-right">
+                            {h.paymentProof ? (
+                              <AdminRowActionsMenu
+                                label={`Comprobante de ${h.commerce?.name || 'cobro'}`}
+                                items={[
+                                  {
+                                    key: 'proof',
+                                    label: 'Ver comprobante',
+                                    icon: ExternalLink,
+                                    href: h.paymentProof,
+                                    target: '_blank',
+                                    tone: 'info',
+                                  },
+                                ]}
+                              />
+                            ) : (
+                              <span className="plans-muted">—</span>
+                            )}
                           </td>
                         </tr>
                       ))
                     )}
                   </tbody>
                 </table>
+                <AdminTablePagination
+                  {...historyPagination}
+                  onPageSizeChange={historyPagination.setPageSize}
+                />
               </div>
             </section>
-
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 .toast-container {
   position: fixed;
-  top: 20px;
+  top: var(--navbar-clearance, 5.5rem);
   right: 20px;
   z-index: 9999;
   display: flex;

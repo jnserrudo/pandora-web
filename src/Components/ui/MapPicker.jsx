@@ -42,7 +42,7 @@ const MapPicker = ({ initialLat, initialLng, onChange }) => {
             onClick={handleMapClick}
             style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
           >
-            <MapControls showZoom showLocate showFullscreen />
+            <MapControls position="top-right" showZoom showLocate showFullscreen />
             
             {marker && (
               <MapMarker

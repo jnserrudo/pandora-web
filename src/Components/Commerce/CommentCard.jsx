@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Star, Clock, Trash2, CheckCircle, Edit, User, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatEnumLabel } from '../../utils/enumLabels.js';
 import './CommentCard.css';
 
 const CommentCard = ({ comment, onMarkAsRead, onDelete, onUpdateNotes }) => {
@@ -70,10 +71,10 @@ const CommentCard = ({ comment, onMarkAsRead, onDelete, onUpdateNotes }) => {
                 />
             ))}
         </div>
-        <span className="category-badge">{comment.category}</span>
+        <span className="category-badge">{formatEnumLabel(comment.category)}</span>
         {priority !== 'NORMAL' && (
              <span className="priority-badge" style={{ backgroundColor: getPriorityColor(priority) }}>
-                {priority}
+                {formatEnumLabel(priority)}
              </span>
         )}
       </div>

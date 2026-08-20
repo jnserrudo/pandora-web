@@ -34,6 +34,8 @@ import {
     Phone,
     Globe
 } from 'lucide-react';
+import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
+import { formatStatusLabel } from '../../utils/enumLabels.js';
 import './AdminCommerceDetailPage.css';
 
 const AdminCommerceDetailPage = () => {
@@ -75,10 +77,10 @@ const AdminCommerceDetailPage = () => {
       setComments(commentsData);
       setMetrics(metricsData);
       setPlans(plansData && plansData.length > 0 ? plansData : [
-        { level: 1, name: 'Free' },
-        { level: 2, name: 'Plata' },
-        { level: 3, name: 'Oro' },
-        { level: 4, name: 'Platino' }
+        { level: 1, name: 'Gratuito' },
+        { level: 2, name: 'Plus' },
+        { level: 3, name: 'Premium' },
+        { level: 4, name: 'Elite' }
       ]);
       setNewPlanLevel(commerceData.planLevel || 1);
     } catch (error) {
@@ -177,7 +179,7 @@ const AdminCommerceDetailPage = () => {
                 <div className="title-section">
                     <h1>{commerce?.name}</h1>
                     <span className={`status-badge status-${commerce?.status?.toLowerCase()}`}>
-                        {commerce?.status}
+                        {formatStatusLabel(commerce?.status)}
                     </span>
                     <span className="plan-badge cursor-pointer" onClick={() => setIsEditingPlan(!isEditingPlan)} title="Clic para cambiar plan">
                         Plan Nivel {metrics?.planLevel}
@@ -256,13 +258,13 @@ const AdminCommerceDetailPage = () => {
             
             <div className="info-item">
               <span className="info-label">Categoría</span>
-              <p className="info-value">{commerce?.category || 'No especificada'}</p>
+              <p className="info-value">{getCategoryDisplayName(commerce?.category)}</p>
             </div>
             
             <div className="info-item">
               <span className="info-label">Estado</span>
               <span className={`status-badge status-${commerce?.status?.toLowerCase() || 'pending'}`}>
-                {commerce?.status || 'Pendiente'}
+                {formatStatusLabel(commerce?.status) || 'Pendiente'}
               </span>
             </div>
             

@@ -6,7 +6,7 @@
 
 .admin-container {
   flex: 1;
-  padding: 4rem 10%;
+  padding: var(--layout-nav-offset) 10% var(--space-2xl);
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;

@@ -1,21 +1,22 @@
 // src/components/MainContent/MainContent.jsx
 
 import React, { useState, useEffect } from "react";
-import HeroSection from "../Hero/HeroSection";
-import CallToAction from "../CallToAction/CallToAction";
 import FeaturedCommerces from "../FeaturedCommerces/FeaturedCommerces";
 import AdvertisementBanner from "../Advertisement/AdvertisementBanner";
 import ArtisticCalendar from "../ArtisticCalendar/ArtisticCalendar";
 import TrendingMagazine from "../Magazine/TrendingMagazine";
-import Ambassadors from "../Ambassadors/Ambassadors";
 import { getAdvertisements } from "../../services/AdvertisementService";
 import { getArticles } from "../../services/api";
+import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
+import { useToast } from "../../context/ToastContext";
 import "./MainContent.css";
 
 const MainContent = () => {
   const [commerceAds, setCommerceAds] = useState([]);
   const [otherAds, setOtherAds] = useState([]);
   const [trendingArticles, setTrendingArticles] = useState([]);
+  const [loadingHome, setLoadingHome] = useState(true);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadContent = async () => {
@@ -29,7 +30,9 @@ const MainContent = () => {
         const articlesData = await getArticles(1, 10, 'recent');
         setTrendingArticles(articlesData.articles || []);
       } catch (error) {
-        console.error('Error loading home content:', error);
+        showToast("No se pudo cargar parte del inicio. Recargá si falta contenido.", 'error');
+      } finally {
+        setLoadingHome(false);
       }
     };
     loadContent();
@@ -37,6 +40,7 @@ const MainContent = () => {
 
   return (
     <main>
+      {loadingHome && <LoadingSpinner message="Cargando el inicio..." />}
       <div className="app-layout">
         
         {/* ===== 5. MAGAZINE (Lo Más Visto) ===== */}
@@ -63,11 +67,6 @@ const MainContent = () => {
           <ArtisticCalendar />
         </div>
 
-        {/* ===== EMBAJADORES ===== */}
-        <div>
-          <Ambassadors />
-        </div>
-
         {/* ===== 8. PUBLICIDADES (Carruseles Nativos) ===== */}
         <div id="publicidades-section">
           {commerceAds.length > 0 && (
@@ -89,16 +88,6 @@ const MainContent = () => {
             title="Explorá nuestra guía completa" 
             variant="medium" 
           />
-        </div>
-
-        {/* Hero Section (Al final como banner) */}
-        <div style={{ display: 'none' }}>
-          <HeroSection />
-        </div>
-
-        {/* Footer / CTA Final */}
-        <div>
-          <CallToAction />
         </div>
       </div>
     </main>

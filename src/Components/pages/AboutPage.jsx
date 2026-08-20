@@ -1,60 +1,119 @@
 // src/pages/AboutPage.jsx
 
 import React, { useEffect } from 'react';
-import './AboutPage.css'; // Crearemos este archivo a continuación
+import { Link } from 'react-router-dom';
+import { ArrowRight, CalendarDays, Newspaper, ShieldCheck, Sparkles, Store } from 'lucide-react';
+import Navbar from '../Navbar/Navbar';
+import Footer from '../Footer/Footer';
+import './AboutPage.css';
 
 const AboutPage = () => {
-  // Sube al inicio de la página cada vez que se carga
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
-    <div className="about-container">
-      <header className="about-header">
-        <h1>Sobre Pandora</h1>
-        <p className="lead-paragraph">
-          Nacimos de la idea de que cada rincón de la ciudad tiene una historia que contar y una experiencia que ofrecer. Pandora es tu guía personal para descubrir el pulso vibrante de la vida cultural y nocturna.
-        </p>
-      </header>
-
-      <section className="about-section">
-        <h2>¿Qué Ofrecemos?</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            {/* <div className="feature-icon">🗓️</div> */}
-            <h3>Agenda de Eventos Actualizada</h3>
-            <p>Desde conciertos íntimos hasta festivales masivos, mantenemos nuestra agenda al día para que nunca te pierdas de nada.</p>
+    <div className="about-page-wrapper">
+      <Navbar />
+      <div className="about-container">
+        <header className="about-header">
+          <div className="about-kicker">Guia local de Salta</div>
+          <h1>Sobre Pandora</h1>
+          <p className="lead-paragraph">
+            Pandora conecta comercios, agenda y revista para mostrar lo que realmente esta activo
+            en la ciudad, con fichas claras y recorridos faciles de entender.
+          </p>
+          <div className="about-hero-actions">
+            <Link to="/commerces" className="about-primary-btn">
+              Explorar lugares <ArrowRight size={16} />
+            </Link>
+            <Link to="/contact" className="about-secondary-btn">
+              Quiero sumar mi proyecto
+            </Link>
           </div>
-          <div className="feature-card">
-            {/* <div className="feature-icon">🏪</div> */}
-            <h3>Directorio de Comercios</h3>
-            <p>Explora los mejores bares, restaurantes y teatros. Conoce su historia, mira sus fotos y encuentra tu próximo lugar favorito.</p>
+          <div className="about-stats">
+            <div className="about-stat-card">
+              <strong>Comercios</strong>
+              <span>Fotos, horarios, mapa y datos utiles para decidir adonde ir.</span>
+            </div>
+            <div className="about-stat-card">
+              <strong>Eventos</strong>
+              <span>Agenda viva con fechas, lugar, organizador y acceso rapido al detalle.</span>
+            </div>
+            <div className="about-stat-card">
+              <strong>Revista</strong>
+              <span>Notas que enlazan lugares y actividades para seguir recorriendo.</span>
+            </div>
           </div>
-          <div className="feature-card">
-            {/* <div className="feature-icon">📰</div> */}
-            <h3>Magazine Cultural</h3>
-            <p>Sumérgete en artículos, entrevistas y reportajes sobre la escena local, contados por sus protagonistas.</p>
+        </header>
+
+        <section className="about-section">
+          <h2>Que encontras en Pandora</h2>
+          <div className="features-grid">
+            <article className="feature-card">
+              <div className="feature-icon"><CalendarDays size={26} /></div>
+              <h3>Agenda activa</h3>
+              <p>Eventos programados con informacion concreta, sin fichas vacias ni vueltas innecesarias.</p>
+            </article>
+            <article className="feature-card">
+              <div className="feature-icon"><Store size={26} /></div>
+              <h3>Comercios con contexto</h3>
+              <p>No es solo un nombre: cada lugar busca mostrar como es, donde queda y por que vale la pena abrirlo.</p>
+            </article>
+            <article className="feature-card">
+              <div className="feature-icon"><Newspaper size={26} /></div>
+              <h3>Revista conectada</h3>
+              <p>Las historias del magazine se conectan con la ciudad real mediante enlaces a comercios y eventos.</p>
+            </article>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="about-section">
-        <h2>Nuestra Filosofía</h2>
-        <p>
-          Creemos en el poder de la comunidad y en la importancia de apoyar a los artistas y emprendedores locales. Pandora no es solo una app, es un puente que conecta a la gente con la cultura que los rodea, fomentando un ecosistema creativo más fuerte y unido.
-        </p>
-      </section>
+        <section className="about-section">
+          <h2>Como se mueve Pandora</h2>
+          <div className="journey-grid">
+            <article className="journey-card">
+              <Sparkles size={22} />
+              <h3>Visitante</h3>
+              <p>Explora, compara y encuentra lugares sin perderse entre pantallas basicas o datos incompletos.</p>
+            </article>
+            <article className="journey-card">
+              <Store size={22} />
+              <h3>Dueno</h3>
+              <p>Carga su ficha, sus fotos y sus eventos para que el lugar se vea mejor y con mas informacion real.</p>
+            </article>
+            <article className="journey-card">
+              <ShieldCheck size={22} />
+              <h3>Admin</h3>
+              <p>Ordena el contenido, revisa altas y usa AI Guard para mantener visible lo que esta listo.</p>
+            </article>
+          </div>
+        </section>
 
-      <section className="about-section contact-section">
-        <h2>Únete a la Comunidad</h2>
-        <p>
-          ¿Tienes un negocio, organizas un evento o quieres colaborar con nuestro magazine? ¡Nos encantaría saber de ti!
-        </p>
-        <a href="mailto:contacto@pandora-app.com" className="contact-button">
-          Contáctanos
-        </a>
-      </section>
+        <section className="about-section about-note-panel">
+          <h2>Que no es Pandora</h2>
+          <p>
+            Pandora no es un e-commerce ni una app de pedidos. Esta pensada para descubrir, presentar
+            y validar informacion local de una forma visual, clara y atractiva.
+          </p>
+        </section>
+
+        <section className="about-section contact-section">
+          <h2>Sumate al ecosistema</h2>
+          <p>
+            Si tenes un comercio, organizas un evento o queres proponer una nota para la revista,
+            esta armado para que tu proyecto se vea mejor.
+          </p>
+          <div className="about-cta-row">
+            <Link to="/contact" className="contact-button">
+              Ir a contacto
+            </Link>
+            <Link to="/events" className="about-inline-link">
+              Ver agenda primero
+            </Link>
+          </div>
+        </section>
+      </div>
+      <Footer />
     </div>
   );
 };

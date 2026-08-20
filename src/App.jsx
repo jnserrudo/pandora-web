@@ -39,6 +39,8 @@ import AdminCommerceDetailPage from "./Components/pages/AdminCommerceDetailPage"
 import AdminAuditPage from "./Components/pages/AdminAuditPage";
 import MyDashboardPage from "./Components/pages/MyDashboardPage";
 import AdminUsersPage from "./Components/pages/AdminUsersPage";
+import PandoraAssistant from "./Components/Assistant/PandoraAssistant";
+import ScrollToTopButton from "./Components/ScrollToTopButton/ScrollToTopButton";
 
 function App() {
   return (
@@ -123,13 +125,13 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/events/create" 
+          <Route
+            path="/events/create"
             element={
-              <ProtectedRoute allowedRoles={['USER', 'OWNER', 'ADMIN']}>
+              <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
                 <EventFormPage />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route 
             path="/events/:id/edit" 
@@ -263,6 +265,8 @@ function App() {
 
         </Routes>
       </main>
+      <PandoraAssistant />
+      <ScrollToTopButton />
     </div>
     </ToastProvider>
   );

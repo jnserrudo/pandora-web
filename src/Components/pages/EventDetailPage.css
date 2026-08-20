@@ -1,38 +1,142 @@
 .event-meta-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    margin-bottom: 30px;
-  }
-
-
-
-  
-/* Hacemos que la cabecera sea el ancla para nuestro botón posicionado absolutamente */
-.detail-header {
-  position: relative; /* ¡Muy importante! */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 30px;
 }
 
-.back-button {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10; /* Para que esté por encima del overlay */
-  
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 50%; /* Lo hace circular */
-  width: 44px;
-  height: 44px;
-  
+.event-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.event-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.event-tier-badge.premium {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  color: #000;
+}
+
+.event-tier-badge.plus {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #fff;
+}
+
+.event-title {
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1.05;
+  max-width: none;
+  margin: 0;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-wrap: balance;
+}
+
+.event-hero-subtitle {
+  margin-top: 0.9rem;
+  max-width: 60ch;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+.event-actions-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.event-primary-link,
+.event-secondary-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.event-primary-link {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #fff;
+}
+
+.event-primary-link.premium {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  color: #000;
+}
+
+.event-secondary-link {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f0e8ff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.info-item a {
+  color: #e9d5ff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.event-detail-map,
+.event-description-box,
+.event-video-section {
+  margin-top: 2.5rem;
+}
+
+.event-video-title {
+  color: #ffd700;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  
-  font-size: 24px; /* Tamaño del ícono/flecha */
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  gap: 8px;
 }
 
-.back-button:hover {
-  background-color: rgba(0, 0, 0, 0.8);
+.event-video-frame {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.event-video-frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .event-title {
+    font-size: 2rem;
+  }
+
+  .event-hero-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-title {
+    font-size: 1.6rem;
+  }
+
+  .event-actions-card {
+    flex-direction: column;
+  }
 }

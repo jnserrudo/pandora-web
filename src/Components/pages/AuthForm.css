@@ -69,6 +69,14 @@
   color: #ff8a8a;
   padding: 1rem;
   border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.input-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #a0a0c0;
 }
 .auth-switch {
   margin-top: 1.5rem;

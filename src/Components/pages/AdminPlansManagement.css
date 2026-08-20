@@ -267,3 +267,51 @@
     grid-template-columns: 1fr;
   }
 }
+
+.plan-level-hint {
+  margin-left: 0.35rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.plans-table-block {
+  min-width: 0;
+}
+
+.plans-empty-cell {
+  opacity: 0.55;
+  padding: 2.5rem !important;
+}
+
+.plans-code-cell {
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.row-disabled {
+  opacity: 0.55;
+}
+
+.row-disabled .plans-code-cell {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.plans-amount {
+  color: #2ecc71;
+  font-weight: 800;
+}
+
+.plans-muted {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.plans-method-filter {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  min-width: 180px;
+}

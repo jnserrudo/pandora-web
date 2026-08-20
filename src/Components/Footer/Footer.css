@@ -2,6 +2,7 @@
 .footer-container {
     width: 100%;
     padding: var(--space-lg);
+    padding-bottom: calc(var(--space-lg) + var(--dock-safe-bottom, 5.5rem));
     margin-top: var(--space-2xl);
     background-color: rgba(13, 2, 24, 0.3);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
