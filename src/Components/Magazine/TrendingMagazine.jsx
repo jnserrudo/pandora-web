@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getAbsoluteImageUrl } from '../../services/api';
+import { articleCardBlurb } from '../../utils/htmlToPlainText';
 import './TrendingMagazine.css';
 
 const TrendingMagazine = ({ articles }) => {
@@ -69,7 +70,7 @@ const TrendingMagazine = ({ articles }) => {
                                 <div className="card-info">
                                     <h3>{article.title}</h3>
                                     <p className="card-description">
-                                        {article.excerpt || (article.content ? article.content.substring(0, 80) + '...' : '')}
+                                        {articleCardBlurb(article, 80)}
                                     </p>
                                 </div>
                             </Link>
