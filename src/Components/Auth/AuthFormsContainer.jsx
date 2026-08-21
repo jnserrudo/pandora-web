@@ -5,18 +5,22 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { ArrowLeft } from 'lucide-react';
+import {
+  getPasswordChecks,
+  isPasswordValid,
+  formatPasswordError,
+  PASSWORD_RULES_HINT,
+} from '../../utils/passwordRules';
 import '../pages/AuthForm.css';
 
 const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   const [isLogin, setIsLogin] = useState(defaultIsLogin);
   
-  // Context and Router
   const { setAuthData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
 
-  // URL Params parsing
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const expired = params.get('expired') === 'true';
@@ -26,7 +30,6 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
     }
   }, [location.search, showToast]);
 
-  // States
   const [identifier, setIdentifier] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -38,6 +41,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   const [requireOTP, setRequireOTP] = useState(false);
   const skipCaptcha = import.meta.env.VITE_E2E === 'true';
   const [captchaToken, setCaptchaToken] = useState(skipCaptcha ? 'test_token_for_automated_testing' : '');
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
@@ -46,9 +50,35 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
 
   const API_URL = import.meta.env.VITE_API_URL_DEV || import.meta.env.VITE_API_URL_PROD || 'http://localhost:3000/api';
 
+  const passwordChecks = getPasswordChecks(password);
+  const passwordOk = isLogin || isPasswordValid(password);
+
+  const resetCaptcha = (extraMessage) => {
+    if (skipCaptcha) return;
+    setCaptchaToken('');
+    setCaptchaKey((k) => k + 1);
+    if (extraMessage) {
+      showToast(extraMessage, 'warning');
+    }
+  };
+
   const submitAuth = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isLogin && !isPasswordValid(password)) {
+      const msg = `La contraseña no cumple los requisitos. ${PASSWORD_RULES_HINT}`;
+      setError(msg);
+      showToast(msg, 'error');
+      return;
+    }
+
+    if (!isLogin && !skipCaptcha && !captchaToken) {
+      setError('Completá el captcha para registrarte.');
+      showToast('Completá el captcha para registrarte.', 'warning');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -66,16 +96,20 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
       const data = await res.json();
       
       if (!res.ok) {
-         const failMessage = data.message || 'No se pudo completar la solicitud.';
+         const failMessage = formatPasswordError(
+           data.message || 'No se pudo completar la solicitud.'
+         );
          if (res.status === 429) {
              setError(failMessage);
              showToast(failMessage, 'error');
+             resetCaptcha();
              return;
          }
          if (res.status === 403 && data.requireCaptcha) {
              setRequireCaptcha(true);
              setError('Se requieren controles de seguridad extra. Completá el captcha para seguir.');
              showToast('Completá el captcha para continuar.', 'warning');
+             resetCaptcha();
              return;
          }
          if (res.status === 403 && data.isVerified === false) {
@@ -85,6 +119,14 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
          }
          setError(failMessage);
          showToast(failMessage, 'error');
+         // Token de un solo uso: hay que renovar el captcha tras cualquier error
+         if (!isLogin || requireCaptcha) {
+           resetCaptcha(
+             /captcha/i.test(data.message || '')
+               ? 'Completá el captcha de nuevo antes de reintentar.'
+               : 'Por seguridad, completá el captcha otra vez antes de reintentar.'
+           );
+         }
          return;
       }
 
@@ -94,7 +136,6 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           navigate('/');
       } else {
           setRegisteredEmail(email);
-          // Manejar el estado del envío de email desde la respuesta del backend
           const wasEmailSent = data.emailSent !== false;
           setEmailSent(wasEmailSent);
           setCanResendOTP(data.canResendOTP === true || !wasEmailSent);
@@ -105,7 +146,6 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           setRequireOTP(true);
       }
     } catch (err) {
-      // Sanitize technical error messages so users never see raw browser errors
       const rawMsg = err.message || '';
       const isNetworkError = rawMsg === 'Failed to fetch' 
         || rawMsg.includes('NetworkError') 
@@ -116,6 +156,9 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
         : rawMsg || 'Ocurrió un error inesperado. Intentá de nuevo.';
       setError(friendly);
       showToast(friendly, 'error');
+      if (!isLogin || requireCaptcha) {
+        resetCaptcha('Por seguridad, completá el captcha otra vez antes de reintentar.');
+      }
     } finally {
       setLoading(false);
     }
@@ -156,7 +199,16 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
 
   const isSubmitDisabled = loading || (isLogin 
     ? (!identifier.trim() || !password || (requireCaptcha && !captchaToken)) 
-    : (!name.trim() || !username.trim() || !email.trim() || !password || !dni.trim() || !captchaToken));
+    : (!name.trim() || !username.trim() || !email.trim() || !password || !dni.trim() || !passwordOk || (!skipCaptcha && !captchaToken)));
+
+  const checkItems = [
+    { ok: passwordChecks.minLength, label: 'Al menos 8 caracteres' },
+    { ok: passwordChecks.upper, label: 'Una mayúscula' },
+    { ok: passwordChecks.lower, label: 'Una minúscula' },
+    { ok: passwordChecks.number, label: 'Un número' },
+    { ok: passwordChecks.special, label: 'Un símbolo: @ $ ! % * ? &' },
+    { ok: passwordChecks.onlyAllowed, label: 'Sin otros símbolos (ej. guion -)' },
+  ];
 
   return (
     <div className="auth-container">
@@ -220,16 +272,38 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           <input 
             type="password" id="password" required
             value={password} onChange={e => setPassword(e.target.value)} 
+            autoComplete={isLogin ? 'current-password' : 'new-password'}
           />
+          {!isLogin && (
+            <>
+              <small className="input-hint">{PASSWORD_RULES_HINT}</small>
+              <ul className="password-checklist" aria-live="polite">
+                {checkItems.map((item) => (
+                  <li key={item.label} className={item.ok ? 'ok' : ''}>
+                    {item.ok ? '✓' : '○'} {item.label}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
 
         {!skipCaptcha && (!isLogin || requireCaptcha) && (
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '15px 0' }}>
-            <Turnstile 
+          <div className="captcha-wrap">
+            <Turnstile
+              key={captchaKey}
               sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'} 
               onVerify={(token) => setCaptchaToken(token)}
+              onExpire={() => setCaptchaToken('')}
+              onError={() => {
+                setCaptchaToken('');
+                showToast('No se pudo cargar el captcha. Recargá o intentá de nuevo.', 'error');
+              }}
               theme="dark"
             />
+            <small className="input-hint captcha-hint">
+              Si el registro falla, el captcha se renueva solo: tenés que marcarlo otra vez (es de un solo uso).
+            </small>
           </div>
         )}
 
@@ -246,7 +320,13 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           {isLogin ? "¿No tenés una cuenta? " : "¿Ya tenés una cuenta? "}
           <button 
             type="button" 
-            onClick={() => { setIsLogin(!isLogin); setError(''); setRequireCaptcha(false); }} 
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+              setRequireCaptcha(false);
+              setCaptchaToken(skipCaptcha ? 'test_token_for_automated_testing' : '');
+              setCaptchaKey((k) => k + 1);
+            }} 
             style={{ background: 'none', border: 'none', color: 'var(--color-accent)', fontWeight: 600, cursor: 'pointer', fontSize: '1rem', padding: 0 }}
           >
             {isLogin ? "Registrate acá" : "Ingresá acá"}

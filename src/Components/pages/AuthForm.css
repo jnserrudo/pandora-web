@@ -77,6 +77,37 @@
   margin-top: 0.35rem;
   font-size: 0.78rem;
   color: #a0a0c0;
+  line-height: 1.35;
+}
+
+.password-checklist {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  text-align: left;
+  font-size: 0.8rem;
+  color: #a0a0c0;
+}
+
+.password-checklist li {
+  margin-bottom: 0.25rem;
+}
+
+.password-checklist li.ok {
+  color: #7dffa3;
+}
+
+.captcha-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 15px 0;
+  gap: 0.5rem;
+}
+
+.captcha-hint {
+  text-align: center;
+  max-width: 360px;
 }
 .auth-switch {
   margin-top: 1.5rem;
