@@ -169,10 +169,10 @@ export function formatPaymentMethodLabel(value, fallback = 'Otro método') {
 }
 
 const PLAN_LEVEL_LABELS = {
-  1: 'Gratuito',
-  2: 'Plus',
-  3: 'Premium',
-  4: 'Elite',
+  1: 'Free',
+  2: 'Plata',
+  3: 'Oro',
+  4: 'Platino',
 };
 
 /** Nivel de plan de comercio (1–4). Usa name si se pasa string no numérico. */
@@ -181,18 +181,22 @@ export function formatPlanLevelLabel(levelOrName, fallback = 'Sin plan') {
   const n = Number(levelOrName);
   if (Number.isFinite(n) && PLAN_LEVEL_LABELS[n]) return PLAN_LEVEL_LABELS[n];
   const raw = String(levelOrName).trim();
-  const upper = raw.toUpperCase();
+  const upper = raw.toUpperCase().normalize('NFD').replace(/\p{M}/gu, '');
   const aliases = {
-    FREE: 'Gratuito',
-    ECO: 'Gratuito',
-    BASIC: 'Gratuito',
-    BASICO: 'Gratuito',
-    BÁSICO: 'Gratuito',
-    PLUS: 'Plus',
-    BOOST: 'Plus',
-    PREMIUM: 'Premium',
-    DIAMOND: 'Elite',
-    ELITE: 'Elite',
+    FREE: 'Free',
+    ECO: 'Free',
+    BASIC: 'Free',
+    BASICO: 'Free',
+    GRATUITO: 'Free',
+    PLATA: 'Plata',
+    PLUS: 'Plata',
+    BOOST: 'Plata',
+    ORO: 'Oro',
+    PREMIUM: 'Oro',
+    GOLD: 'Oro',
+    PLATINO: 'Platino',
+    ELITE: 'Platino',
+    DIAMOND: 'Platino',
   };
   if (aliases[upper]) return aliases[upper];
   return raw || fallback;

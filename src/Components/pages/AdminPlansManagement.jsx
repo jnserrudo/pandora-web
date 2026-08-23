@@ -29,6 +29,11 @@ import {
   formatPaymentMethodLabel,
   formatPlanLevelLabel,
 } from '../../utils/enumLabels.js';
+import {
+  COMMERCE_PLAN_CATALOG,
+  benefitsToStorage,
+  parsePlanBenefits,
+} from '../../utils/planCatalog.js';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
@@ -54,22 +59,29 @@ const AdminPlansManagement = () => {
     try {
       setLoading(true);
 
-      const baselinePlans = [
-        { level: 1, name: 'Gratuito', price: 0, description: 'Básico y esencial' },
-        { level: 2, name: 'Plus', price: 1500, description: 'Visibilidad mejorada' },
-        { level: 3, name: 'Premium', price: 3500, description: 'Presencia profesional' },
-        { level: 4, name: 'Elite', price: 6000, description: 'Socio estratégico' },
-      ];
+      const baselinePlans = COMMERCE_PLAN_CATALOG.map((p) => ({
+        level: p.level,
+        name: p.name,
+        price: p.price,
+        description: p.description,
+        benefits: benefitsToStorage(p.benefits),
+      }));
 
       try {
         const plansData = await getPlans(token);
         const mergedPlans = baselinePlans.map((base) => {
           const existing = plansData?.find((p) => p.level === base.level);
           if (existing) {
+            const benefitsRaw =
+              existing.benefits != null && String(existing.benefits).trim() !== ''
+                ? existing.benefits
+                : base.benefits;
             return {
               ...base,
               ...existing,
-              name: existing.name || formatPlanLevelLabel(existing.level, base.name),
+              name: formatPlanLevelLabel(existing.level, base.name),
+              description: existing.description || base.description,
+              benefits: benefitsToStorage(parsePlanBenefits(benefitsRaw)),
             };
           }
           return { ...base, id: `new-${base.level}` };
@@ -111,7 +123,13 @@ const AdminPlansManagement = () => {
   const handleSavePlan = async (plan) => {
     setSaving(true);
     try {
-      const payload = { ...plan, price: parseFloat(plan.price) || 0 };
+      const payload = {
+        level: plan.level,
+        name: plan.name,
+        description: plan.description || '',
+        benefits: benefitsToStorage(plan.benefits),
+        price: parseFloat(plan.price) || 0,
+      };
       await updatePlan(plan.id, payload, token);
       showToast(`Plan ${plan.name} guardado correctamente.`, 'success');
       await fetchData();
@@ -227,7 +245,10 @@ const AdminPlansManagement = () => {
                   </div>
                   <div>
                     <h2>Tarifario de niveles</h2>
-                    <p>Actualizá nombre, descripción y precio mensual de cada plan.</p>
+                    <p>
+                      Planes de comercio: Free, Plata, Oro y Platino. Editá nombre, descripción,
+                      beneficios (un ítem por línea) y precio.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -261,6 +282,17 @@ const AdminPlansManagement = () => {
                         value={plan.description || ''}
                         onChange={(e) => handlePlanChange(plan.id, 'description', e.target.value)}
                         placeholder="Breve descripción..."
+                      />
+                      <label className="plan-benefits-label" htmlFor={`plan-benefits-${plan.id}`}>
+                        Beneficios (un ítem por línea)
+                      </label>
+                      <textarea
+                        id={`plan-benefits-${plan.id}`}
+                        className="plan-benefits-input"
+                        value={plan.benefits || ''}
+                        onChange={(e) => handlePlanChange(plan.id, 'benefits', e.target.value)}
+                        placeholder={'1 foto\n1 categoría\n1 sucursal'}
+                        rows={5}
                       />
                     </div>
 

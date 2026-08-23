@@ -142,6 +142,36 @@
   outline: none;
 }
 
+.plan-benefits-label {
+  display: block;
+  margin-top: 0.75rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.plan-benefits-input {
+  width: 100%;
+  min-height: 110px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+}
+
+.plan-benefits-input:focus {
+  border-color: rgba(124, 58, 237, 0.45);
+}
+
 .plan-price-editor {
   display: flex;
   align-items: center;

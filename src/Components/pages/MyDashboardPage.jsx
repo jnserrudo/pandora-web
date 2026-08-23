@@ -88,7 +88,7 @@ const MyDashboardPage = () => {
   };
 
   const planLabel = (level) => {
-    const map = { 1: 'Free', 2: 'Plus', 3: 'Premium', 4: 'Diamond' };
+    const map = { 1: 'Free', 2: 'Plata', 3: 'Oro', 4: 'Platino' };
     return map[level] || `Plan ${level}`;
   };
 

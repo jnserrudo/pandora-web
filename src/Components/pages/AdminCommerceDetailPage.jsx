@@ -77,10 +77,10 @@ const AdminCommerceDetailPage = () => {
       setComments(commentsData);
       setMetrics(metricsData);
       setPlans(plansData && plansData.length > 0 ? plansData : [
-        { level: 1, name: 'Gratuito' },
-        { level: 2, name: 'Plus' },
-        { level: 3, name: 'Premium' },
-        { level: 4, name: 'Elite' }
+        { level: 1, name: 'Free' },
+        { level: 2, name: 'Plata' },
+        { level: 3, name: 'Oro' },
+        { level: 4, name: 'Platino' }
       ]);
       setNewPlanLevel(commerceData.planLevel || 1);
     } catch (error) {

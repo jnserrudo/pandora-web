@@ -18,6 +18,8 @@ import {
   Headphones
 } from 'lucide-react';
 import Reveal from '../motion/Reveal';
+import { COMMERCE_PLAN_CATALOG, parsePlanBenefits } from '../../utils/planCatalog';
+import { formatPlanLevelLabel } from '../../utils/enumLabels';
 import './PricingPage.css';
 
 const PricingPage = () => {
@@ -35,52 +37,48 @@ const PricingPage = () => {
       try {
         setLoading(true);
         const data = await getPlans(token);
-        
-        // Si el backend no devuelve nada aún, usamos el fallback hardcoded para no romper la UI
-        if (!data || data.length === 0) {
-          setPlans([
-            { level: 1, name: "ECO", price: 0, description: "Esencial para aparecer en el mapa.", iconName: "MousePointer2", color: "var(--tier-basic)", features: ["Presencia básica", "Contacto", "Horarios"] },
-            { level: 2, name: "BOOST", price: 1500, description: "Diferenciate con una vitrina atractiva.", iconName: "Zap", color: "var(--tier-plus)", features: ["Todo lo de Nivel 1", "5 fotos", "Badge verificado"] },
-            { level: 3, name: "PREMIUM", price: 3500, description: "Ideal con eventos y promos.", iconName: "Award", color: "var(--color-primary)", features: ["Todo lo de Nivel 2", "Ofertas", "Push básicas"], featured: true },
-            { level: 4, name: "ELITE", price: 6000, description: "Socio Pandora con analíticas.", iconName: "Crown", color: "var(--tier-premium)", features: ["Socio Pandora", "Analíticas", "Soporte 24/7"] }
-          ]);
-        } else {
-          // Adaptar datos del backend (benefits string -> features array)
-          const adapted = data.map(p => {
-            let features = [];
-            if (p.features) {
-              features = Array.isArray(p.features) ? p.features : [p.features];
-            } else if (p.benefits) {
-              // El backend guarda benefits como texto (posiblemente con saltos de línea)
-              features = p.benefits.split('\n').map(f => f.trim()).filter(f => f);
-            }
 
-            // Asignar Iconos y Colores por defecto si no vienen del DB
-            const defaults = {
-                1: { icon: "MousePointer2", color: "var(--tier-basic)" },
-                2: { icon: "Zap", color: "var(--tier-plus)" },
-                3: { icon: "Award", color: "var(--color-primary)", featured: true },
-                4: { icon: "Crown", color: "var(--tier-premium)" }
-            }[p.level] || { icon: "MousePointer2", color: "var(--color-primary)" };
+        if (!data || data.length === 0) {
+          setPlans(
+            COMMERCE_PLAN_CATALOG.map((p) => ({
+              ...p,
+              features: p.benefits,
+            }))
+          );
+        } else {
+          const adapted = data.map((p) => {
+            const catalog = COMMERCE_PLAN_CATALOG.find((c) => c.level === p.level);
+            let features = parsePlanBenefits(p.features || p.benefits);
+            if (features.length === 0 && catalog?.benefits) {
+              features = catalog.benefits;
+            }
 
             return {
               ...p,
-              iconName: p.iconName || defaults.icon,
-              color: p.color || defaults.color,
-              featured: p.featured !== undefined ? p.featured : (defaults.featured || false),
-              features: features.length > 0 ? features : ["Sin beneficios especificados"]
+              name: formatPlanLevelLabel(p.level, p.name || catalog?.name || `Nivel ${p.level}`),
+              description: p.description || catalog?.description || '',
+              iconName: p.iconName || catalog?.iconName || 'MousePointer2',
+              color: p.color || catalog?.color || 'var(--color-primary)',
+              featured: p.featured !== undefined ? p.featured : Boolean(catalog?.featured),
+              features,
             };
           });
           setPlans(adapted);
         }
       } catch (err) {
-        console.error("Error fetching plans:", err);
+        console.error('Error fetching plans:', err);
+        setPlans(
+          COMMERCE_PLAN_CATALOG.map((p) => ({
+            ...p,
+            features: p.benefits,
+          }))
+        );
       } finally {
         setLoading(false);
       }
     };
     fetchPlans();
-  }, []);
+  }, [token]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
