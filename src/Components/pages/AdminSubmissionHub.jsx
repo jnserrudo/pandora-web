@@ -159,7 +159,7 @@ const AdminSubmissionHub = () => {
               <thead>
                 <tr>
                   <th className="col-main">REMITENTE Y TIPO</th>
-                  <th className="hide-tablet col-meta">MENSAJE</th>
+                  <th className="hide-tablet col-meta col-message">MENSAJE</th>
                   <th className="hide-tablet col-meta">ADJUNTO</th>
                   <th className="hide-mobile col-status">ESTADO</th>
                   <th className="col-actions text-right">ACCIONES</th>
@@ -187,9 +187,13 @@ const AdminSubmissionHub = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="hide-tablet col-meta">
+                    <td className="hide-tablet col-meta col-message">
                       <div className="message-preview">
-                        {sub.message?.substring(0, 50)}...
+                        {sub.message
+                          ? (sub.message.length > 90
+                              ? `${sub.message.slice(0, 90).trimEnd()}…`
+                              : sub.message)
+                          : '—'}
                       </div>
                     </td>
                     <td className="hide-tablet col-meta">
@@ -292,8 +296,16 @@ const AdminSubmissionHub = () => {
           font-weight: 800;
         }
         .message-preview {
-          color: rgba(255,255,255,0.4);
-          font-style: italic;
+          color: rgba(255,255,255,0.55);
+          font-style: normal;
+          font-size: 0.88rem;
+          line-height: 1.45;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          white-space: normal;
         }
         .sub-detail-info {
           font-size: 0.9rem;

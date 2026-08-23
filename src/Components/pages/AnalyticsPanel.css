@@ -13,9 +13,7 @@
 .analytics-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(90deg, #fff, #b3a0ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
   margin-bottom: 0.3rem;
 }
 
@@ -60,8 +58,7 @@
 
 .stat-card-mini:hover {
   background: rgba(255, 255, 255, 0.04);
-  transform: translateY(-3px);
-  border-color: rgba(138, 43, 226, 0.2);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .icon-circ {
@@ -73,10 +70,10 @@
   justify-content: center;
 }
 
-.icon-circ.purple { background: rgba(138, 43, 226, 0.15); color: #8a2be2; }
-.icon-circ.pink { background: rgba(255, 32, 147, 0.15); color: #ff2093; }
-.icon-circ.blue { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
-.icon-circ.yellow { background: rgba(255, 189, 57, 0.15); color: #ffbd39; }
+.icon-circ.purple { background: rgba(124, 58, 237, 0.12); color: #a78bfa; }
+.icon-circ.pink { background: rgba(225, 29, 138, 0.12); color: #f472b6; }
+.icon-circ.blue { background: rgba(56, 189, 248, 0.12); color: #7dd3fc; }
+.icon-circ.yellow { background: rgba(201, 162, 39, 0.12); color: #d4b84a; }
 
 .stat-info .value {
   display: block;

@@ -1,7 +1,7 @@
 /* src/Components/pages/AdminAuditPage.css */
 
 .admin-wrapper.hub-theme {
-  background: radial-gradient(circle at top right, #1a1a2e 0%, #0d0d15 100%);
+  background: var(--color-background);
   min-height: 100vh;
 }
 
@@ -59,30 +59,22 @@
   color: #ffffff !important;
 }
 
-.hub-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 50px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  width: fit-content;
-  text-transform: uppercase;
+.admin-kicker {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0.02em;
 }
 
 .admin-title-group h1 {
   font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1.1;
   margin: 0;
-  background: linear-gradient(to right, #fff, rgba(255,255,255,0.5));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -2px;
+  color: #fff;
+  letter-spacing: -0.02em;
 }
 
 .admin-title-group p {

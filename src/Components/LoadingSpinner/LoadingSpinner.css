@@ -15,7 +15,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #0d0218 0%, #1a0d2e 50%, #0d0218 100%);
+  background: var(--color-background, #0a0612);
   z-index: 9999;
   animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -28,53 +28,8 @@
   gap: 2.5rem;
 }
 
-/* Animated Background Circles - usando colores de marca */
-.spinner-circles {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
+/* Background orbs removed — simple spinner only */
 
-.circle {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.15;
-  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.circle-1 {
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, var(--color-primary, #8a2be2) 0%, transparent 65%);
-  animation-delay: 0s;
-  filter: blur(40px);
-}
-
-.circle-2 {
-  width: 75%;
-  height: 75%;
-  top: 12.5%;
-  left: 12.5%;
-  background: radial-gradient(circle, var(--color-secondary, #c738dd) 0%, transparent 65%);
-  animation-delay: 1.3s;
-  filter: blur(35px);
-}
-
-.circle-3 {
-  width: 50%;
-  height: 50%;
-  top: 25%;
-  left: 25%;
-  background: radial-gradient(circle, var(--color-accent, #ff00c8) 0%, transparent 65%);
-  animation-delay: 2.6s;
-  filter: blur(30px);
-}
-
-/* Main Spinner Logo Wrapper */
 .spinner-logo-wrapper {
   position: relative;
   width: 160px;
@@ -86,28 +41,16 @@
 }
 
 /* Rotating Rings - colores de marca */
-.spinner-ring,
-.spinner-ring-secondary {
+.spinner-ring {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
   border: 3px solid transparent;
   animation: rotate 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.spinner-ring {
-  border-top-color: var(--color-primary, #8a2be2);
-  border-right-color: var(--color-primary, #8a2be2);
-  filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.6));
-}
-
-.spinner-ring-secondary {
-  border-bottom-color: var(--color-accent, #ff00c8);
-  border-left-color: var(--color-accent, #ff00c8);
-  animation-direction: reverse;
-  animation-duration: 2s;
-  filter: drop-shadow(0 0 15px rgba(255, 0, 200, 0.6));
+  border-top-color: var(--color-primary, #7c3aed);
+  border-right-color: var(--color-primary, #7c3aed);
+  filter: none;
 }
 
 /* Logo Container */
@@ -119,17 +62,15 @@
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  background: rgba(13, 2, 24, 0.8);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
-  animation: float 3s ease-in-out infinite;
+  background: var(--card, #12081f);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .logo-image {
   width: 70%;
   height: 70%;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.4));
+  filter: none;
 }
 
 /* Loading Dots - usando colores de marca */
@@ -145,9 +86,9 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary, #8a2be2), var(--color-secondary, #c738dd));
+  background: var(--btn-primary-bg);
   animation: bounce 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+  box-shadow: none;
 }
 
 .dot:nth-child(1) {
@@ -156,13 +97,13 @@
 
 .dot:nth-child(2) {
   animation-delay: -0.16s;
-  background: linear-gradient(135deg, var(--color-secondary, #c738dd), var(--color-accent, #ff00c8));
-  box-shadow: 0 0 15px rgba(199, 56, 221, 0.6);
+  background: var(--color-secondary, #c738dd);
+  box-shadow: none;
 }
 
 .dot:nth-child(3) {
-  background: linear-gradient(135deg, var(--color-accent, #ff00c8), var(--color-primary, #8a2be2));
-  box-shadow: 0 0 15px rgba(255, 0, 200, 0.6);
+  background: var(--color-accent, #ff00c8);
+  box-shadow: none;
 }
 
 /* Loading Message */
@@ -174,7 +115,7 @@
   text-align: center;
   opacity: 0.9;
   animation: fadeInOut 2.5s ease-in-out infinite;
-  text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+  text-shadow: none;
 }
 
 /* ========== ANIMATIONS ========== */

@@ -10,21 +10,51 @@
   color: rgba(255,255,255,0.7);
 }
 
+.commerce-action-buttons {
+  display: flex;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.commerce-action-buttons .btn-pandora-secondary.is-fav {
+  border-color: rgba(225, 29, 138, 0.55);
+  background: rgba(225, 29, 138, 0.18);
+  color: #fff;
+}
+
+.commerce-wa-btn {
+  background: #1f9a55;
+}
+
+.commerce-wa-btn:hover {
+  background: #188a4a;
+}
+
 .detail-page-container {
   padding-bottom: var(--dock-safe-bottom, 5.5rem);
 }
 
 .detail-header {
   min-height: clamp(320px, 58vh, 560px);
-  background-color: #1e1e2c;
+  background-color: #12081f;
   background-size: cover;
   background-position: center;
   position: relative;
   display: flex;
   color: white;
+  overflow: hidden;
+}
+
+.detail-header-media {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
 }
 
 .header-overlay {
+  position: relative;
+  z-index: 1;
   background:
     linear-gradient(to top, rgba(8, 2, 18, 0.96) 0%, rgba(8, 2, 18, 0.55) 42%, rgba(8, 2, 18, 0.2) 100%);
   width: 100%;
@@ -360,7 +390,7 @@
   }
 
   .header-overlay {
-    padding: 20px;
+    padding: calc(var(--back-top) + 1.5rem) 1rem 1.5rem;
   }
 
   .header-overlay h1 {

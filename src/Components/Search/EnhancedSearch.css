@@ -218,31 +218,42 @@
 @media (max-width: 768px) {
   .enhanced-search-container {
     max-width: 100%;
-    padding: 0 1rem;
+    padding: 0 0.85rem;
   }
 
   .search-input-wrapper {
-    padding: 0.6rem 1rem;
+    padding: 0.65rem 0.95rem;
+    min-height: 48px;
   }
 
   .search-input {
-    font-size: 0.9rem;
+    font-size: 1rem;
     width: 100%;
-    min-height: 40px; /* Asegurar altura para evitar recortes */
+    min-height: 44px;
+  }
+
+  .search-clear {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .search-results-dropdown {
-    max-height: 400px;
-    width: calc(100% - 2rem);
-    left: 1rem;
+    max-height: min(55vh, 360px);
+    width: 100%;
+    left: 0;
+    right: 0;
   }
 
   .result-item {
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
+    min-height: 52px;
   }
 
   .result-name {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

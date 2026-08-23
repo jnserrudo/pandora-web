@@ -75,18 +75,22 @@
   align-items: center;
   gap: 10px;
   padding: 12px 24px;
-  background: #fff;
-  color: #000;
+  background: var(--btn-primary-bg);
+  color: #fff;
   text-decoration: none;
-  font-weight: 800;
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+  border-radius: var(--radius-input);
+  transition: background 0.2s ease, transform 0.2s var(--motion-ease, ease);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  border: none;
+  cursor: pointer;
 }
 
 .btn-create-premium:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+  background: var(--btn-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+  color: #fff;
 }
 
 /* --- TABLE WRAPPER PREMIUM --- */
@@ -144,18 +148,27 @@
 }
 
 .btn-filter-premium {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c4b5d4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #fff;
-  padding: 10px 18px;
-  border-radius: 12px;
+  padding: 0.7rem 2.75rem 0.7rem 1rem;
+  border-radius: var(--radius-input);
   font-weight: 600;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
   outline: none;
+  min-height: 44px;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .btn-filter-premium option {
@@ -205,17 +218,21 @@
   min-width: 0;
 }
 
-/* Column roles */
+/* Column roles — room for badges without ellipsis */
 .admin-table-premium .col-main {
-  width: auto;
+  width: 28%;
 }
 
 .admin-table-premium .col-meta {
-  width: 8.5rem;
+  width: 22%;
+}
+
+.admin-table-premium .col-meta.col-message {
+  width: 30%;
 }
 
 .admin-table-premium .col-status {
-  width: 7.5rem;
+  width: 10.5rem;
 }
 
 .admin-table-premium .col-date {
@@ -230,6 +247,19 @@
   padding-left: 0.5rem;
   padding-right: 0.85rem;
   overflow: visible;
+}
+
+.admin-table-premium td.col-status,
+.admin-table-premium th.col-status {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.admin-table-premium td.col-message {
+  white-space: normal;
+  overflow: hidden;
+  vertical-align: middle;
 }
 
 .admin-table-premium .text-right {
@@ -283,12 +313,18 @@
 
 .badge-premium {
   display: inline-flex;
-  padding: 5px 12px;
-  border-radius: 50px;
-  font-size: 0.7rem;
-  font-weight: 800;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: var(--font-main);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .badge-premium.active {

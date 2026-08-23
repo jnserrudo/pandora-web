@@ -1,89 +1,53 @@
-import React, { useRef, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { getAbsoluteImageUrl } from '../../services/api';
 import { articleCardBlurb } from '../../utils/htmlToPlainText';
+import AutoCarousel from '../motion/AutoCarousel';
+import EntityMedia from '../motion/EntityMedia';
+import Reveal from '../motion/Reveal';
 import './TrendingMagazine.css';
 
 const TrendingMagazine = ({ articles }) => {
-    const scrollContainer = useRef(null);
-    const isPausedRef = useRef(false);
+  return (
+    <Reveal as="section" className="trending-magazine-section" variant="up">
+      <div className="trending-header">
+        <h2>
+          Lo más visto en{' '}
+          <span style={{ color: 'var(--color-accent)' }}>Pandora Magazine</span>
+        </h2>
+      </div>
 
-    const scroll = useCallback((direction) => {
-        if (scrollContainer.current) {
-            const { scrollLeft, clientWidth, scrollWidth } = scrollContainer.current;
-            let scrollTo = direction === 'left'
-                ? scrollLeft - clientWidth / 2
-                : scrollLeft + clientWidth / 2;
-            if (direction === 'right' && scrollLeft + clientWidth >= scrollWidth - 10) {
-                scrollTo = 0;
-            }
-            scrollContainer.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-        }
-    }, []);
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            if (!isPausedRef.current) scroll('right');
-        }, 4500);
-        return () => clearInterval(timer);
-    }, [scroll]);
-
-    return (
-        <section className="trending-magazine-section">
-            <div className="trending-header">
-                <h2>Lo más visto en <span style={{ color: 'var(--color-accent)' }}>Pandora Magazine</span></h2>
-            </div>
-
-            {(!articles || articles.length === 0) ? (
-                <div className="trending-magazine-empty" style={{ 
-                    padding: '3rem', 
-                    textAlign: 'center', 
-                    color: 'rgba(255,255,255,0.4)',
-                    background: 'rgba(0,0,0,0.2)',
-                    borderRadius: '1rem',
-                    margin: '0 2rem'
-                }}>
-                    <p>Estamos preparando las mejores noticias para vos.</p>
-                    <small style={{ marginTop: '0.5rem', display: 'block' }}>Próximamente contenido exclusivo</small>
-                </div>
-            ) : (
-                <div
-                className="trending-carousel-container"
-                onMouseEnter={() => { isPausedRef.current = true; }}
-                onMouseLeave={() => { isPausedRef.current = false; }}
+      {!articles || articles.length === 0 ? (
+        <div className="trending-magazine-empty">
+          <p>Estamos preparando las mejores noticias para vos.</p>
+          <small>Próximamente contenido exclusivo</small>
+        </div>
+      ) : (
+        <AutoCarousel className="trending-carousel-container" intervalMs={4500} scrollRatio={0.5}>
+          {articles.map((article) => (
+            <Link
+              to={`/article/${article.slug}`}
+              key={article.id}
+              className="trending-article-card"
             >
-                    <button className="nav-btn prev" onClick={() => scroll('left')}>
-                        <ChevronLeft />
-                    </button>
-
-                    <div className="trending-cards-wrapper" ref={scrollContainer}>
-                        {articles.map((article) => (
-                            <Link 
-                                to={`/article/${article.slug}`} 
-                                key={article.id} 
-                                className="trending-article-card"
-                            >
-                                <div className="card-media">
-                                    <img src={getAbsoluteImageUrl(article.coverImage)} alt={article.title} />
-                                </div>
-                                <div className="card-info">
-                                    <h3>{article.title}</h3>
-                                    <p className="card-description">
-                                        {articleCardBlurb(article, 80)}
-                                    </p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-
-                    <button className="nav-btn next" onClick={() => scroll('right')}>
-                        <ChevronRight />
-                    </button>
-                </div>
-            )}
-        </section>
-    );
+              <div className="card-media">
+                <EntityMedia
+                  coverImage={article.coverImage}
+                  images={article.galleryImages}
+                  alt={article.title}
+                  intervalMs={3800 + (article.id % 5) * 200}
+                />
+              </div>
+              <div className="card-info">
+                <h3>{article.title}</h3>
+                <p className="card-description">{articleCardBlurb(article, 80)}</p>
+              </div>
+            </Link>
+          ))}
+        </AutoCarousel>
+      )}
+    </Reveal>
+  );
 };
 
 export default TrendingMagazine;

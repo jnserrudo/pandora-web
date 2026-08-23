@@ -1,13 +1,16 @@
 // src/Components/FeaturedCommerces/FeaturedCommerces.jsx
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { getCategoryDisplayName } from "../../utils/categoryUtils.js";
 import { Link } from "react-router-dom";
-import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
-import { getCommerces, toggleFavorite, getAbsoluteImageUrl } from "../../services/api";
+import { Heart } from "lucide-react";
+import { getCommerces, toggleFavorite } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
+import AutoCarousel from "../motion/AutoCarousel";
+import EntityMedia from "../motion/EntityMedia";
+import Reveal from "../motion/Reveal";
 import "./FeaturedCommerces.css";
 
 const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) => {
@@ -15,155 +18,118 @@ const FeaturedCommerces = ({ planLevel = null, title = "", variant = "large" }) 
   const { showToast } = useToast();
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
-  const scrollContainerRef = useRef(null);
-  const autoPlayRef = useRef(null);
-  const isPausedRef = useRef(false);
 
   useEffect(() => {
     const fetchCommerces = async () => {
       setLoading(true);
       try {
-        // Ahora filtramos desde el servidor para mayor eficiencia
         const data = await getCommerces({ planLevel });
         if (Array.isArray(data)) {
-           // Mantenemos un filtrado preventivo por si el server no lo soporta o para planes específicos
-           if (planLevel) {
-             setCommerces(data.filter(c => {
-               const cLevel = Number(c.planLevel);
-               const targetLevel = Number(planLevel);
-               return cLevel === targetLevel;
-             }));
-           } else {
-             setCommerces(data);
-           }
+          if (planLevel) {
+            setCommerces(
+              data.filter((c) => Number(c.planLevel) === Number(planLevel))
+            );
+          } else {
+            setCommerces(data);
+          }
         }
-      } catch (error) {
-        showToast("No se pudieron cargar los locales destacados.", 'error');
+      } catch {
+        showToast("No se pudieron cargar los locales destacados.", "error");
       } finally {
         setLoading(false);
       }
     };
     fetchCommerces();
-  }, [token, planLevel]);
+  }, [token, planLevel, showToast]);
 
   const handleFavorite = async (e, commerceId) => {
     e.preventDefault();
     e.stopPropagation();
     if (!token) {
-      showToast("Debes iniciar sesión para guardar favoritos.", 'info');
+      showToast("Debes iniciar sesión para guardar favoritos.", "info");
       return;
     }
     try {
-      await toggleFavorite(commerceId, 'commerce', token);
-      setCommerces(prev => prev.map(c => 
-        (c.id === commerceId || c._id === commerceId) 
-          ? { ...c, isFavorite: !c.isFavorite } 
-          : c
-      ));
-      showToast("Favoritos actualizados.", 'success');
+      await toggleFavorite(commerceId, "commerce", token);
+      setCommerces((prev) =>
+        prev.map((c) =>
+          c.id === commerceId || c._id === commerceId
+            ? { ...c, isFavorite: !c.isFavorite }
+            : c
+        )
+      );
+      showToast("Favoritos actualizados.", "success");
     } catch (err) {
-      showToast(err.message || "No se pudo actualizar el favorito.", 'error');
+      showToast(err.message || "No se pudo actualizar el favorito.", "error");
     }
-  };
-
-  const scroll = useCallback((direction) => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, clientWidth, scrollWidth } = scrollContainerRef.current;
-      const scrollAmount = variant === "large" ? clientWidth * 0.8 : clientWidth * 0.6;
-      let scrollTo = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
-      // Volver al inicio si llega al final
-      if (direction === 'right' && scrollLeft + clientWidth >= scrollWidth - 10) {
-        scrollTo = 0;
-      }
-      scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  }, [variant]);
-
-  useEffect(() => {
-    autoPlayRef.current = setInterval(() => {
-      if (!isPausedRef.current) scroll('right');
-    }, 4000);
-    return () => clearInterval(autoPlayRef.current);
-  }, [scroll]);
-
-  const getPlaceholderImage = (category) => {
-    return "https://placehold.co/400x250/0d0218/ffffff/png?text=Pandora";
   };
 
   if (loading) return <LoadingSpinner message="Buscando los mejores lugares..." />;
 
   return (
-    <section className={`featured-commerces-carousel-section ${variant}`}>
+    <Reveal
+      as="section"
+      className={`featured-commerces-carousel-section ${variant}`}
+      variant="up"
+    >
       {title && (
-        <div className="section-header" style={{ marginBottom: '1.5rem', paddingLeft: '1rem' }}>
-           <h2 className="section-title-premium">{title}</h2>
+        <div className="section-header" style={{ marginBottom: "1.5rem", paddingLeft: "1rem" }}>
+          <h2 className="section-title-premium">{title}</h2>
         </div>
       )}
 
       {commerces.length === 0 ? (
-          <div className="featured-empty-diagnostic" style={{ 
-              padding: '3rem 1rem', 
-              textAlign: 'center', 
-              color: 'rgba(255,255,255,0.4)',
-              background: 'rgba(255,255,255,0.02)',
-              borderRadius: '1rem',
-              margin: '1rem auto',
-              maxWidth: '800px',
-              border: '1px solid rgba(255,255,255,0.05)'
-          }}>
-              <p>Todavía no hay locales destacados en este bloque.</p>
-              <small style={{ opacity: 0.5 }}><Link to="/commerces">Ver todos los comercios</Link></small>
-          </div>
+        <div className="featured-empty-diagnostic">
+          <p>Todavía no hay locales destacados en este bloque.</p>
+          <small>
+            <Link to="/commerces">Ver todos los comercios</Link>
+          </small>
+        </div>
       ) : (
-        <div
+        <AutoCarousel
           className="carousel-wrapper"
-          onMouseEnter={() => { isPausedRef.current = true; }}
-          onMouseLeave={() => { isPausedRef.current = false; }}
+          intervalMs={4000}
+          scrollRatio={variant === "large" ? 0.75 : 0.55}
         >
-          <button className="carousel-nav-btn prev" onClick={() => scroll('left')}>
-            <ChevronLeft size={24} />
-          </button>
-          
-          <div className="commerces-scroll-container" ref={scrollContainerRef}>
-            {commerces.map((commerce) => (
-              <Link 
-                key={commerce.id || commerce._id} 
-                to={`/commerce/${commerce.id || commerce._id}`} 
+          {commerces.map((commerce) => {
+            const id = commerce.id || commerce._id;
+            return (
+              <Link
+                key={id}
+                to={`/commerce/${id}`}
                 className="commerce-carousel-card-link"
               >
                 <div className="commerce-carousel-card">
-                  <img 
+                  <EntityMedia
                     className="commerce-card-image"
-                    src={getAbsoluteImageUrl(commerce.coverImage || (commerce.galleryImages?.[0] || commerce.image))} 
-                    alt={commerce.name} 
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = getPlaceholderImage(commerce.category);
-                    }}
+                    coverImage={commerce.coverImage || commerce.image}
+                    images={commerce.galleryImages}
+                    alt={commerce.name}
+                    intervalMs={3600 + (Number(id) % 7) * 180}
                   />
-                  
-                  <button 
-                    className={`favorite-btn-floating ${commerce.isFavorite ? 'active' : ''}`}
-                    onClick={(e) => handleFavorite(e, commerce.id || commerce._id)}
+
+                  <button
+                    type="button"
+                    className={`favorite-btn-floating ${commerce.isFavorite ? "active" : ""}`}
+                    onClick={(e) => handleFavorite(e, id)}
+                    aria-label="Favorito"
                   >
                     <Heart size={18} fill={commerce.isFavorite ? "currentColor" : "none"} />
                   </button>
 
                   <div className="commerce-card-overlay">
                     <h3 className="commerce-card-name">{commerce.name}</h3>
-                    <span className="commerce-card-category">{getCategoryDisplayName(commerce.category)}</span>
+                    <span className="commerce-card-category">
+                      {getCategoryDisplayName(commerce.category)}
+                    </span>
                   </div>
                 </div>
               </Link>
-            ))}
-          </div>
-
-          <button className="carousel-nav-btn next" onClick={() => scroll('right')}>
-            <ChevronRight size={24} />
-          </button>
-        </div>
+            );
+          })}
+        </AutoCarousel>
       )}
-    </section>
+    </Reveal>
   );
 };
 

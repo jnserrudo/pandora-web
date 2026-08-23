@@ -7,6 +7,8 @@ import MapView from '../ui/MapView';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import EntityMedia from '../motion/EntityMedia';
+import Reveal from '../motion/Reveal';
 import { useToast } from '../../context/ToastContext';
 import './CommerceDetailPage.css'; 
 import './EventDetailPage.css';
@@ -81,10 +83,15 @@ const EventDetailPage = () => {
       <button type="button" onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
         <ArrowLeft size={18} />
       </button>
-      <header 
-        className="detail-header" 
-        style={{ backgroundImage: event.coverImage ? `url(${getAbsoluteImageUrl(event.coverImage)})` : 'none' }}
-      >
+      <header className="detail-header">
+        <EntityMedia
+          className="detail-header-media"
+          coverImage={event.coverImage}
+          images={event.galleryImages}
+          alt={event.name}
+          intervalMs={5000}
+          hoverZoom={false}
+        />
         <div className="header-overlay">
           <div className="event-hero-badges">
             {isPremium && (
@@ -174,14 +181,14 @@ const EventDetailPage = () => {
         </section>
         
         {event.galleryImages && event.galleryImages.length > 0 && (
-          <section className="gallery-section">
+          <Reveal as="section" className="gallery-section" variant="up">
             <h2>Galería del Evento</h2>
             <div className="gallery-grid">
               {event.galleryImages.map((img, index) => (
                 <img key={index} src={getAbsoluteImageUrl(img)} alt={`${event.name} galeria ${index + 1}`} />
               ))}
             </div>
-          </section>
+          </Reveal>
         )}
       </main>
       <Footer />

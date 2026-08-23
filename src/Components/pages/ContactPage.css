@@ -17,27 +17,17 @@
   text-align: center;
   margin-bottom: var(--space-2xl);
   padding: 2.8rem;
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(26, 8, 48, 0.92), rgba(13, 2, 24, 0.96)),
-    radial-gradient(circle at top, rgba(255, 0, 200, 0.14), transparent 52%);
+  border-radius: 16px;
+  background: var(--card, #12081f);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.28);
 }
 
 .contact-kicker {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #c4b5fd;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 1rem;
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
 }
 
 .contact-title {
@@ -45,10 +35,6 @@
   font-weight: 700;
   color: var(--color-text, #f0e8ff);
   margin-bottom: 0.8rem;
-  background: linear-gradient(135deg, var(--color-primary, #8a2be2), var(--color-accent, #ff00c8));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   letter-spacing: -0.04em;
 }
 
@@ -139,9 +125,8 @@
 }
 
 .contact-info-card.is-active {
-  border-color: rgba(255, 0, 200, 0.55);
-  box-shadow: 0 16px 34px rgba(104, 44, 199, 0.22);
-  background: linear-gradient(135deg, rgba(138, 43, 226, 0.18), rgba(255, 0, 200, 0.08));
+  border-color: rgba(124, 58, 237, 0.45);
+  background: rgba(124, 58, 237, 0.08);
 }
 
 .info-icon {
@@ -319,16 +304,16 @@
 
 .form-submit-btn {
   padding: 1rem 2.5rem;
-  background: linear-gradient(135deg, var(--color-primary, #8a2be2), var(--color-secondary, #c738dd));
+  background: var(--btn-primary-bg);
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-input);
   color: #ffffff;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.2s ease, transform 0.2s ease;
   margin-top: var(--space-sm);
-  box-shadow: var(--shadow-glow);
+  box-shadow: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -336,9 +321,9 @@
 }
 
 .form-submit-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(138, 43, 226, 0.6);
-  background: linear-gradient(135deg, var(--color-secondary, #c738dd), var(--color-accent, #ff00c8));
+  transform: translateY(-1px);
+  box-shadow: none;
+  background: var(--btn-primary-hover);
 }
 
 .form-submit-btn:active:not(:disabled) {

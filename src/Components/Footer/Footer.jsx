@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -6,9 +7,11 @@ const Footer = () => {
       <div className="footer-content">
         <p>&copy; {new Date().getFullYear()} Pandora. Todos los derechos reservados.</p>
         <div className="footer-links">
-          <a href="/about">Sobre Nosotros</a>
-          <a href="/pricing">Planes</a>
-          <a href="/contact">Contacto</a>
+          <Link to="/about">Sobre nosotros</Link>
+          <Link to="/pricing">Planes</Link>
+          <Link to="/contact">Contacto</Link>
+          <Link to="/terminos">Términos</Link>
+          <Link to="/privacidad">Privacidad</Link>
         </div>
       </div>
     </footer>

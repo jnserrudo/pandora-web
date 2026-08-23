@@ -4,7 +4,7 @@
   max-width: var(--layout-max-width);
   width: 100%;
   margin: 0 auto;
-  padding: var(--layout-nav-offset) var(--layout-padding-x) var(--space-lg) var(--layout-padding-x);
+  padding: var(--layout-nav-offset) var(--layout-padding-x) var(--dock-safe-bottom, 5.5rem);
 }
 
 .articles-list-header {
@@ -13,16 +13,15 @@
 }
 
 .articles-list-header h1 {
-  font-size: var(--text-h1);
-  font-weight: 900;
-  color: var(--color-text);
+  font-family: var(--font-main);
+  font-size: clamp(1.85rem, 5vw, 2.75rem);
+  font-weight: 600;
+  color: #fff;
   margin-bottom: var(--space-xs);
-  background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-transform: uppercase;
-  letter-spacing: 3px;
+  background: none;
+  -webkit-text-fill-color: unset;
+  text-transform: none;
+  letter-spacing: -0.02em;
 }
 
 .articles-list-header p {
@@ -32,7 +31,7 @@
 
 .articles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--space-lg);
   margin-bottom: var(--space-lg);
   width: 100%;
@@ -46,34 +45,30 @@
 }
 
 .article-card {
-  background: rgba(20, 20, 35, 0.7);
+  background: var(--surface-elevated, rgba(18, 8, 31, 0.95));
   border-radius: var(--radius-card);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.35s var(--motion-ease, ease), border-color 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.08);
   height: 100%;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(10px);
   box-shadow: var(--shadow-card);
 }
 
 .article-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(138, 43, 226, 0.5);
+  transform: translateY(-6px);
+  border-color: rgba(124, 58, 237, 0.45);
   box-shadow: var(--shadow-card-hover);
 }
 
-.article-card-image {
+.article-card-image,
+.article-card .entity-media.article-card-image {
+  position: relative;
   width: 100%;
   height: 220px;
-  object-fit: cover;
-  transition: transform 0.6s ease;
   display: block;
-}
-
-.article-card:hover .article-card-image {
-  transform: scale(1.1);
+  flex-shrink: 0;
 }
 
 .article-card-content {
@@ -86,7 +81,7 @@
 .article-card-category {
   display: inline-block;
   padding: 0.3rem 0.8rem;
-  background: rgba(138, 43, 226, 0.3);
+  background: rgba(124, 58, 237, 0.28);
   border-radius: 20px;
   font-size: 0.7rem;
   font-weight: 600;
@@ -160,7 +155,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .articles-list-container {
-    padding: 120px var(--space-sm) var(--space-md) var(--space-sm);
+    padding: var(--layout-nav-offset) var(--layout-padding-x) var(--dock-safe-bottom, 5.5rem);
   }
 
   .articles-list-header h1 {

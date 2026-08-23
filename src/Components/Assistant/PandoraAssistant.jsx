@@ -14,13 +14,32 @@ const WELCOME = {
   GUEST: 'Hola. Te ayudo a descubrir Salta en PANDORA y a hacer trámites: explorar, entrar o cargar un local.',
   USER: 'Hola. Puedo listarte lugares, decirte cómo guardar favoritos, comentar o dar de alta tu comercio.',
   OWNER: 'Hola. Te guío con tu ficha, planes, eventos PENDING y cómo responder comentarios.',
-  ADMIN: 'Hola. Te llevo a las colas: comercios, eventos, buzón y AI Guard.',
+  ADMIN: 'Hola. Te llevo a las colas: comercios, eventos, buzón y moderación.',
 };
 
+/** List-in-chat shortcuts (not immediate redirect). */
 const SHORTCUTS = [
-  { id: 'commerces', label: 'Comercios', to: '/commerces', icon: Store },
-  { id: 'events', label: 'Eventos', to: '/events', icon: Calendar },
-  { id: 'magazine', label: 'Revista', to: '/magazine', icon: Newspaper },
+  {
+    id: 'commerces',
+    label: 'Comercios',
+    query: 'Mostrame comercios',
+    seeAll: { label: 'Ver todos los comercios', to: '/commerces' },
+    icon: Store,
+  },
+  {
+    id: 'events',
+    label: 'Eventos',
+    query: 'Mostrame eventos',
+    seeAll: { label: 'Ver toda la agenda', to: '/events' },
+    icon: Calendar,
+  },
+  {
+    id: 'magazine',
+    label: 'Revista',
+    query: 'Mostrame la revista',
+    seeAll: { label: 'Ir a Pandora Magazine', to: '/magazine' },
+    icon: Newspaper,
+  },
 ];
 
 function promptsFor(role) {
@@ -60,6 +79,21 @@ const PandoraAssistant = () => {
     return () => document.body.classList.remove('assistant-open');
   }, [open]);
 
+  useEffect(() => {
+    const el = logRef.current;
+    if (!el || !open) return undefined;
+
+    const stopLenis = (event) => {
+      event.stopPropagation();
+    };
+    el.addEventListener('wheel', stopLenis, { passive: true });
+    el.addEventListener('touchmove', stopLenis, { passive: true });
+    return () => {
+      el.removeEventListener('wheel', stopLenis);
+      el.removeEventListener('touchmove', stopLenis);
+    };
+  }, [open]);
+
   if (HIDDEN_PATHS.includes(location.pathname)) return null;
 
   const goTo = (to) => {
@@ -68,7 +102,7 @@ const PandoraAssistant = () => {
     navigate(to);
   };
 
-  const sendText = async (text) => {
+  const sendText = async (text, options = {}) => {
     if (!text || busy) return;
     const next = [...messages, { role: 'user', content: text }];
     setMessages(next);
@@ -77,10 +111,14 @@ const PandoraAssistant = () => {
     try {
       const payload = next.filter((msg) => msg.role === 'user' || (msg.role === 'assistant' && !msg.prompts));
       const data = await sendAssistantChat(payload, location.pathname, token);
+      const actions = [...(data.actions || [])];
+      if (options.seeAll?.to && !actions.some((a) => a.to === options.seeAll.to)) {
+        actions.push(options.seeAll);
+      }
       setMessages([...next, {
         role: 'assistant',
         content: data.reply || 'No pude armar una respuesta. Probá de nuevo.',
-        actions: data.actions || [],
+        actions,
         items: data.items || [],
       }]);
     } catch (err) {
@@ -92,15 +130,32 @@ const PandoraAssistant = () => {
     }
   };
 
+  const handleShortcut = (item) => {
+    if (item.query) {
+      sendText(item.query, { seeAll: item.seeAll });
+      return;
+    }
+    goTo(item.to);
+  };
+
   const handleSend = (event) => {
     event.preventDefault();
     sendText(draft.trim());
   };
 
+  const shortcutItems = token
+    ? SHORTCUTS
+    : [...SHORTCUTS, { id: 'login', label: 'Entrar', to: '/login', icon: LogIn }];
+
   return (
     <div className="pandora-assistant">
       {open && (
-        <div className="assistant-panel" role="dialog" aria-label="Asistente PANDORA">
+        <div
+          className="assistant-panel"
+          role="dialog"
+          aria-label="Asistente PANDORA"
+          data-lenis-prevent
+        >
           <header className="assistant-header">
             <div className="assistant-brand">
               <span className="assistant-avatar" aria-hidden="true">
@@ -115,7 +170,13 @@ const PandoraAssistant = () => {
               <X size={18} />
             </button>
           </header>
-          <div className="assistant-log" ref={logRef}>
+          <div
+            className="assistant-log"
+            ref={logRef}
+            data-lenis-prevent
+            data-lenis-prevent-wheel
+            data-lenis-prevent-touch
+          >
             {messages.map((msg, i) => (
               <div key={i} className={`assistant-row ${msg.role}`}>
                 <div className={`assistant-bubble ${msg.role} ${msg.items?.length ? 'has-items' : ''}`}>
@@ -152,13 +213,15 @@ const PandoraAssistant = () => {
             )}
           </div>
           <div className="assistant-shortcuts" aria-label="Atajos">
-            {(token
-              ? SHORTCUTS
-              : [...SHORTCUTS, { id: 'login', label: 'Entrar', to: '/login', icon: LogIn }]
-            ).map((item) => {
+            {shortcutItems.map((item) => {
               const Icon = item.icon;
               return (
-                <button key={item.id} type="button" onClick={() => goTo(item.to)}>
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleShortcut(item)}
+                  disabled={busy && Boolean(item.query)}
+                >
                   <Icon size={13} />
                   {item.label}
                 </button>

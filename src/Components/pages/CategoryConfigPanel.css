@@ -4,6 +4,7 @@
   border-radius: 30px;
   padding: 2.5rem;
   margin-top: 3rem;
+  overflow: visible;
   animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -12,6 +13,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2.5rem;
+  overflow: visible;
+  padding-top: 2px;
 }
 
 .title-group {
@@ -32,14 +35,13 @@
 }
 
 .accent-glow {
-  color: #8a2be2;
-  filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.5));
+  color: var(--color-primary);
 }
 
 .btn-save-glow {
-  background: linear-gradient(135deg, #8a2be2, #ff2093);
-  border: none;
-  border-radius: 14px;
+  background: var(--btn-primary-bg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
   padding: 12px 24px;
   color: #fff;
   font-weight: 700;
@@ -47,13 +49,14 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(138, 43, 226, 0.2);
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: none;
 }
 
 .btn-save-glow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
+  background: var(--btn-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: none;
 }
 
 .categories-draggables {
@@ -145,7 +148,7 @@
 
 .featured .feature-badge {
   opacity: 1;
-  filter: drop-shadow(0 0 5px rgba(255, 189, 57, 0.5));
+  filter: none;
 }
 
 .panel-footer-note {

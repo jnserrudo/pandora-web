@@ -26,6 +26,8 @@ import MapView from '../ui/MapView';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import EntityMedia from '../motion/EntityMedia';
+import Reveal from '../motion/Reveal';
 import "./CommerceDetailPage.css";
 
 const CommerceDetailPage = () => {
@@ -132,10 +134,15 @@ const CommerceDetailPage = () => {
       <button type="button" onClick={() => navigate(-1)} className="back-button" aria-label="Volver">
         <ArrowLeft size={18} />
       </button>
-      <header
-        className="detail-header"
-        style={{ backgroundImage: coverImage ? `url(${getAbsoluteImageUrl(coverImage)})` : "none" }}
-      >
+      <header className="detail-header">
+        <EntityMedia
+          className="detail-header-media"
+          coverImage={coverImage}
+          images={commerce.galleryImages}
+          alt={commerce.name}
+          intervalMs={5000}
+          hoverZoom={false}
+        />
         <div className="header-overlay">
           <div className="flex gap-2 mb-2 flex-wrap">
             {commerce.categories && commerce.categories.length > 0 ? (
@@ -155,7 +162,7 @@ const CommerceDetailPage = () => {
       </header>
 
       <main className="detail-content">
-        <section className="info-section">
+        <Reveal as="section" className="info-section" variant="up">
           <h2>Sobre el Lugar</h2>
           <p>{commerce.description}</p>
           <div className="info-grid">
@@ -187,25 +194,23 @@ const CommerceDetailPage = () => {
             )}
           </div>
 
-          <div className="commerce-action-buttons" style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-            <button 
-              onClick={handleShare}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '50px', backgroundColor: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', transition: 'background 0.3s' }}
-            >
+          <div className="commerce-action-buttons">
+            <button type="button" onClick={handleShare} className="btn-pandora-secondary">
               <Share2 size={18} /> Compartir
             </button>
             <button
+              type="button"
               onClick={handleFavorite}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '50px', backgroundColor: isFavorite ? 'rgba(255,20,147,0.2)' : 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}
+              className={`btn-pandora-secondary ${isFavorite ? 'is-fav' : ''}`}
             >
-              <Heart size={18} fill={isFavorite ? '#FF1493' : 'none'} /> {isFavorite ? 'En favoritos' : 'Guardar'}
+              <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'En favoritos' : 'Guardar'}
             </button>
             {commerce.phone && commerce.planLevel >= 2 && (
               <a 
                 href={`https://wa.me/${commerce.phone.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '50px', backgroundColor: '#25D366', color: '#fff', textDecoration: 'none', fontWeight: '600', transition: 'opacity 0.3s' }}
+                className="btn-pandora commerce-wa-btn"
               >
                 <MessageCircle size={18} /> Escribir por WhatsApp
               </a>
@@ -215,7 +220,7 @@ const CommerceDetailPage = () => {
                 href={commerce.externalLink.startsWith('http') ? commerce.externalLink : `https://${commerce.externalLink}`}
                 target="_blank"
                 rel="noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '50px', backgroundColor: 'var(--color-accent)', color: '#fff', textDecoration: 'none', fontWeight: '500', transition: 'opacity 0.3s' }}
+                className="btn-pandora"
               >
                 <Globe size={18} /> Ver menú / Sitio web
               </a>
@@ -254,10 +259,10 @@ const CommerceDetailPage = () => {
               <MapView latitude={commerce.latitude} longitude={commerce.longitude} />
             </div>
           )}
-        </section>
+        </Reveal>
 
         {commerce.galleryImages && commerce.galleryImages.length > 0 && (
-          <section className="gallery-section">
+          <Reveal as="section" className="gallery-section" variant="up">
             <h2>Galería</h2>
             <div className="gallery-grid">
               {commerce.galleryImages.map((img, index) => (
@@ -268,7 +273,7 @@ const CommerceDetailPage = () => {
                 />
               ))}
             </div>
-          </section>
+          </Reveal>
         )}
 
         {/* --- CATÁLOGO DE PRODUCTOS (PLATA O SUPERIOR) --- */}

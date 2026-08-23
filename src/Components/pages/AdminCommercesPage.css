@@ -190,13 +190,17 @@
 }
 
 .commerce-review-modal .btn-primary {
-  background: var(--color-primary, #8a2be2);
+  background: var(--btn-primary-bg);
   border: none;
   color: #fff;
 }
 
+.commerce-review-modal .btn-primary:hover {
+  background: var(--btn-primary-hover);
+}
+
 .commerce-review-modal .btn-danger {
-  background: #e11d48 !important;
+  background: var(--destructive, #e11d48) !important;
 }
 
 .commerce-review-modal .btn-primary:disabled,

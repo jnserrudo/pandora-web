@@ -6,7 +6,7 @@
   flex-direction: column;
   background-color: var(--color-background);
   color: #fff;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-main);
 }
 
 .my-commerces-container {
@@ -44,10 +44,7 @@
   font-size: 2.8rem;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
 }
 
 .header-title-neo p {
@@ -57,22 +54,24 @@
 
 /* Success Button Neo */
 .btn-neo-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: var(--btn-primary-bg);
     color: #fff;
     padding: 0.8rem 1.8rem;
-    border-radius: 14px;
+    border-radius: var(--radius-input);
     font-weight: 700;
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    border: none;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .btn-neo-success:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+    background: var(--btn-primary-hover);
+    box-shadow: none;
 }
 
 /* Grid Layout Neo */
@@ -84,10 +83,9 @@
 
 /* Neo Manage Card */
 .neo-manage-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(15px);
+    background: var(--card, #12081f);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
+    border-radius: 16px;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -95,9 +93,9 @@
 }
 
 .neo-manage-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    border-color: rgba(138, 43, 226, 0.4);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .card-media {
@@ -398,8 +396,7 @@
 }
 /* Hub Specific Utilities */
 .neo-glass-panel {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(15px);
+    background: var(--card, #12081f);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -425,17 +422,14 @@
     justify-content: center;
     margin-bottom: 2rem;
     border: 1px solid rgba(138, 43, 226, 0.2);
-    box-shadow: 0 0 30px rgba(138, 43, 226, 0.15);
+    box-shadow: none;
 }
 
 .empty-state-hub h3 {
     font-size: 2rem;
     font-weight: 800;
     margin-bottom: 1rem;
-    background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #fff;
 }
 
 .empty-state-hub p {
@@ -447,19 +441,21 @@
 }
 
 .btn-neo-primary {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    background: var(--btn-primary-bg);
     color: #fff;
     padding: 1rem 2.5rem;
-    border-radius: 16px;
+    border-radius: var(--radius-input);
     font-weight: 700;
     text-decoration: none;
-    box-shadow: 0 8px 25px rgba(138, 43, 226, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: none;
+    border: none;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .btn-neo-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(138, 43, 226, 0.5);
+    transform: translateY(-1px);
+    background: var(--btn-primary-hover);
+    box-shadow: none;
 }
 .card-top-info {
     display: flex;

@@ -21,12 +21,12 @@
 }
 
 .event-tier-badge.premium {
-  background: linear-gradient(135deg, #ffd700, #ffa500);
-  color: #000;
+  background: var(--tier-premium);
+  color: #12081f;
 }
 
 .event-tier-badge.plus {
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  background: var(--tier-plus);
   color: #fff;
 }
 
@@ -62,19 +62,19 @@
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  border-radius: 999px;
+  border-radius: var(--radius-input);
   padding: 0.75rem 1rem;
   font-weight: 700;
 }
 
 .event-primary-link {
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  background: var(--btn-primary-bg);
   color: #fff;
 }
 
 .event-primary-link.premium {
-  background: linear-gradient(135deg, #ffd700, #ffa500);
-  color: #000;
+  background: var(--tier-premium);
+  color: #12081f;
 }
 
 .event-secondary-link {

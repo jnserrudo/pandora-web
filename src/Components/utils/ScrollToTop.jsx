@@ -1,15 +1,20 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useSmoothScroll } from '../motion/SmoothScrollProvider';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
+  const smooth = useSmoothScroll();
 
   useEffect(() => {
     const scrollUp = () => {
+      if (smooth?.scrollTo) {
+        smooth.scrollTo(0, { immediate: true });
+      }
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
-      
+
       const root = document.getElementById('root');
       if (root) root.scrollTop = 0;
 
@@ -17,10 +22,7 @@ const ScrollToTop = () => {
       if (appWrapper) appWrapper.scrollTop = 0;
     };
 
-    // Ejecutar inmediatamente
     scrollUp();
-    
-    // Asegurar el scroll después de que React pinte el DOM (ej: al desmontar spinners)
     const t1 = setTimeout(scrollUp, 50);
     const t2 = setTimeout(scrollUp, 150);
 
@@ -28,7 +30,7 @@ const ScrollToTop = () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [pathname]);
+  }, [pathname, smooth]);
 
   return null;
 };

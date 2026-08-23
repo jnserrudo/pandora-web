@@ -398,8 +398,12 @@
   padding: 0.55rem 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, #8a2be2, #ff00c8);
+  background: var(--btn-primary-bg);
   color: #fff;
+}
+
+.ia-guard-action-row button:hover:not(.danger) {
+  background: var(--btn-primary-hover);
 }
 
 .ia-guard-action-row button.danger {
@@ -469,12 +473,16 @@
 }
 
 .ia-guard-chat form button {
-  background: linear-gradient(135deg, #8a2be2, #ff00c8);
+  background: var(--btn-primary-bg);
   border: 0;
   color: #fff;
   border-radius: 12px;
   padding: 0 0.9rem;
   cursor: pointer;
+}
+
+.ia-guard-chat form button:hover {
+  background: var(--btn-primary-hover);
 }
 
 .spinning { animation: guard-spin 1s linear infinite; }

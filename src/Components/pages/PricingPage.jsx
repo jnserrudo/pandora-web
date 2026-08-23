@@ -13,11 +13,11 @@ import {
   Crown, 
   ArrowRight,
   MousePointer2,
-  TrendingUp,
-  MessageSquare,
-  Sparkles,
-  Ticket
+  Ticket,
+  MapPin,
+  Headphones
 } from 'lucide-react';
+import Reveal from '../motion/Reveal';
 import './PricingPage.css';
 
 const PricingPage = () => {
@@ -39,10 +39,10 @@ const PricingPage = () => {
         // Si el backend no devuelve nada aún, usamos el fallback hardcoded para no romper la UI
         if (!data || data.length === 0) {
           setPlans([
-            { level: 1, name: "ECO", price: 0, description: "Esencial para aparecer en el mapa.", iconName: "MousePointer2", color: "#94a3b8", features: ["Presencia básica", "Contacto", "Horarios"] },
-            { level: 2, name: "BOOST", price: 1500, description: "Diferenciate con una vitrina atractiva.", iconName: "Zap", color: "#00D4FF", features: ["Todo lo de Nivel 1", "5 fotos", "Badge verificado"] },
+            { level: 1, name: "ECO", price: 0, description: "Esencial para aparecer en el mapa.", iconName: "MousePointer2", color: "var(--tier-basic)", features: ["Presencia básica", "Contacto", "Horarios"] },
+            { level: 2, name: "BOOST", price: 1500, description: "Diferenciate con una vitrina atractiva.", iconName: "Zap", color: "var(--tier-plus)", features: ["Todo lo de Nivel 1", "5 fotos", "Badge verificado"] },
             { level: 3, name: "PREMIUM", price: 3500, description: "Ideal con eventos y promos.", iconName: "Award", color: "var(--color-primary)", features: ["Todo lo de Nivel 2", "Ofertas", "Push básicas"], featured: true },
-            { level: 4, name: "ELITE", price: 6000, description: "Socio Pandora con analíticas.", iconName: "Crown", color: "#FFD700", features: ["Socio Pandora", "Analíticas", "Soporte 24/7"] }
+            { level: 4, name: "ELITE", price: 6000, description: "Socio Pandora con analíticas.", iconName: "Crown", color: "var(--tier-premium)", features: ["Socio Pandora", "Analíticas", "Soporte 24/7"] }
           ]);
         } else {
           // Adaptar datos del backend (benefits string -> features array)
@@ -57,11 +57,11 @@ const PricingPage = () => {
 
             // Asignar Iconos y Colores por defecto si no vienen del DB
             const defaults = {
-                1: { icon: "MousePointer2", color: "#94a3b8" },
-                2: { icon: "Zap", color: "#00D4FF" },
+                1: { icon: "MousePointer2", color: "var(--tier-basic)" },
+                2: { icon: "Zap", color: "var(--tier-plus)" },
                 3: { icon: "Award", color: "var(--color-primary)", featured: true },
-                4: { icon: "Crown", color: "#FFD700" }
-            }[p.level] || { icon: "MousePointer2", color: "#8A2BE2" };
+                4: { icon: "Crown", color: "var(--tier-premium)" }
+            }[p.level] || { icon: "MousePointer2", color: "var(--color-primary)" };
 
             return {
               ...p,
@@ -123,17 +123,17 @@ const PricingPage = () => {
       <Navbar />
       
       <main className="pricing-main-content">
-        <header className="pricing-hero">
+        <Reveal as="header" className="pricing-hero" variant="up">
           <div className="pricing-glow-orb"></div>
           <div className="pricing-hero-text">
             <span className="pricing-badge">PLANES PANDORA</span>
             <h1>Potenciá tu <span className="highlight">alcance</span></h1>
             <p>Elegí el nivel de visibilidad ideal para tu comercio y conectá con miles de personas.</p>
           </div>
-        </header>
+        </Reveal>
 
         {/* Sección de Cupón */}
-        <section className="coupon-section">
+        <Reveal as="section" className="coupon-section" variant="up" delay={80}>
           <div className="coupon-container glass-morphism">
             <div className="coupon-info">
               <Ticket className="coupon-icon" />
@@ -159,17 +159,19 @@ const PricingPage = () => {
             {couponError && <span className="coupon-error">{couponError}</span>}
             {activeCoupon && <span className="coupon-success">¡Cupón {activeCoupon.code} ACTIVADO!</span>}
           </div>
-        </section>
+        </Reveal>
 
         <section className="pricing-grid-container">
           <div className="pricing-grid">
-            {plans.map((plan) => (
-              <div 
-                key={plan.level} 
+            {plans.map((plan, i) => (
+              <Reveal
+                key={plan.level}
                 className={`pricing-card ${plan.featured ? 'featured' : ''}`}
-                style={{ '--accent-color': plan.color || '#8A2BE2' }}
+                style={{ '--accent-color': plan.color || 'var(--color-primary)' }}
+                delay={Math.min(i, 5) * 70}
+                variant="up"
               >
-                {plan.featured && <div className="featured-badge"><Sparkles size={14} /> RECOMENDADO</div>}
+                {plan.featured && <div className="featured-badge" role="status">Recomendado</div>}
                 <div className="card-top">
                   <div className="plan-icon">{getIcon(plan.iconName)}</div>
                   <h3 className="plan-name">Nivel {plan.level}: {plan.name}</h3>
@@ -199,21 +201,21 @@ const PricingPage = () => {
                     <ArrowRight size={18} />
                   </Link>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </section>
 
         <section className="pricing-extra-info">
           <div className="info-card">
-            <TrendingUp size={40} className="info-icon" />
-            <h3>Crecimiento Asegurado</h3>
-            <p>Aumentá tus visitas hasta un 300% con los niveles superiores.</p>
+            <MapPin size={36} className="info-icon" aria-hidden />
+            <h3>Más visible en Salta</h3>
+            <p>Los planes altos priorizan tu ficha en listados, mapa y destacados de la ciudad.</p>
           </div>
           <div className="info-card">
-            <MessageSquare size={40} className="info-icon" />
-            <h3>Soporte Directo</h3>
-            <p>Consultanos cualquier duda sobre cómo mejorar tu perfil comercial.</p>
+            <Headphones size={36} className="info-icon" aria-hidden />
+            <h3>Acompañamiento real</h3>
+            <p>Escribinos desde Contacto si necesitás ayuda para armar o mejorar tu perfil.</p>
           </div>
         </section>
       </main>

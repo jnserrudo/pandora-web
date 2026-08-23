@@ -100,7 +100,7 @@ const AdminAdvertisementsPage = () => {
           <div className="hub-empty-state">
             <Megaphone size={48} />
             <h3>No hay campañas activas</h3>
-            <p>Comienza a promocionar el ecosistema Pandora ahora.</p>
+            <p>Publicá banners y campañas para comercios y eventos en Pandora.</p>
             <Link to="/admin/advertisements/create" className="btn-create-premium">Crear Primera Publicidad</Link>
           </div>
         ) : (

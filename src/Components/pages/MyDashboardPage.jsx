@@ -113,10 +113,10 @@ const MyDashboardPage = () => {
             <p>Todo tu contenido en Pandora, de un vistazo.</p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link to="/events/create" className="btn-neo-success" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.2rem', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '0.9rem', background: 'linear-gradient(135deg,#8a2be2,#ff2093)', color: '#fff' }}>
+            <Link to="/events/create" className="btn-pandora" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.2rem', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '0.9rem' }}>
               <Calendar size={16} /> Nuevo Evento
             </Link>
-            <Link to="/commerces/create" className="btn-neo-success" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.2rem', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '0.9rem', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
+            <Link to="/commerces/create" className="btn-neo-success">
               <Store size={16} /> Nuevo Comercio
             </Link>
           </div>
@@ -179,7 +179,7 @@ const MyDashboardPage = () => {
                   <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
                     <Calendar size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
                     <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>Todavía no tenés eventos creados.</p>
-                    <Link to="/events/create" style={{ padding: '0.7rem 1.5rem', background: 'linear-gradient(135deg,#8a2be2,#ff2093)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontWeight: 700 }}>
+                    <Link to="/events/create" className="btn-pandora" style={{ padding: '0.7rem 1.5rem', borderRadius: '10px', textDecoration: 'none', fontWeight: 700 }}>
                       Crear mi primer evento
                     </Link>
                   </div>
@@ -249,7 +249,7 @@ const MyDashboardPage = () => {
                   <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
                     <Store size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
                     <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>Todavía no tenés comercios registrados.</p>
-                    <Link to="/commerces/create" style={{ padding: '0.7rem 1.5rem', background: 'linear-gradient(135deg,#8a2be2,#ff2093)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontWeight: 700 }}>
+                    <Link to="/commerces/create" className="btn-pandora" style={{ padding: '0.7rem 1.5rem', borderRadius: '10px', textDecoration: 'none', fontWeight: 700 }}>
                       Registrar mi comercio
                     </Link>
                   </div>

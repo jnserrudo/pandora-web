@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getEvents, getAbsoluteImageUrl } from '../../services/api';
-import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { getEvents } from '../../services/api';
+import EntityCardSkeleton from '../ui/EntityCardSkeleton';
+import EntityMedia from '../motion/EntityMedia';
+import Reveal from '../motion/Reveal';
 import { MapPin, Star, Zap, Crown, ExternalLink } from 'lucide-react';
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
@@ -61,15 +63,25 @@ const EventsListPage = () => {
   const plusEvents = filteredEvents.filter(e => (e.eventTier || 1) === 2);
   const basicEvents = filteredEvents.filter(e => (e.eventTier || 1) === 1);
 
-  const handleImageError = (e) => {
-    e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop';
-  };
-
   if (loading) {
-    return <LoadingSpinner fullscreen message="Cargando agenda..." />;
+    return (
+      <div className="events-page-wrapper">
+        <Navbar />
+        <div className="events-list-container" aria-busy="true" aria-label="Cargando agenda">
+          <header className="events-header">
+            <h1>Agenda</h1>
+            <p>Cargando lo que está por pasar en Salta…</p>
+          </header>
+          <div className="events-grid">
+            <EntityCardSkeleton count={6} />
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
-  const renderEventCard = (event) => {
+  const renderEventCard = (event, index = 0) => {
     const date = new Date(event.startDate);
     const day = date.toLocaleDateString('es-ES', { day: '2-digit' });
     const month = date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '').toUpperCase();
@@ -83,14 +95,23 @@ const EventsListPage = () => {
     else if (event.featured) cardClass += ' event-card--featured';
 
     return (
-      <Link to={`/event/${event.id}`} key={event.id} className="event-card-link">
+      <Reveal
+        key={event.id}
+        as={Link}
+        to={`/event/${event.id}`}
+        className="event-card-link"
+        delay={Math.min(index, 8) * 45}
+        variant="up"
+      >
         <div className={cardClass}>
           <div className="event-card-image-wrapper">
-            <img
-              src={event.coverImage ? getAbsoluteImageUrl(event.coverImage) : 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop'}
-              alt={event.name}
+            <EntityMedia
               className="event-card-image"
-              onError={handleImageError}
+              coverImage={event.coverImage}
+              images={event.galleryImages}
+              alt={event.name}
+              intervalMs={3900 + (event.id % 5) * 220}
+              fallback="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=500&auto=format&fit=crop"
             />
             <div className="event-card-date-badge">
               <span className="event-card-day">{day}</span>
@@ -108,7 +129,7 @@ const EventsListPage = () => {
             )}
             {!isPremium && !isPlus && event.featured && (
               <span className="event-featured-badge">
-                <Star size={14} fill="#FFD700" style={{ display: 'inline-block', marginRight: '4px' }} /> DESTACADO
+                <Star size={14} fill="var(--tier-premium)" style={{ display: 'inline-block', marginRight: '4px' }} /> DESTACADO
               </span>
             )}
           </div>
@@ -127,7 +148,7 @@ const EventsListPage = () => {
             </p>
           </div>
         </div>
-      </Link>
+      </Reveal>
     );
   };
 
@@ -177,7 +198,7 @@ const EventsListPage = () => {
         {/* Eventos Premium */}
         {premiumEvents.length > 0 && (
           <section className="events-featured-section">
-            <h2 className="events-section-title" style={{ color: '#FFD700' }}>
+            <h2 className="events-section-title events-section-title--premium">
               <Crown size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
               Eventos Premium
             </h2>
@@ -190,7 +211,10 @@ const EventsListPage = () => {
         {/* Eventos Plus */}
         {plusEvents.length > 0 && (
           <section className="events-featured-section">
-            <h2 className="events-section-title" style={{ color: '#38bdf8', marginTop: premiumEvents.length > 0 ? '3rem' : 0 }}>
+            <h2
+              className="events-section-title events-section-title--plus"
+              style={{ marginTop: premiumEvents.length > 0 ? '3rem' : 0 }}
+            >
               <Zap size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
               Eventos Plus
             </h2>

@@ -171,9 +171,9 @@ const AnalyticsPanel = ({ data, loading, error }) => {
     return (
       <div className="analytics-panel loading-state">
         <div className="analytics-header">
-          <h2><BarChart3 size={20} style={{ display: 'inline-block', marginRight: '8px' }} /> Analíticas del Sistema</h2>
+          <h2><BarChart3 size={20} style={{ display: 'inline-block', marginRight: '8px' }} /> Métricas</h2>
         </div>
-        <div className="loading-placeholder">Cargando métricas de rendimiento...</div>
+        <div className="loading-placeholder">Cargando métricas...</div>
       </div>
     );
   }
@@ -190,9 +190,9 @@ const AnalyticsPanel = ({ data, loading, error }) => {
     <div className="analytics-panel">
       <div className="analytics-header">
         <div className="analytics-title-group">
-          <h2><BarChart3 size={20} style={{ display: 'inline-block', marginRight: '8px' }} /> Rendimiento del sistema</h2>
+          <h2><BarChart3 size={20} style={{ display: 'inline-block', marginRight: '8px' }} /> Resumen de actividad</h2>
           <span className="analytics-subtitle">
-            KPIs de publicidades (totales) + actividad real de los últimos 7 días
+            Publicidades (totales) y actividad de los últimos 7 días
           </span>
         </div>
         <div className="analytics-period">Últimos 7 días · actividad</div>

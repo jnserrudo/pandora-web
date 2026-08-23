@@ -11,7 +11,7 @@ import { Helmet } from 'react-helmet-async';
  */
 const SEOManager = ({ title, description, image, url }) => {
   const siteName = "Pandora Web";
-  const defaultDescription = "Descubrí el ecosistema Pandora. Comercios, eventos y magazine local.";
+  const defaultDescription = "Guía viva de Salta: comercios, eventos y revista local.";
   const defaultImage = "/og-image.jpg"; // Placeholder path
 
   const fullTitle = title ? `${title} | ${siteName}` : siteName;

@@ -13,6 +13,7 @@ import CommerceDetailPage from './Components/pages/CommerceDetailPage';
 import EventDetailPage from './Components/pages/EventDetailPage';       
 import AboutPage from './Components/pages/AboutPage';
 import ContactPage from './Components/pages/ContactPage'; 
+import LegalPage from './Components/pages/LegalPage';
 import UserProfilePage from './Components/pages/UserProfilePage';
 import PricingPage from './Components/pages/PricingPage';
 import MySubmissionsPage from './Components/pages/MySubmissionsPage';
@@ -41,12 +42,14 @@ import MyDashboardPage from "./Components/pages/MyDashboardPage";
 import AdminUsersPage from "./Components/pages/AdminUsersPage";
 import PandoraAssistant from "./Components/Assistant/PandoraAssistant";
 import ScrollToTopButton from "./Components/ScrollToTopButton/ScrollToTopButton";
+import RouteMosaic from "./Components/motion/RouteMosaic";
 
 function App() {
   return (
     <ToastProvider>
       <div className="app-wrapper">
       <ScrollToTop />
+      <RouteMosaic />
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -60,6 +63,8 @@ function App() {
           <Route path="/event/:id" element={<EventDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terminos" element={<LegalPage type="terminos" />} />
+          <Route path="/privacidad" element={<LegalPage type="privacidad" />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route 
             path="/my-submissions" 

@@ -152,7 +152,7 @@
 }
 
 .star-premium.active {
-  filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.4));
+  filter: none;
 }
 
 .rating-indicator-text {
@@ -221,7 +221,7 @@
 .btn-submit-premium {
   width: 100%;
   padding: 1.15rem;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  background: var(--btn-primary-bg);
   color: #fff;
   border: none;
   border-radius: 16px;
@@ -229,7 +229,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,9 +238,9 @@
 }
 
 .btn-submit-premium:hover:not(:disabled) {
+  background: var(--btn-primary-hover);
   transform: translateY(-4px);
-  box-shadow: 0 15px 30px rgba(138, 43, 226, 0.5);
-  filter: brightness(1.1);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
 }
 
 .btn-submit-premium:disabled {

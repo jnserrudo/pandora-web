@@ -10,7 +10,6 @@ import {
   Clock, 
   FileText,
   AlertCircle,
-  History,
   Info
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -84,17 +83,14 @@ const AdminAuditPage = () => {
                             <ChevronLeft size={20} />
                             <span>Volver al Panel</span>
                         </Link>
-                        <div className="hub-badge">
-                            <History size={14} />
-                            <span>AUDITORÍA GLOBAL</span>
-                        </div>
-                        <h1>Historial del Sistema</h1>
-                        <p>Seguimiento detallado de todas las transacciones y cambios de datos.</p>
+                        <p className="admin-kicker">Auditoría</p>
+                        <h1>Historial del sistema</h1>
+                        <p>Registro de cambios, altas y acciones en la plataforma.</p>
                     </div>
                 </header>
 
                 {loading ? (
-                    <LoadingSpinner message="Reconstruyendo historial..." />
+                    <LoadingSpinner message="Cargando historial..." />
                 ) : (
                     <div className="admin-audit-layout">
                         <div className="audit-controls">

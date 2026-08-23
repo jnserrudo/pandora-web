@@ -1,10 +1,12 @@
 // src/Components/pages/CommercesListPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { getCommerces, getAbsoluteImageUrl } from '../../services/api';
+import { getCommerces } from '../../services/api';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
-import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import EntityCardSkeleton from '../ui/EntityCardSkeleton';
+import EntityMedia from '../motion/EntityMedia';
+import Reveal from '../motion/Reveal';
 import { MapPin, Search } from 'lucide-react';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { useToast } from '../../context/ToastContext';
@@ -43,10 +45,6 @@ const CommercesListPage = () => {
   useEffect(() => {
     if (categoryParam) setActiveCategory(categoryParam);
   }, [categoryParam]);
-
-  const handleImageError = (e) => {
-    e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop';
-  };
 
   // Filtrado y ordenamiento client-side
   const filtered = allCommerces
@@ -116,8 +114,8 @@ const CommercesListPage = () => {
         </header>
 
         {loading ? (
-          <div className="loader-container">
-            <LoadingSpinner message="Buscando los mejores lugares..." />
+          <div className="unified-commerces-grid" aria-busy="true" aria-label="Cargando comercios">
+            <EntityCardSkeleton count={6} />
           </div>
         ) : (
           <>
@@ -128,15 +126,24 @@ const CommercesListPage = () => {
             )}
             <div className="unified-commerces-grid">
               {filtered.length > 0 ? (
-                filtered.map((commerce) => (
-                  <Link to={`/commerce/${commerce.id}`} key={commerce.id} className="commerce-card-link">
+                filtered.map((commerce, i) => (
+                  <Reveal
+                    key={commerce.id}
+                    as={Link}
+                    to={`/commerce/${commerce.id}`}
+                    className="commerce-card-link"
+                    delay={Math.min(i, 8) * 45}
+                    variant="up"
+                  >
                     <div className="commerce-card">
                       <div className="card-image-wrapper">
-                        <img 
-                          src={commerce.galleryImages?.[0] ? getAbsoluteImageUrl(commerce.galleryImages[0]) : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop'} 
-                          alt={commerce.name} 
+                        <EntityMedia
                           className="commerce-image"
-                          onError={handleImageError}
+                          coverImage={commerce.coverImage}
+                          images={commerce.galleryImages}
+                          alt={commerce.name}
+                          intervalMs={4000 + (commerce.id % 6) * 250}
+                          fallback="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500&auto=format&fit=crop"
                         />
                         <span className="card-category-badge">
                           {getCategoryDisplayName(commerce.category)}
@@ -155,7 +162,7 @@ const CommercesListPage = () => {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </Reveal>
                 ))
               ) : (
                 <div className="no-results">

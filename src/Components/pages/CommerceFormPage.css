@@ -112,10 +112,7 @@
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  background: linear-gradient(90deg, #fff, #b3a0ff);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
 }
 
 .form-card {
@@ -271,23 +268,24 @@ textarea.form-control {
 
 .submit-btn {
   flex: 2;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: var(--btn-primary-bg);
   color: white;
   border: none;
   padding: 1rem;
   border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .submit-btn:hover:not(:disabled) {
+  background: var(--btn-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
 }
 
 .submit-btn:disabled {
-  background: linear-gradient(135deg, #444, #333);
+  background: #444;
   color: #777;
   cursor: not-allowed;
   transform: none !important;

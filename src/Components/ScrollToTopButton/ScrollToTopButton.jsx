@@ -1,35 +1,31 @@
 // src/Components/ScrollToTopButton/ScrollToTopButton.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useSmoothScroll } from '../motion/SmoothScrollProvider';
 import './ScrollToTopButton.css';
 
 const HIDDEN_PATHS = ['/login', '/register'];
 
 const ScrollToTopButton = ({ showAfter = 300 }) => {
   const location = useLocation();
+  const smooth = useSmoothScroll();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.pageYOffset > showAfter) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      setIsVisible(window.pageYOffset > showAfter);
     };
 
-    window.addEventListener('scroll', toggleVisibility);
-
-    return () => {
-      window.removeEventListener('scroll', toggleVisibility);
-    };
+    window.addEventListener('scroll', toggleVisibility, { passive: true });
+    return () => window.removeEventListener('scroll', toggleVisibility);
   }, [showAfter]);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    if (smooth?.scrollTo) {
+      smooth.scrollTo(0, { duration: 1.1 });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (HIDDEN_PATHS.includes(location.pathname)) return null;

@@ -17,7 +17,7 @@ import {
   ChevronRight,
   Clock,
   Search,
-  Sparkles,
+  Shield,
   Info,
   BookOpen,
   Filter,
@@ -42,9 +42,9 @@ const FILTERS = [
   { id: 'pending', label: 'Por revisar' },
   { id: 'reviewed', label: 'Revisados' },
   { id: 'all', label: 'Todos' },
-  { id: 'flagged', label: 'Marcados IA' },
-  { id: 'approved', label: 'En orden IA' },
-  { id: 'rejected', label: 'Alerta IA' },
+  { id: 'flagged', label: 'Marcados automáticamente' },
+  { id: 'approved', label: 'En orden' },
+  { id: 'rejected', label: 'Con alerta' },
 ];
 
 const TYPE_FILTERS = [
@@ -69,7 +69,7 @@ const FALLBACK_EXAMPLES = [
     category: 'insultos',
     title: 'Lenguaje ofensivo',
     input: 'Sos un idiota, no vengan a este lugar',
-    step: 'Filtro local + texto IA',
+    step: 'Filtro local + análisis de texto',
     why: 'Contiene insultos dirigidos a personas',
     resultLabel: 'Marcar → Por revisar',
   },
@@ -77,7 +77,7 @@ const FALLBACK_EXAMPLES = [
     category: 'estafa',
     title: 'Estafa / phishing',
     input: 'Transferí a esta billetera y duplicamos tu plata',
-    step: 'Filtro local + texto IA',
+    step: 'Filtro local + análisis de texto',
     why: 'Promesa engañosa de dinero y transferencia',
     resultLabel: 'Alerta alta',
   },
@@ -85,7 +85,7 @@ const FALLBACK_EXAMPLES = [
     category: 'sexual',
     title: 'Contenido sexual en texto',
     input: 'Local con shows sexuales explícitos y packs privados',
-    step: 'Filtro local + texto IA',
+    step: 'Filtro local + análisis de texto',
     why: 'Lenguaje sexual explícito no apto para la guía local',
     resultLabel: 'Alerta alta',
   },
@@ -146,7 +146,7 @@ function aiSeverityLabel(status, reviewedAt) {
     return 'Revisado';
   }
   if (key === 'FLAGGED') return 'Por revisar (marcado)';
-  if (key === 'REJECTED') return 'Por revisar (alerta IA)';
+  if (key === 'REJECTED') return 'Por revisar (alerta automática)';
   if (key === 'APPROVED') return 'En orden';
   return formatStatusLabel(status);
 }
@@ -194,11 +194,11 @@ function pipelineSteps(item) {
     },
     {
       id: 'text',
-      title: '2. Análisis de texto IA',
+      title: '2. Análisis de texto',
       icon: ScanText,
       state: text.skipped ? 'skip' : (text.status === 'REJECTED' ? 'alert' : text.status === 'FLAGGED' ? 'flag' : 'ok'),
       detail: text.skipped
-        ? (text.reason || 'Omitido (sin Groq o error)')
+        ? (text.reason || 'Omitido (sin análisis automático o error)')
         : `${formatStatusLabel(text.status)}${text.reason ? ` — ${text.reason}` : ''}`,
     },
     {
@@ -285,8 +285,8 @@ const IAModerationStub = () => {
       const current = list.find((item) => item.id === nextSelected);
       setNotes(current?.adminNotes || '');
     } catch (err) {
-      setError(err?.response?.data?.message || err.message || 'No se pudo cargar AI Guard');
-      showToast('No se pudo cargar AI Guard.', 'error');
+      setError(err?.response?.data?.message || err.message || 'No se pudo cargar la moderación');
+      showToast('No se pudo cargar la moderación.', 'error');
     }
   };
 
@@ -367,14 +367,14 @@ const IAModerationStub = () => {
             <ShieldCheck size={16} />
             Interceptor de contenido
           </div>
-          <h3>AI Guard</h3>
+          <h3>Moderación de contenido</h3>
           <p>
             No bloquea altas ni ediciones. Analiza texto e imágenes, deja el caso acá y vos decidís.
-            Cerrar un caso del Guard no publica ni oculta la ficha: eso se hace en Comercios, Eventos o Revista.
+            Cerrar un caso no publica ni oculta la ficha: eso se hace en Comercios, Eventos o Revista.
           </p>
         </div>
         <div className={`ia-guard-chip ${configured ? 'ok' : 'warn'}`}>
-          {configured ? 'Groq activo (texto + imágenes)' : 'Sin API key — solo filtro local'}
+          {configured ? 'Análisis automático activo' : 'Solo filtro local'}
         </div>
       </header>
 
@@ -389,8 +389,8 @@ const IAModerationStub = () => {
         <div className="ia-guard-how-card">
           <ScanText size={18} />
           <div>
-            <strong>2. Texto IA</strong>
-            <p>Groq clasifica el mensaje con categorías y motivo en español.</p>
+            <strong>2. Análisis de texto</strong>
+            <p>Clasifica el mensaje con categorías y motivo en español.</p>
           </div>
         </div>
         <div className="ia-guard-how-card">
@@ -445,15 +445,15 @@ const IAModerationStub = () => {
         </button>
         <button type="button" className={filter === 'approved' ? 'on' : ''} onClick={() => handleFilter('approved')}>
           <strong>{stats?.approved ?? 0}</strong>
-          <span>En orden IA</span>
+          <span>En orden</span>
         </button>
         <button type="button" className={filter === 'flagged' ? 'on' : ''} onClick={() => handleFilter('flagged')}>
           <strong>{stats?.flagged ?? 0}</strong>
-          <span>Marcados IA</span>
+          <span>Marcados automáticamente</span>
         </button>
         <button type="button" className={filter === 'rejected' ? 'on' : ''} onClick={() => handleFilter('rejected')}>
           <strong>{stats?.rejected ?? 0}</strong>
-          <span>Alerta IA</span>
+          <span>Con alerta</span>
         </button>
       </div>
 
@@ -691,7 +691,7 @@ const IAModerationStub = () => {
             </>
           ) : (
             <div className="ia-guard-empty detail">
-              <Sparkles size={22} />
+              <Shield size={22} />
               <h4>Elegí un caso</h4>
               <p>Tocá una fila para ver cómo verificó, el porqué y los ejemplos parecidos.</p>
               {!guideOpen && (

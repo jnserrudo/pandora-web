@@ -8,7 +8,6 @@ import {
   Calendar, 
   Mail,
   ArrowRight,
-  Settings,
   Activity,
   UserCheck,
   Ticket,
@@ -119,12 +118,8 @@ const AdminDashboard = () => {
       <div className="admin-container">
         <header className="hub-header">
           <div className="hub-header-content">
-            <div className="hub-badge">
-              <Activity size={14} />
-              <span>SISTEMA ACTIVO</span>
-            </div>
-            <h1>Panel Central de Gestión</h1>
-            <p>Control total sobre el ecosistema Pandora</p>
+            <h1>Panel de administración</h1>
+            <p>Comercios, eventos, revista y publicidades desde un solo lugar.</p>
           </div>
         </header>
 
@@ -151,7 +146,6 @@ const AdminDashboard = () => {
           {adminModules.map((module, index) => (
             <Link to={module.link} key={index} className="hub-card-link">
               <div className="hub-card" style={{ '--accent-color': module.color }}>
-                <div className="hub-card-glow"></div>
                 <div className="hub-card-icon">
                   {module.icon}
                 </div>
@@ -186,8 +180,7 @@ const AdminDashboard = () => {
       
       <style>{`
         .hub-theme {
-          background: radial-gradient(circle at top right, rgba(138, 43, 226, 0.1), transparent),
-                      radial-gradient(circle at bottom left, rgba(255, 20, 147, 0.1), transparent);
+          background: none;
         }
 
         .hub-header {
@@ -195,21 +188,12 @@ const AdminDashboard = () => {
           justify-content: space-between;
           align-items: flex-end;
           margin-bottom: 4rem;
+          overflow: visible;
+          padding-top: 4px;
         }
 
-        .hub-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 12px;
-          background: rgba(46, 204, 113, 0.1);
-          border: 1px solid rgba(46, 204, 113, 0.3);
-          border-radius: 50px;
-          color: #2ecc71;
-          font-size: 0.75rem;
-          font-weight: 800;
-          letter-spacing: 1px;
-          margin-bottom: 1rem;
+        .hub-header-content {
+          overflow: visible;
         }
 
         .hub-header-content h1 {
@@ -217,9 +201,10 @@ const AdminDashboard = () => {
           font-weight: 900;
           letter-spacing: -1px;
           margin-bottom: 0.5rem;
-          background: linear-gradient(to right, #fff, #aaa);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          color: #fff;
+          background: none;
+          -webkit-background-clip: unset;
+          -webkit-text-fill-color: unset;
         }
 
         .hub-header-content p {
@@ -263,34 +248,15 @@ const AdminDashboard = () => {
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
-          overflow: hidden;
+          overflow: visible;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          backdrop-filter: blur(10px);
-        }
-
-        .hub-card-glow {
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle at center, var(--accent-color), transparent 70%);
-          opacity: 0;
-          transition: opacity 0.4s ease;
-          pointer-events: none;
-          filter: blur(80px);
         }
 
         .hub-card:hover {
-          transform: translateY(-8px);
+          transform: translateY(-2px);
           border-color: var(--accent-color);
           background: rgba(255, 255, 255, 0.05);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
-                      0 0 20px rgba(138, 43, 226, 0.1);
-        }
-
-        .hub-card:hover .hub-card-glow {
-          opacity: 0.1;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
         }
 
         .hub-card-icon {
@@ -307,10 +273,8 @@ const AdminDashboard = () => {
         }
 
         .hub-card:hover .hub-card-icon {
-          transform: scale(1.1) rotate(-5deg);
           background: var(--accent-color);
           color: #fff;
-          box-shadow: 0 0 20px var(--accent-color);
         }
 
         .hub-card-info h3 {

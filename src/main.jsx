@@ -5,14 +5,18 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { HelmetProvider } from 'react-helmet-async';
+import SmoothScrollProvider from './Components/motion/SmoothScrollProvider.jsx';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <HelmetProvider>
-          <App />
-        </HelmetProvider>
-      </AuthProvider>
+      <SmoothScrollProvider>
+        <AuthProvider>
+          <HelmetProvider>
+            <App />
+          </HelmetProvider>
+        </AuthProvider>
+      </SmoothScrollProvider>
     </BrowserRouter>
   </StrictMode>,
 )

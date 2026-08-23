@@ -116,7 +116,7 @@
 .comment-user-info .avatar {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    background: var(--btn-primary-bg);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -262,13 +262,6 @@
     font-size: 0.85rem;
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    animation: pulse-upsell 2s infinite ease-in-out;
-}
-
-@keyframes pulse-upsell {
-    0% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.03); box-shadow: 0 4px 20px rgba(138, 43, 226, 0.3); }
-    100% { transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes fadeIn {
@@ -343,7 +336,7 @@
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, var(--color-primary), #ff00ff);
+    background: var(--btn-primary-bg);
     border: none;
     color: white;
     padding: 0.6rem 1.5rem;
@@ -355,8 +348,9 @@
 }
 
 .btn-submit:hover:not(:disabled) {
+    background: var(--btn-primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
 }
 
 .btn-submit:disabled {

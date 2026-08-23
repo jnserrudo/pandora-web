@@ -2,9 +2,10 @@
 
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays, Newspaper, ShieldCheck, Sparkles, Store } from 'lucide-react';
+import { ArrowRight, MapPin, Store, Shield } from 'lucide-react';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import Reveal from '../motion/Reveal';
 import './AboutPage.css';
 
 const AboutPage = () => {
@@ -16,99 +17,99 @@ const AboutPage = () => {
     <div className="about-page-wrapper">
       <Navbar />
       <div className="about-container">
-        <header className="about-header">
-          <div className="about-kicker">Guia local de Salta</div>
+        <Reveal as="header" className="about-header" variant="up">
+          <p className="about-kicker">Guía viva de Salta</p>
           <h1>Sobre Pandora</h1>
           <p className="lead-paragraph">
-            Pandora conecta comercios, agenda y revista para mostrar lo que realmente esta activo
-            en la ciudad, con fichas claras y recorridos faciles de entender.
+            Pandora muestra lo que está abierto hoy: comercios con ficha clara, agenda con fechas
+            reales y una revista que te lleva del relato al mapa.
           </p>
           <div className="about-hero-actions">
             <Link to="/commerces" className="about-primary-btn">
-              Explorar lugares <ArrowRight size={16} />
+              Explorar lugares <ArrowRight size={16} aria-hidden />
             </Link>
             <Link to="/contact" className="about-secondary-btn">
-              Quiero sumar mi proyecto
+              Sumar mi proyecto
             </Link>
           </div>
-          <div className="about-stats">
-            <div className="about-stat-card">
-              <strong>Comercios</strong>
-              <span>Fotos, horarios, mapa y datos utiles para decidir adonde ir.</span>
-            </div>
-            <div className="about-stat-card">
-              <strong>Eventos</strong>
-              <span>Agenda viva con fechas, lugar, organizador y acceso rapido al detalle.</span>
-            </div>
-            <div className="about-stat-card">
-              <strong>Revista</strong>
-              <span>Notas que enlazan lugares y actividades para seguir recorriendo.</span>
-            </div>
-          </div>
-        </header>
+        </Reveal>
 
-        <section className="about-section">
-          <h2>Que encontras en Pandora</h2>
-          <div className="features-grid">
-            <article className="feature-card">
-              <div className="feature-icon"><CalendarDays size={26} /></div>
-              <h3>Agenda activa</h3>
-              <p>Eventos programados con informacion concreta, sin fichas vacias ni vueltas innecesarias.</p>
-            </article>
-            <article className="feature-card">
-              <div className="feature-icon"><Store size={26} /></div>
-              <h3>Comercios con contexto</h3>
-              <p>No es solo un nombre: cada lugar busca mostrar como es, donde queda y por que vale la pena abrirlo.</p>
-            </article>
-            <article className="feature-card">
-              <div className="feature-icon"><Newspaper size={26} /></div>
-              <h3>Revista conectada</h3>
-              <p>Las historias del magazine se conectan con la ciudad real mediante enlaces a comercios y eventos.</p>
-            </article>
+        <section className="about-section about-split">
+          <div className="about-split-copy">
+            <h2 className="about-display">Qué encontrás</h2>
+            <p>
+              Agenda con fechas concretas, locales con foto y mapa, y notas que enlazan lugares
+              y noches de la ciudad — sin fichas eternas ni datos inventados.
+            </p>
+            <ul className="about-plain-list">
+              <li>
+                <strong>Agenda</strong>
+                <span>Eventos programados, con lugar y acceso al detalle.</span>
+              </li>
+              <li>
+                <strong>Comercios</strong>
+                <span>Cómo es el lugar, dónde queda y por qué vale la pena abrirlo.</span>
+              </li>
+              <li>
+                <strong>Revista</strong>
+                <span>Historias que conectan con la ciudad que está activa.</span>
+              </li>
+            </ul>
           </div>
+          <aside className="about-split-aside" aria-label="En números de producto">
+            <div className="about-aside-block">
+              <strong>Comercios</strong>
+              <span>Fotos, horarios y mapa para decidir a dónde ir.</span>
+            </div>
+            <div className="about-aside-block">
+              <strong>Eventos</strong>
+              <span>Calendario vivo, no un afiche eterno.</span>
+            </div>
+            <div className="about-aside-block">
+              <strong>Revista</strong>
+              <span>Notas que te llevan a la ficha del local.</span>
+            </div>
+          </aside>
         </section>
 
         <section className="about-section">
-          <h2>Como se mueve Pandora</h2>
-          <div className="journey-grid">
+          <h2 className="about-display">Cómo se mueve</h2>
+          <div className="journey-row">
             <article className="journey-card">
-              <Sparkles size={22} />
+              <MapPin size={20} aria-hidden />
               <h3>Visitante</h3>
-              <p>Explora, compara y encuentra lugares sin perderse entre pantallas basicas o datos incompletos.</p>
+              <p>Explorá, compará y encontrá lugares con datos útiles, no pantallas vacías.</p>
             </article>
             <article className="journey-card">
-              <Store size={22} />
-              <h3>Dueno</h3>
-              <p>Carga su ficha, sus fotos y sus eventos para que el lugar se vea mejor y con mas informacion real.</p>
+              <Store size={20} aria-hidden />
+              <h3>Dueño</h3>
+              <p>Cargá ficha, fotos y eventos para que el local se vea como es.</p>
             </article>
             <article className="journey-card">
-              <ShieldCheck size={22} />
-              <h3>Admin</h3>
-              <p>Ordena el contenido, revisa altas y usa AI Guard para mantener visible lo que esta listo.</p>
+              <Shield size={20} aria-hidden />
+              <h3>Equipo Pandora</h3>
+              <p>Revisa altas y mantiene visible lo que está listo para la ciudad.</p>
             </article>
           </div>
         </section>
 
         <section className="about-section about-note-panel">
-          <h2>Que no es Pandora</h2>
+          <h2 className="about-display">Alcance</h2>
           <p>
-            Pandora no es un e-commerce ni una app de pedidos. Esta pensada para descubrir, presentar
-            y validar informacion local de una forma visual, clara y atractiva.
+            Estamos pensados para descubrir, presentar y validar información local de Salta de
+            forma visual y clara. Pedidos a domicilio y checkout no son parte del producto.
           </p>
         </section>
 
         <section className="about-section contact-section">
-          <h2>Sumate al ecosistema</h2>
-          <p>
-            Si tenes un comercio, organizas un evento o queres proponer una nota para la revista,
-            esta armado para que tu proyecto se vea mejor.
-          </p>
+          <h2 className="about-display">¿Querés sumarte?</h2>
+          <p>Escribinos o empezá cargando tu comercio.</p>
           <div className="about-cta-row">
-            <Link to="/contact" className="contact-button">
-              Ir a contacto
+            <Link to="/contact" className="about-primary-btn">
+              Contacto
             </Link>
-            <Link to="/events" className="about-inline-link">
-              Ver agenda primero
+            <Link to="/commerces/create" className="about-secondary-btn">
+              Publicar comercio
             </Link>
           </div>
         </section>

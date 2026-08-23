@@ -195,7 +195,7 @@ const AdminAdvertisementFormPage = () => {
             <div className="form-group">
               <label>Categoría / Tipo <span className="required-tag">(Obligatorio)</span></label>
               <select name="category" value={formData.category} onChange={handleChange} className="form-control">
-                <option value="COMMERCE">Comercio (negocio del ecosistema Pandora)</option>
+                <option value="COMMERCE">Comercio (local de Pandora)</option>
                 <option value="EXTERNAL">Externo (gobierno, ONG, empresa ajena)</option>
                 <option value="SPONSOR">Sponsor Oficial (patrocinador especial)</option>
               </select>

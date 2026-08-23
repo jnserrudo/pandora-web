@@ -127,6 +127,19 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -328,17 +341,24 @@ const Navbar = () => {
             <>
               <div className="mobile-divider"></div>
               <Link to="/my-dashboard" onClick={closeMenu}>Mi Panel</Link>
+              <Link to="/my-submissions" onClick={closeMenu}>Mis mensajes</Link>
+              <Link to="/commerces/create" onClick={closeMenu}>Sumar comercio</Link>
+              {(user?.role === 'OWNER' || user?.role === 'ADMIN' || user?.role === 'USER') && (
+                <Link to="/my-commerces" onClick={closeMenu}>Mis Comercios</Link>
+              )}
               {(user?.role === 'OWNER' || user?.role === 'ADMIN') && (
-                <>
-                  <Link to="/my-commerces" onClick={closeMenu}>Mis Comercios</Link>
-                  <Link to="/my-events" onClick={closeMenu}>Mis Eventos</Link>
-                </>
+                <Link to="/my-events" onClick={closeMenu}>Mis Eventos</Link>
               )}
               {user?.role === 'ADMIN' && (
                 <Link to="/admin/dashboard" className="mobile-admin-link" onClick={closeMenu}>Panel Admin</Link>
               )}
               <Link to="/profile" onClick={closeMenu}>Mi Perfil</Link>
-              <button onClick={handleLogout} className="mobile-logout-btn">Cerrar Sesión</button>
+              {unreadCount > 0 && (
+                <span className="m-stat" style={{ padding: '0 1rem', color: 'rgba(255,255,255,0.55)' }}>
+                  {unreadCount} notificación{unreadCount === 1 ? '' : 'es'} sin leer
+                </span>
+              )}
+              <button type="button" onClick={handleLogout} className="mobile-logout-btn">Cerrar Sesión</button>
             </>
           )}
 

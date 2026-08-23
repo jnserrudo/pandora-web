@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import { Link } from 'react-router-dom';
-import { getArticles, getAbsoluteImageUrl } from '../../services/api';
+import { getArticles } from '../../services/api';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
+import EntityMedia from '../motion/EntityMedia';
+import Reveal from '../motion/Reveal';
 import { useToast } from '../../context/ToastContext';
 import { Calendar, User } from 'lucide-react';
 import './ArticlesListPage.css';
@@ -80,10 +82,6 @@ const ArticlesListPage = () => {
     }
   };
 
-  const handleImageError = (e) => {
-    e.target.src = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=500&auto=format&fit=crop';
-  };
-
   if (loading) {
     return <LoadingSpinner fullscreen message="Cargando noticias..." />;
   }
@@ -101,17 +99,21 @@ const ArticlesListPage = () => {
         <div className="articles-grid">
           {articles.length > 0 ? (
             articles.map((article, index) => (
-              <Link
-                to={`/article/${article.slug}`}
+              <Reveal
                 key={article.id}
+                as={Link}
+                to={`/article/${article.slug}`}
                 className={`article-card-link ${index === 0 ? 'featured' : ''}`}
+                delay={Math.min(index, 8) * 45}
+                variant="up"
               >
                 <div className="article-card">
-                  <img
-                    src={getAbsoluteImageUrl(article.coverImage)}
-                    alt={article.title}
+                  <EntityMedia
                     className="article-card-image"
-                    onError={handleImageError}
+                    coverImage={article.coverImage}
+                    images={article.galleryImages}
+                    alt={article.title}
+                    intervalMs={4100 + (article.id % 4) * 200}
                   />
                   <div className="article-card-content">
                     <span className="article-card-category">{getCategoryDisplayName(article.category?.name || article.category)}</span>
@@ -131,7 +133,7 @@ const ArticlesListPage = () => {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </Reveal>
             ))
           ) : loadError ? (
             <div className="no-results">
