@@ -222,12 +222,14 @@ const AdminPlansManagement = () => {
     <div className="admin-wrapper hub-theme">
       <Navbar />
       <div className="admin-container">
+        <div className="admin-sticky-back">
+          <Link to="/admin/dashboard" className="back-link">
+            <ChevronLeft size={20} />
+            <span>Volver al Panel</span>
+          </Link>
+        </div>
         <header className="admin-header-premium">
           <div className="admin-title-group">
-            <Link to="/admin/dashboard" className="back-link">
-              <ChevronLeft size={20} />
-              <span>Volver al Panel</span>
-            </Link>
             <h1>Gestión de Negocio</h1>
             <p>Ajustá tarifas, gestioná promociones y auditá ingresos.</p>
           </div>
@@ -490,10 +492,10 @@ const AdminPlansManagement = () => {
                   </select>
                 </div>
 
-                <table className="admin-table-premium">
+                <table className="admin-table-premium plans-history-table">
                   <thead>
                     <tr>
-                      <th className="col-main">COMERCIO</th>
+                      <th className="col-main plans-commerce-head">COMERCIO</th>
                       <th className="col-meta">CAMBIO</th>
                       <th className="col-meta">MONTO</th>
                       <th className="hide-mobile col-status">MÉTODO</th>
@@ -512,7 +514,7 @@ const AdminPlansManagement = () => {
                     ) : (
                       historyPagination.pageItems.map((h) => (
                         <tr key={h.id}>
-                          <td className="col-main row-title">{h.commerce?.name || 'Comercio'}</td>
+                          <td className="col-main plans-commerce-cell">{h.commerce?.name || 'Comercio'}</td>
                           <td className="col-meta">
                             {formatPlanLevelLabel(h.oldLevel)} → {formatPlanLevelLabel(h.newLevel)}
                           </td>

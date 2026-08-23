@@ -133,6 +133,7 @@ export default function AdminRowActionsMenu({ items = [], label = 'Acciones' }) 
         >
           {visibleItems.map((item) => {
             const Icon = item.icon;
+            const showIcon = typeof Icon === 'function';
             const className = `admin-row-actions-item tone-${item.tone || 'default'}${item.disabled ? ' is-disabled' : ''}`;
 
             if (item.to && !item.disabled) {
@@ -144,7 +145,7 @@ export default function AdminRowActionsMenu({ items = [], label = 'Acciones' }) 
                   role="menuitem"
                   onClick={() => close()}
                 >
-                  {Icon ? <Icon size={16} /> : null}
+                  {showIcon ? <Icon size={16} /> : null}
                   <span>{item.label}</span>
                 </Link>
               );
@@ -161,7 +162,7 @@ export default function AdminRowActionsMenu({ items = [], label = 'Acciones' }) 
                   rel={item.rel || (item.target === '_blank' ? 'noreferrer' : undefined)}
                   onClick={() => close()}
                 >
-                  {Icon ? <Icon size={16} /> : null}
+                  {showIcon ? <Icon size={16} /> : null}
                   <span>{item.label}</span>
                 </a>
               );
@@ -176,7 +177,7 @@ export default function AdminRowActionsMenu({ items = [], label = 'Acciones' }) 
                 disabled={item.disabled}
                 onClick={() => handleItemActivate(item)}
               >
-                {Icon ? <Icon size={16} /> : null}
+                {showIcon ? <Icon size={16} /> : null}
                 <span>{item.label}</span>
               </button>
             );

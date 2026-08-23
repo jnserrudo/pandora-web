@@ -136,12 +136,97 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   font-size: 0.95rem;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .admin-table-premium tr:hover td {
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* Columnas auditoría: entidad legible, sin ellipsis agresivo */
+.admin-audit-layout .admin-table-premium .col-date {
+  width: 9.5rem;
+}
+
+.admin-audit-layout .admin-table-premium .col-main {
+  width: 18%;
+  min-width: 8rem;
+}
+
+.admin-audit-layout .admin-table-premium .col-status {
+  width: 9.5rem;
+}
+
+.admin-audit-layout .admin-table-premium .col-meta {
+  width: auto;
+  min-width: 12rem;
+}
+
+.admin-audit-layout .admin-table-premium td.col-meta {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+}
+
+.user-info-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.user-info-inline span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entity-tag {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.entity-tag svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.55;
+}
+
+.diff-panel h4 {
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.json-viewer {
+  background: #080808 !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  color: #4ade80 !important;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 0.82rem !important;
+  line-height: 1.45;
+  padding: 1.25rem !important;
+  border-radius: 16px;
+  max-height: 360px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* --- BADGES --- */
@@ -297,26 +382,6 @@
   gap: 1.5rem;
   align-items: center;
   margin-bottom: 2.5rem;
-}
-
-.diff-panel h4 {
-  margin-bottom: 1rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.6;
-}
-
-.json-viewer {
-  background: #080808 !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
-  color: #4ade80 !important;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.85rem !important;
-  padding: 1.5rem !important;
-  border-radius: 16px;
-  max-height: 400px;
-  overflow: auto;
 }
 
 .diff-arrow {

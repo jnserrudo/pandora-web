@@ -59,6 +59,39 @@
   box-shadow: none;
 }
 
+.btn-save-glow:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.categories-loading,
+.categories-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+}
+
+.cat-slug {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+
+.spin {
+  animation: cat-spin 0.9s linear infinite;
+}
+
+@keyframes cat-spin {
+  to { transform: rotate(360deg); }
+}
+
 .categories-draggables {
   display: flex;
   flex-direction: column;

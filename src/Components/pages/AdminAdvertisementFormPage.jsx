@@ -8,7 +8,7 @@ import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import { Camera, CheckCircle, Pause, Info, Upload, X } from 'lucide-react';
+import { Camera, CheckCircle, Pause, Info, Upload, X, ChevronLeft } from 'lucide-react';
 import './CommerceFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
@@ -169,6 +169,12 @@ const AdminAdvertisementFormPage = () => {
     <div className="commerce-form-wrapper">
       <Navbar />
       <div className="commerce-form-container">
+        <div className="admin-sticky-back">
+          <Link to="/admin/advertisements" className="back-link">
+            <ChevronLeft size={20} />
+            <span>Volver a Publicidades</span>
+          </Link>
+        </div>
         <div className="form-header">
           <h1>{isEditMode ? 'Editar Publicidad' : 'Nueva Campaña Publicitaria'}</h1>
           <p>{isEditMode ? 'Modificá los datos de la campaña activa.' : 'Completá los datos para lanzar una nueva campaña.'}</p>
@@ -333,8 +339,8 @@ const AdminAdvertisementFormPage = () => {
           </div>
 
           {/* Estado */}
-          <div className="form-group">
-            <label>Estado de la Campaña</label>
+          <div className="form-group ad-form-status">
+            <span className="ad-form-status-heading">Estado de la Campaña</span>
             <div className="toggle-row">
               <input 
                 type="checkbox" 

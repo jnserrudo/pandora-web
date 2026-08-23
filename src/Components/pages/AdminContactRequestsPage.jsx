@@ -74,12 +74,14 @@ const AdminContactRequestsPage = () => {
     <div className="admin-wrapper hub-theme">
       <Navbar />
       <div className="admin-container">
+        <div className="admin-sticky-back">
+          <Link to="/admin/dashboard" className="back-link">
+            <ChevronLeft size={20} />
+            <span>Volver al Panel</span>
+          </Link>
+        </div>
         <header className="admin-header-premium">
           <div className="admin-title-group">
-            <Link to="/admin/dashboard" className="back-link">
-              <ChevronLeft size={20} />
-              <span>Volver al Panel</span>
-            </Link>
             <h1>Centro de Mensajería</h1>
           </div>
           <div className="stat-pill">

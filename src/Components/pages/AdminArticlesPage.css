@@ -6,7 +6,7 @@
   flex-direction: column;
   background-color: var(--color-background);
   color: #fff;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .admin-container {
@@ -15,6 +15,25 @@
   width: 100%;
   margin: 0 auto;
   padding: 8rem 2rem 4rem 2rem;
+}
+
+/* Sticky "Volver al Panel" — queda visible al scrollear */
+.admin-sticky-back {
+  position: sticky;
+  top: var(--navbar-clearance, 5.5rem);
+  z-index: 100;
+  padding: 0.35rem 0 0.65rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(
+    180deg,
+    var(--color-background) 0%,
+    var(--color-background) 72%,
+    transparent 100%
+  );
+}
+
+.admin-sticky-back .back-link {
+  margin-bottom: 0;
 }
 
 /* --- HEADER PREMIUM --- */

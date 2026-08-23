@@ -136,6 +136,35 @@ export const getCategories = async () => {
   }
 };
 
+/** Categorías visibles en Home, ordenadas por homeOrder */
+export const getHomeCategories = async () => {
+  try {
+    const response = await apiClient.get(`${API_URL}/categories`, {
+      params: { home: 1 },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching home categories:', error);
+    throw error;
+  }
+};
+
+/** Admin: guardar orden y visibilidad de categorías en Home */
+export const updateHomeCategories = async (items, token) => {
+  try {
+    const response = await apiClient.put(
+      `${API_URL}/categories/home-config`,
+      { items },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || 'Error al guardar categorías de la home.'
+    );
+  }
+};
+
 // --- FUNCIONES PARA EVENTOS (NUEVAS) ---
 
 // Obtiene eventos. includeAll=true solo para listados admin (requiere token admin).

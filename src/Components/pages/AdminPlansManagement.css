@@ -346,3 +346,28 @@
   padding: 0.55rem 0.85rem;
   min-width: 180px;
 }
+
+/* Columna comercio en auditoría de cobros — sin ellipsis a 1 letra */
+.admin-table-premium td.plans-commerce-cell,
+.admin-table-premium th.col-main.plans-commerce-head {
+  width: 22%;
+  min-width: 12rem;
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+}
+
+.admin-table-premium.plans-history-table {
+  table-layout: auto;
+}
+
+.admin-table-premium.plans-history-table .col-main {
+  width: auto;
+  min-width: 12rem;
+}
