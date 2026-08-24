@@ -211,7 +211,7 @@ const CommerceProductManager = ({ commerceId, planLevel }) => {
                         </div>
                     ) : products.length === 0 ? (
                         <div className="empty-state">
-                            <p>Aún no tenés productos. Cargá nombre, precio y foto para mostrarlos en tu ficha (plan Plata u Oro).</p>
+                            <p>Aún no tenés productos. Cargá nombre, precio y foto para mostrarlos en tu ficha (plan Plata, Oro o Platino).</p>
                         </div>
                     ) : (
                         <div className="owner-products-grid">

@@ -18,7 +18,7 @@ import {
   Headphones
 } from 'lucide-react';
 import Reveal from '../motion/Reveal';
-import { COMMERCE_PLAN_CATALOG, parsePlanBenefits } from '../../utils/planCatalog';
+import { COMMERCE_PLAN_CATALOG, parsePlanBenefits, isCommercePlanSelectable } from '../../utils/planCatalog';
 import { formatPlanLevelLabel } from '../../utils/enumLabels';
 import './PricingPage.css';
 
@@ -161,15 +161,18 @@ const PricingPage = () => {
 
         <section className="pricing-grid-container">
           <div className="pricing-grid">
-            {plans.map((plan, i) => (
+            {plans.map((plan, i) => {
+              const selectable = isCommercePlanSelectable(plan.level);
+              return (
               <Reveal
                 key={plan.level}
-                className={`pricing-card ${plan.featured ? 'featured' : ''}`}
+                className={`pricing-card ${plan.featured ? 'featured' : ''}${!selectable ? ' is-coming-soon' : ''}`}
                 style={{ '--accent-color': plan.color || 'var(--color-primary)' }}
                 delay={Math.min(i, 5) * 70}
                 variant="up"
               >
-                {plan.featured && <div className="featured-badge" role="status">Recomendado</div>}
+                {plan.featured && selectable && <div className="featured-badge" role="status">Recomendado</div>}
+                {!selectable && <div className="featured-badge coming-soon-badge" role="status">Próximamente</div>}
                 <div className="card-top">
                   <div className="plan-icon">{getIcon(plan.iconName)}</div>
                   <h3 className="plan-name">Nivel {plan.level}: {plan.name}</h3>
@@ -194,13 +197,20 @@ const PricingPage = () => {
                 </div>
 
                 <div className="plan-footer">
-                  <Link to="/commerces/create" className="plan-cta">
-                    {plan.level === 1 ? 'Publicar Comercio Gratis' : `Mejorar a ${plan.name}`}
-                    <ArrowRight size={18} />
-                  </Link>
+                  {selectable ? (
+                    <Link to="/commerces/create" className="plan-cta">
+                      {plan.level === 1 ? 'Publicar Comercio Gratis' : `Mejorar a ${plan.name}`}
+                      <ArrowRight size={18} />
+                    </Link>
+                  ) : (
+                    <span className="plan-cta plan-cta-disabled" aria-disabled="true">
+                      Próximamente
+                    </span>
+                  )}
                 </div>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
         </section>
 

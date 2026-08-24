@@ -195,7 +195,7 @@ const MyEventsPage = () => {
                     )}
 
                     <div className="card-neo-actions">
-                      <Link to={`/events/edit/${event.id}`} className="btn-card-neo edit">
+                      <Link to={`/events/${event.id}/edit`} className="btn-card-neo edit">
                         <Settings size={18} />
                         Editar
                       </Link>

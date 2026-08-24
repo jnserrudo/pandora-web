@@ -229,6 +229,28 @@
   border-color: var(--btn-primary-bg);
 }
 
+.pricing-card.is-coming-soon {
+  opacity: 0.78;
+}
+
+.featured-badge.coming-soon-badge {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.plan-cta.plan-cta-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.pricing-card.is-coming-soon:hover .plan-cta-disabled {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 /* Extra Info */
 .pricing-extra-info {
   display: grid;

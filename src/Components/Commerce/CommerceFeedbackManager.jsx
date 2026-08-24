@@ -110,7 +110,7 @@ const CommerceFeedbackManager = ({ commerce }) => {
                 <div className="upgrade-notice-feedback">
                     <AlertCircle size={20} className="text-yellow-500" />
                     <div>
-                        <strong>Función Premium Requerida</strong>
+                        <strong>Requiere Plan Plata o superior</strong>
                         <p>Para poder responder públicamente a las reseñas de tus clientes y gestionar tu reputación online, necesitas al menos el Plan Plata.</p>
                     </div>
                 </div>

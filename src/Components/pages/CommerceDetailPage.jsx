@@ -306,7 +306,7 @@ const CommerceDetailPage = () => {
                         <span className="event-month">{month}</span>
                       </div>
                       <div className="event-info">
-                        <h3 className="event-title">{event.name}</h3>
+                        <h3 className="related-event-title">{event.name}</h3>
                         <p className="event-location">
                           {event.address || commerce.name}
                         </p>

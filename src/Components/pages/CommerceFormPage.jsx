@@ -11,6 +11,12 @@ import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import MapPicker from '../ui/MapPicker';
 import { Camera, Upload, CheckCircle, FileText, X, Plus } from 'lucide-react';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
+import { formatPlanLevelLabel } from '../../utils/enumLabels.js';
+import {
+  COMMERCE_PLAN_CATALOG,
+  isCommercePlanSelectable,
+  getCommercePlanShortHint,
+} from '../../utils/planCatalog.js';
 import './CommerceFormPage.css';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 
@@ -58,7 +64,7 @@ const CommerceFormPage = () => {
 
     // Validar comprobante para planes pagos
     if (formData.planLevel > 1 && !formData.paymentProof) {
-      return "Como seleccionaste un plan PRO, debes adjuntar el comprobante de pago.";
+      return `Como seleccionaste el plan ${formatPlanLevelLabel(formData.planLevel)}, debes adjuntar el comprobante de pago.`;
     }
 
     if (!formData.latitude || !formData.longitude) {
@@ -459,29 +465,32 @@ const CommerceFormPage = () => {
           <div className="form-group">
             <label>Nivel de Plan Deseado</label>
             <div className="plan-selector">
-              {[1, 2, 3, 4].map(level => {
-                const isLocked = level === 4;
-                const labels = { 1: 'Free', 2: 'Plus', 3: 'Premium', 4: 'Diamond' };
+              {COMMERCE_PLAN_CATALOG.map((plan) => {
+                const level = plan.level;
+                const isLocked = !isCommercePlanSelectable(level);
                 return (
                   <div 
                     key={level} 
                     className={`plan-option ${formData.planLevel === level ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
                     onClick={() => !isLocked && setFormData(prev => ({ ...prev, planLevel: level }))}
-                    title={isLocked ? 'Próximamente — Plan no disponible aún' : ''}
+                    title={isLocked ? 'Próximamente — Plan no disponible aún' : getCommercePlanShortHint(level)}
                     style={isLocked ? { opacity: 0.45, cursor: 'not-allowed', filter: 'grayscale(0.6)' } : {}}
                   >
                     <span className="plan-number">{level}</span>
-                    <span className="plan-label">{labels[level]}</span>
-                    {level > 1 && !isLocked && <span className="premium-tag">PRO</span>}
-                    {isLocked && <span className="premium-tag" style={{ background: 'rgba(255,255,255,0.1)', color: '#888' }}>PRONTO</span>}
+                    <span className="plan-label">{formatPlanLevelLabel(level)}</span>
+                    {isLocked && (
+                      <span className="premium-tag" style={{ background: 'rgba(255,255,255,0.1)', color: '#888' }}>
+                        PRONTO
+                      </span>
+                    )}
                   </div>
                 );
               })}
             </div>
             <p className="plan-info-text">
-              {formData.planLevel === 1 
-                ? 'El nivel 1 es gratuito y permite visibilidad básica.' 
-                : 'Este nivel requiere validación del comprobante de pago por parte de administración.'}
+              {formData.planLevel === 1
+                ? getCommercePlanShortHint(1) || 'El plan Free permite visibilidad básica.'
+                : `Plan ${formatPlanLevelLabel(formData.planLevel)}: requiere comprobante de pago y validación de administración.`}
             </p>
           </div>
 
@@ -511,7 +520,7 @@ const CommerceFormPage = () => {
                 </p>
               </div>
 
-              <label>Comprobante de Pago <span className="required-tag">(Obligatorio para Planes PRO)</span></label>
+              <label>Comprobante de Pago <span className="required-tag">(Obligatorio para planes de pago — Plata u Oro)</span></label>
               <div className="proof-upload-zone">
                 <input 
                   type="file" 

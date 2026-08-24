@@ -4,7 +4,7 @@ import OTPVerification from './OTPVerification';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import {
   getPasswordChecks,
   isPasswordValid,
@@ -36,6 +36,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   const [name, setName] = useState('');
   const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const [requireCaptcha, setRequireCaptcha] = useState(false);
   const [requireOTP, setRequireOTP] = useState(false);
@@ -269,11 +270,25 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
 
         <div className="input-group">
           <label htmlFor="password">Contraseña</label>
-          <input 
-            type="password" id="password" required
-            value={password} onChange={e => setPassword(e.target.value)} 
-            autoComplete={isLogin ? 'current-password' : 'new-password'}
-          />
+          <div className="password-field">
+            <input 
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)} 
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           {!isLogin && (
             <>
               <small className="input-hint">{PASSWORD_RULES_HINT}</small>

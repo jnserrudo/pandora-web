@@ -35,7 +35,7 @@ import {
     Globe
 } from 'lucide-react';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
-import { formatStatusLabel } from '../../utils/enumLabels.js';
+import { formatStatusLabel, formatPlanLevelLabel } from '../../utils/enumLabels.js';
 import './AdminCommerceDetailPage.css';
 
 const AdminCommerceDetailPage = () => {
@@ -182,7 +182,7 @@ const AdminCommerceDetailPage = () => {
                         {formatStatusLabel(commerce?.status)}
                     </span>
                     <span className="plan-badge cursor-pointer" onClick={() => setIsEditingPlan(!isEditingPlan)} title="Clic para cambiar plan">
-                        Plan Nivel {metrics?.planLevel}
+                        Plan {formatPlanLevelLabel(metrics?.planLevel)}
                         <Shield size={14} style={{ display: 'inline', marginLeft: '5px' }} />
                     </span>
                 </div>
@@ -287,7 +287,9 @@ const AdminCommerceDetailPage = () => {
                                 }}
                             >
                                 {plans.map(p => (
-                                    <option key={p.level} value={p.level}>Nivel {p.level} - {p.name}</option>
+                                    <option key={p.level} value={p.level}>
+                                      Nivel {p.level} — {formatPlanLevelLabel(p.level, p.name)}
+                                    </option>
                                 ))}
                             </select>
                             <button 
@@ -321,8 +323,7 @@ const AdminCommerceDetailPage = () => {
                         </div>
                     ) : (
                         <p className="info-value" style={{ fontSize: '1.2rem', margin: '5px 0' }}>
-                            Nivel {commerce?.planLevel} 
-                            ({plans.find(p => p.level === commerce?.planLevel)?.name || 'Estandar'})
+                            {formatPlanLevelLabel(commerce?.planLevel)}
                         </p>
                     )}
                   </div>

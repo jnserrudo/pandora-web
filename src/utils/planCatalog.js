@@ -96,3 +96,15 @@ export function benefitsToStorage(features) {
 export function getCatalogPlan(level) {
   return COMMERCE_PLAN_CATALOG.find((p) => p.level === Number(level)) || null;
 }
+
+/** Niveles que el dueño puede elegir al crear/comprar. Platino (4) queda “próximamente”. */
+export const COMMERCE_PLAN_SELECTABLE_LEVELS = [1, 2, 3];
+
+export function isCommercePlanSelectable(level) {
+  return COMMERCE_PLAN_SELECTABLE_LEVELS.includes(Number(level));
+}
+
+export function getCommercePlanShortHint(level) {
+  const plan = getCatalogPlan(level);
+  return plan?.description || '';
+}

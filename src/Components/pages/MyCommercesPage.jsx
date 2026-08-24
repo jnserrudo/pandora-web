@@ -1,6 +1,7 @@
 // src/Components/pages/MyCommercesPage.jsx
 import React, { useState, useEffect } from 'react';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
+import { formatPlanLevelLabel } from '../../utils/enumLabels.js';
 import { Link } from 'react-router-dom';
 import { 
     getMyCommerces, 
@@ -186,7 +187,7 @@ const MyCommercesPage = () => {
                                             <Target size={14} /> Recomendación Nueva
                                         </div>
                                     )}
-                                    <div className="plan-tag">Nivel {commerce.planLevel || 1}</div>
+                                    <div className="plan-tag">Plan {formatPlanLevelLabel(commerce.planLevel || 1)}</div>
                                 </div>
                                 
                                 <div className="card-body">
