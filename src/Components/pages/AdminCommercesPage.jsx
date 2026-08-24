@@ -91,10 +91,20 @@ const AdminCommercesPage = () => {
     if (found) {
       openedReviewRef.current = reviewId;
       openReviewModal(found);
-      if (found.status === 'PENDING') setPendingOnly(true);
+      if (found.status === 'PENDING') {
+        setPendingOnly(true);
+      } else {
+        showToast(
+          `Este comercio ya no está pendiente (estado: ${formatStatusLabel(found.status)}).`,
+          'info'
+        );
+      }
     } else {
-      showToast('No se encontró el comercio a revisar.', 'warning');
+      showToast('No se encontró el comercio de esa notificación (puede haberse eliminado).', 'warning');
       openedReviewRef.current = reviewId;
+      const next = new URLSearchParams(searchParams);
+      next.delete('review');
+      setSearchParams(next, { replace: true });
     }
   }, [searchParams, commerces, loading]);
 
@@ -357,6 +367,13 @@ const AdminCommercesPage = () => {
             </div>
 
             <div className="commerce-review-scroll">
+              {modalMode === 'REVIEW' && selectedCommerce.status !== 'PENDING' && (
+                <p className="commerce-review-already">
+                  Esta solicitud ya fue procesada (estado: {formatStatusLabel(selectedCommerce.status)}).
+                  No se puede volver a validar desde acá.
+                </p>
+              )}
+
               {(cover || thumbs.length > 0) && (
                 <div className="commerce-review-media">
                   {cover && (
@@ -451,9 +468,11 @@ const AdminCommercesPage = () => {
 
               <div className="modal-form-group">
                 <label>
-                  {modalMode === 'DEACTIVATE' || modalMode === 'REVIEW'
-                    ? 'Motivo o nota del administrador'
-                    : 'Nota'}
+                  {modalMode === 'DEACTIVATE'
+                    ? 'Motivo de la baja'
+                    : selectedCommerce.status === 'PENDING'
+                      ? 'Motivo o nota del administrador'
+                      : 'Nota'}
                 </label>
                 <textarea
                   value={validationReason}
@@ -463,6 +482,7 @@ const AdminCommercesPage = () => {
                       ? 'Motivo de la baja (recomendado)...'
                       : 'Obligatorio al rechazar; opcional al validar...'
                   }
+                  disabled={modalMode === 'REVIEW' && selectedCommerce.status !== 'PENDING'}
                 />
               </div>
             </div>
@@ -476,7 +496,7 @@ const AdminCommercesPage = () => {
               </Link>
               <div className="commerce-review-actions">
                 <button type="button" className="btn-secondary" onClick={closeModal} disabled={processing}>
-                  Cancelar
+                  {modalMode === 'REVIEW' && selectedCommerce.status !== 'PENDING' ? 'Cerrar' : 'Cancelar'}
                 </button>
                 {modalMode === 'DEACTIVATE' ? (
                   <button
@@ -487,7 +507,7 @@ const AdminCommercesPage = () => {
                   >
                     Confirmar baja
                   </button>
-                ) : (
+                ) : selectedCommerce.status === 'PENDING' ? (
                   <>
                     <button
                       type="button"
@@ -506,7 +526,7 @@ const AdminCommercesPage = () => {
                       <CheckCircle size={16} /> Validar
                     </button>
                   </>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

@@ -30,6 +30,7 @@ import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import AdminTablePagination, { useAdminPagination } from '../admin/AdminTablePagination';
 import AdminRowActionsMenu from '../admin/AdminRowActionsMenu';
 import './AdminArticlesPage.css';
+import './AdminCommercesPage.css';
 
 const AdminEventsPage = () => {
   const { token } = useAuth();
@@ -66,11 +67,12 @@ const AdminEventsPage = () => {
     setShowReviewModal(true);
   };
 
-  const closeReviewModal = () => {
-    if (reviewBusy) return;
+  const closeReviewModal = (force = false) => {
+    if (reviewBusy && !force) return;
     setShowReviewModal(false);
     setReviewEvent(null);
     setReviewNote('');
+    setReviewBusy(false);
     if (searchParams.get('review')) {
       const next = new URLSearchParams(searchParams);
       next.delete('review');
@@ -104,10 +106,27 @@ const AdminEventsPage = () => {
     if (found) {
       openedReviewRef.current = reviewId;
       openReviewModal(found);
-      if (found.status === 'PENDING') setStatusFilter('PENDING');
+      if (found.status === 'PENDING') {
+        setStatusFilter('PENDING');
+      } else {
+        const labels = {
+          SCHEDULED: 'Programado',
+          APPROVED: 'Aprobado',
+          REJECTED: 'Rechazado',
+          CANCELLED: 'Cancelado',
+          FINISHED: 'Finalizado',
+        };
+        showToast(
+          `Este evento ya no está pendiente (estado: ${labels[found.status] || found.status}).`,
+          'info'
+        );
+      }
     } else {
-      showToast('No se encontró el evento a revisar.', 'warning');
+      showToast('No se encontró el evento de esa notificación (puede haberse eliminado).', 'warning');
       openedReviewRef.current = reviewId;
+      const next = new URLSearchParams(searchParams);
+      next.delete('review');
+      setSearchParams(next, { replace: true });
     }
   }, [searchParams, events, loading]);
 
@@ -117,13 +136,28 @@ const AdminEventsPage = () => {
       await approveEvent(id, token);
       setEvents(prev => prev.map(e => e.id === id ? { ...e, status: 'SCHEDULED', isActive: true } : e));
       showToast("Evento aprobado y publicado. Se notificó al propietario.", 'success');
-      setShowReviewModal(false);
-      setReviewEvent(null);
-      if (searchParams.get('review')) {
-        const next = new URLSearchParams(searchParams);
-        next.delete('review');
-        setSearchParams(next, { replace: true });
-      }
+      closeReviewModal(true);
+    } catch (err) {
+      const msg = err.message || '';
+      showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
+    } finally {
+      setReviewBusy(false);
+    }
+  };
+
+  const handleRejectFromReview = async () => {
+    if (!reviewEvent) return;
+    if (!reviewNote.trim()) {
+      showToast('Indicá el motivo del rechazo.', 'warning');
+      return;
+    }
+    try {
+      setReviewBusy(true);
+      await rejectEvent(reviewEvent.id, reviewNote, token);
+      setEvents(prev => prev.map(e => e.id === reviewEvent.id ? { ...e, status: 'REJECTED', isActive: false } : e));
+      showToast("Solicitud rechazada. Se notificó al usuario.", 'success');
+      setShowRejectModal(false);
+      closeReviewModal(true);
     } catch (err) {
       const msg = err.message || '';
       showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
@@ -400,101 +434,149 @@ const AdminEventsPage = () => {
 
       {/* Modal de revisión de solicitud */}
       {showReviewModal && reviewEvent && (
-        <div className="admin-modal-overlay" onClick={closeReviewModal} role="presentation">
+        <div className="commerce-review-overlay" onClick={closeReviewModal} role="presentation">
           <div
-            className="admin-modal-content"
-            style={{ maxWidth: '560px' }}
+            className="commerce-review-modal"
             role="dialog"
             aria-modal="true"
+            aria-labelledby="event-review-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>Revisión de evento</h2>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Revisá el detalle y aceptá o rechazá la solicitud.
-            </p>
+            <div className="commerce-review-header">
+              <div>
+                <p className="commerce-review-kicker">
+                  {reviewEvent.status === 'PENDING' ? 'Revisión de solicitud' : 'Detalle de evento'}
+                </p>
+                <h2 id="event-review-title">{reviewEvent.name}</h2>
+              </div>
+              <span className={`badge-premium ${statusLabel(reviewEvent.status).cls}`}>
+                {statusLabel(reviewEvent.status).label}
+              </span>
+            </div>
 
-            {reviewEvent.coverImage && (
-              <img
-                src={getAbsoluteImageUrl(reviewEvent.coverImage)}
-                alt=""
-                style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 12, marginBottom: '1rem' }}
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-            )}
-
-            <div style={{ marginBottom: '1rem' }}>
-              <h3 style={{ margin: '0 0 0.35rem', color: '#fff' }}>{reviewEvent.name}</h3>
-              <p style={{ margin: 0, color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem' }}>
-                {reviewEvent.commerce?.name || reviewEvent.organizerName || 'Sin organizador'} ·{' '}
-                {reviewEvent.startDate
-                  ? new Date(reviewEvent.startDate).toLocaleString('es-AR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                  : 'Sin fecha'}
-              </p>
-              {reviewEvent.address && (
-                <p style={{ margin: '0.35rem 0 0', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
-                  <MapPin size={12} style={{ verticalAlign: 'middle' }} /> {reviewEvent.address}
+            <div className="commerce-review-scroll">
+              {reviewEvent.status !== 'PENDING' && (
+                <p className="commerce-review-already">
+                  Esta solicitud ya fue procesada. No se puede volver a validar desde acá.
+                  {reviewEvent.status === 'SCHEDULED' || reviewEvent.status === 'APPROVED'
+                    ? ' El evento ya está publicado.'
+                    : reviewEvent.status === 'REJECTED'
+                      ? ' Fue rechazado.'
+                      : ''}
                 </p>
               )}
-              {reviewEvent.description && (
-                <p style={{ marginTop: '0.75rem', color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
-                  {reviewEvent.description}
-                </p>
+
+              {reviewEvent.coverImage && (
+                <div className="commerce-review-media">
+                  <img
+                    className="commerce-review-cover"
+                    src={getAbsoluteImageUrl(reviewEvent.coverImage)}
+                    alt=""
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+              )}
+
+              <div className="commerce-review-grid">
+                <div className="commerce-review-block">
+                  <h3>Organizador</h3>
+                  <p>{reviewEvent.commerce?.name || reviewEvent.organizerName || 'Sin organizador'}</p>
+                  {reviewEvent.address && (
+                    <p><MapPin size={14} /> {reviewEvent.address}</p>
+                  )}
+                </div>
+                <div className="commerce-review-block">
+                  <h3>Fecha</h3>
+                  <p>
+                    <Clock size={14} />
+                    {reviewEvent.startDate
+                      ? new Date(reviewEvent.startDate).toLocaleString('es-AR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : 'Sin fecha'}
+                  </p>
+                  {reviewEvent.endDate && (
+                    <p style={{ opacity: 0.75 }}>
+                      Fin:{' '}
+                      {new Date(reviewEvent.endDate).toLocaleString('es-AR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  )}
+                </div>
+                <div className="commerce-review-block">
+                  <h3>Nivel</h3>
+                  <p>{tierLabel(reviewEvent.eventTier || 1).label}</p>
+                  {reviewEvent.eventTier > 1 && (
+                    <p>
+                      Pago:{' '}
+                      {(paymentStatusLabel(reviewEvent.paymentStatus || 'PENDING') || { label: '—' }).label}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="commerce-review-desc">
+                <h3>Descripción</h3>
+                <p>{reviewEvent.description || 'Sin descripción cargada.'}</p>
+              </div>
+
+              {reviewEvent.status === 'PENDING' && (
+                <div className="modal-form-group">
+                  <label>Nota / motivo (obligatorio al rechazar)</label>
+                  <textarea
+                    value={reviewNote}
+                    onChange={(e) => setReviewNote(e.target.value)}
+                    placeholder="Ej. Falta información, fechas incorrectas..."
+                    rows={3}
+                  />
+                </div>
               )}
             </div>
 
-            {reviewEvent.status === 'PENDING' && (
-              <div className="modal-form-group">
-                <label>Nota / motivo (obligatorio solo al rechazar):</label>
-                <textarea
-                  value={reviewNote}
-                  onChange={(e) => setReviewNote(e.target.value)}
-                  placeholder="Ej. Falta información, fechas incorrectas..."
-                  rows={3}
-                />
-              </div>
-            )}
-
-            <div className="modal-actions" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-              <button type="button" className="btn-secondary" onClick={closeReviewModal} disabled={reviewBusy}>
-                Cerrar
-              </button>
-              <Link to={`/event/${reviewEvent.id}`} className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                Ver página
+            <div className="commerce-review-footer">
+              <Link to={`/event/${reviewEvent.id}`} className="btn-secondary commerce-detail-link">
+                Ver página pública
               </Link>
-              {reviewEvent.status === 'PENDING' && (
-                <>
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    style={{ background: '#22c55e' }}
-                    disabled={reviewBusy}
-                    onClick={() => handleApprove(reviewEvent.id)}
-                  >
-                    Aprobar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    style={{ background: '#ef4444' }}
-                    disabled={reviewBusy}
-                    onClick={() => openRejectModal(reviewEvent.id)}
-                  >
-                    Rechazar
-                  </button>
-                </>
-              )}
+              <div className="commerce-review-actions">
+                <button type="button" className="btn-secondary" onClick={closeReviewModal} disabled={reviewBusy}>
+                  Cerrar
+                </button>
+                {reviewEvent.status === 'PENDING' && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-primary btn-danger"
+                      disabled={reviewBusy}
+                      onClick={handleRejectFromReview}
+                    >
+                      <XCircle size={16} /> Rechazar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      disabled={reviewBusy}
+                      onClick={() => handleApprove(reviewEvent.id)}
+                    >
+                      <CheckCircle size={16} /> Aprobar
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal de Rechazo */}
+      {/* Modal de Rechazo (acciones de tabla) */}
       {showRejectModal && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-content">

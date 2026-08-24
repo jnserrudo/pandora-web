@@ -204,6 +204,111 @@
   color: #fff;
 }
 
+/* --- Modal admin (overlay fijo centrado) --- */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.admin-modal-content {
+  width: min(520px, 100%);
+  max-height: min(90vh, 860px);
+  overflow-y: auto;
+  background: #15101f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  padding: 1.4rem 1.5rem 1.35rem;
+  color: #fff;
+}
+
+.admin-modal-content h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.admin-modal-content .modal-form-group {
+  margin: 0 0 1rem;
+}
+
+.admin-modal-content .modal-form-group label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.86rem;
+}
+
+.admin-modal-content .modal-form-group textarea,
+.admin-modal-content .modal-form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 90px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  color: #fff;
+  resize: vertical;
+  font: inherit;
+}
+
+.admin-modal-content .modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.admin-modal-content .btn-secondary,
+.admin-modal-content .btn-primary {
+  border-radius: 12px;
+  padding: 0.7rem 1.1rem;
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.admin-modal-content .btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.admin-modal-content .btn-primary {
+  background: var(--btn-primary-bg, #7c3aed);
+  border: none;
+  color: #fff;
+}
+
+.admin-modal-content .btn-primary:disabled,
+.admin-modal-content .btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-review-already {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .btn-filter-premium:hover {
   background: rgba(255, 255, 255, 0.1);
 }

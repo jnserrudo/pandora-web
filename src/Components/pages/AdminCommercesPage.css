@@ -209,6 +209,17 @@
   cursor: not-allowed;
 }
 
+.commerce-review-already {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 800px) {
   .commerce-review-grid {
     grid-template-columns: 1fr;
