@@ -484,7 +484,13 @@ const AdminUsersPage = () => {
                               </div>
                             </div>
                             <div className="admin-users-mini-links">
-                              <Link to={`/event/${ev.id}`} className="view" title="Ver evento"><Eye size={14} /></Link>
+                              {ev.status === 'PENDING' ? (
+                                <Link to={`/admin/events?review=${ev.id}`} className="view" title="Revisar y validar">
+                                  <Eye size={14} />
+                                </Link>
+                              ) : (
+                                <Link to={`/event/${ev.id}`} className="view" title="Ver evento"><Eye size={14} /></Link>
+                              )}
                               <Link to={`/events/${ev.id}/edit`} className="edit" title="Editar"><Calendar size={14} /></Link>
                             </div>
                           </div>
@@ -518,7 +524,13 @@ const AdminUsersPage = () => {
                               </div>
                             </div>
                             <div className="admin-users-mini-links">
-                              <Link to={`/commerce/${c.id}`} className="view" title="Ver comercio"><Eye size={14} /></Link>
+                              {c.status === 'PENDING' ? (
+                                <Link to={`/admin/commerces?review=${c.id}`} className="view" title="Revisar y validar">
+                                  <Eye size={14} />
+                                </Link>
+                              ) : (
+                                <Link to={`/commerce/${c.id}`} className="view" title="Ver comercio"><Eye size={14} /></Link>
+                              )}
                               <Link to={`/admin/commerces/${c.id}/detail`} className="edit" title="Detalle admin"><Store size={14} /></Link>
                             </div>
                           </div>

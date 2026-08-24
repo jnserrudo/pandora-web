@@ -1,6 +1,6 @@
 // src/Components/pages/AdminEventsPage.jsx
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Calendar, 
   Search, 
@@ -21,7 +21,7 @@ import {
   CreditCard,
   ExternalLink
 } from 'lucide-react';
-import { getEvents, approveEvent, rejectEvent, validateEventPayment } from '../../services/api';
+import { getEvents, approveEvent, rejectEvent, validateEventPayment, getAbsoluteImageUrl } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../Navbar/Navbar';
@@ -34,13 +34,21 @@ import './AdminArticlesPage.css';
 const AdminEventsPage = () => {
   const { token } = useAuth();
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const openedReviewRef = useRef(null);
 
-  // Modal de rechazo
+  // Modal de revisión (detalle + aceptar/rechazar)
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewEvent, setReviewEvent] = useState(null);
+  const [reviewNote, setReviewNote] = useState('');
+  const [reviewBusy, setReviewBusy] = useState(false);
+
+  // Modal de rechazo (legacy, también usado desde review)
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectNote, setRejectNote] = useState('');
@@ -51,6 +59,24 @@ const AdminEventsPage = () => {
   const [paymentNote, setPaymentNote] = useState('');
   const [tierFilter, setTierFilter] = useState('ALL');
   const [paymentFilter, setPaymentFilter] = useState('ALL');
+
+  const openReviewModal = (event) => {
+    setReviewEvent(event);
+    setReviewNote('');
+    setShowReviewModal(true);
+  };
+
+  const closeReviewModal = () => {
+    if (reviewBusy) return;
+    setShowReviewModal(false);
+    setReviewEvent(null);
+    setReviewNote('');
+    if (searchParams.get('review')) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('review');
+      setSearchParams(next, { replace: true });
+    }
+  };
 
   const fetchEvents = async () => {
     try {
@@ -69,32 +95,68 @@ const AdminEventsPage = () => {
     fetchEvents();
   }, [token]);
 
+  // Abrir modal de revisión desde ?review=ID (notificaciones / perfil usuario)
+  useEffect(() => {
+    const reviewId = searchParams.get('review');
+    if (!reviewId || loading || events.length === 0) return;
+    if (openedReviewRef.current === reviewId) return;
+    const found = events.find((e) => String(e.id) === String(reviewId));
+    if (found) {
+      openedReviewRef.current = reviewId;
+      openReviewModal(found);
+      if (found.status === 'PENDING') setStatusFilter('PENDING');
+    } else {
+      showToast('No se encontró el evento a revisar.', 'warning');
+      openedReviewRef.current = reviewId;
+    }
+  }, [searchParams, events, loading]);
+
   const handleApprove = async (id) => {
     try {
+      setReviewBusy(true);
       await approveEvent(id, token);
-      setEvents(prev => prev.map(e => e.id === id ? { ...e, status: 'APPROVED' } : e));
-      showToast("Evento aprobado y publicado.", 'success');
+      setEvents(prev => prev.map(e => e.id === id ? { ...e, status: 'SCHEDULED', isActive: true } : e));
+      showToast("Evento aprobado y publicado. Se notificó al propietario.", 'success');
+      setShowReviewModal(false);
+      setReviewEvent(null);
+      if (searchParams.get('review')) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('review');
+        setSearchParams(next, { replace: true });
+      }
     } catch (err) {
       const msg = err.message || '';
       showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
+    } finally {
+      setReviewBusy(false);
     }
   };
 
   const openRejectModal = (id) => {
     setRejectingId(id);
-    setRejectNote('');
+    setRejectNote(reviewNote || '');
     setShowRejectModal(true);
   };
 
   const handleReject = async () => {
     try {
+      setReviewBusy(true);
       await rejectEvent(rejectingId, rejectNote, token);
-      setEvents(prev => prev.map(e => e.id === rejectingId ? { ...e, status: 'REJECTED' } : e));
+      setEvents(prev => prev.map(e => e.id === rejectingId ? { ...e, status: 'REJECTED', isActive: false } : e));
       setShowRejectModal(false);
+      setShowReviewModal(false);
+      setReviewEvent(null);
       showToast("Solicitud rechazada. Se notificó al usuario.", 'success');
+      if (searchParams.get('review')) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('review');
+        setSearchParams(next, { replace: true });
+      }
     } catch (err) {
       const msg = err.message || '';
       showToast(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de red.' : msg, 'error');
+    } finally {
+      setReviewBusy(false);
     }
   };
 
@@ -271,6 +333,15 @@ const AdminEventsPage = () => {
                           items={[
                             { key: 'view', label: 'Ver evento', icon: Eye, to: `/event/${event.id}`, tone: 'info' },
                             { key: 'edit', label: 'Editar evento', icon: Edit, to: `/events/${event.id}/edit` },
+                            event.status === 'PENDING'
+                              ? {
+                                  key: 'review',
+                                  label: 'Revisar solicitud',
+                                  icon: CheckCircle,
+                                  tone: 'success',
+                                  onClick: () => openReviewModal(event),
+                                }
+                              : null,
                             event.eventTier > 1 && (event.paymentStatus === 'PENDING' || !event.paymentStatus)
                               ? {
                                   key: 'pay',
@@ -292,24 +363,6 @@ const AdminEventsPage = () => {
                                   href: event.paymentProof,
                                   target: '_blank',
                                   tone: 'info',
-                                }
-                              : null,
-                            event.status === 'PENDING'
-                              ? {
-                                  key: 'approve',
-                                  label: 'Aprobar solicitud',
-                                  icon: CheckCircle,
-                                  tone: 'success',
-                                  onClick: () => handleApprove(event.id),
-                                }
-                              : null,
-                            event.status === 'PENDING'
-                              ? {
-                                  key: 'reject',
-                                  label: 'Rechazar solicitud',
-                                  icon: XCircle,
-                                  tone: 'danger',
-                                  onClick: () => openRejectModal(event.id),
                                 }
                               : null,
                             event.status !== 'PENDING'
@@ -344,6 +397,102 @@ const AdminEventsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de revisión de solicitud */}
+      {showReviewModal && reviewEvent && (
+        <div className="admin-modal-overlay" onClick={closeReviewModal} role="presentation">
+          <div
+            className="admin-modal-content"
+            style={{ maxWidth: '560px' }}
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Revisión de evento</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Revisá el detalle y aceptá o rechazá la solicitud.
+            </p>
+
+            {reviewEvent.coverImage && (
+              <img
+                src={getAbsoluteImageUrl(reviewEvent.coverImage)}
+                alt=""
+                style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 12, marginBottom: '1rem' }}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
+
+            <div style={{ marginBottom: '1rem' }}>
+              <h3 style={{ margin: '0 0 0.35rem', color: '#fff' }}>{reviewEvent.name}</h3>
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem' }}>
+                {reviewEvent.commerce?.name || reviewEvent.organizerName || 'Sin organizador'} ·{' '}
+                {reviewEvent.startDate
+                  ? new Date(reviewEvent.startDate).toLocaleString('es-AR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : 'Sin fecha'}
+              </p>
+              {reviewEvent.address && (
+                <p style={{ margin: '0.35rem 0 0', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+                  <MapPin size={12} style={{ verticalAlign: 'middle' }} /> {reviewEvent.address}
+                </p>
+              )}
+              {reviewEvent.description && (
+                <p style={{ marginTop: '0.75rem', color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+                  {reviewEvent.description}
+                </p>
+              )}
+            </div>
+
+            {reviewEvent.status === 'PENDING' && (
+              <div className="modal-form-group">
+                <label>Nota / motivo (obligatorio solo al rechazar):</label>
+                <textarea
+                  value={reviewNote}
+                  onChange={(e) => setReviewNote(e.target.value)}
+                  placeholder="Ej. Falta información, fechas incorrectas..."
+                  rows={3}
+                />
+              </div>
+            )}
+
+            <div className="modal-actions" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+              <button type="button" className="btn-secondary" onClick={closeReviewModal} disabled={reviewBusy}>
+                Cerrar
+              </button>
+              <Link to={`/event/${reviewEvent.id}`} className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                Ver página
+              </Link>
+              {reviewEvent.status === 'PENDING' && (
+                <>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    style={{ background: '#22c55e' }}
+                    disabled={reviewBusy}
+                    onClick={() => handleApprove(reviewEvent.id)}
+                  >
+                    Aprobar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    style={{ background: '#ef4444' }}
+                    disabled={reviewBusy}
+                    onClick={() => openRejectModal(reviewEvent.id)}
+                  >
+                    Rechazar
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Rechazo */}
       {showRejectModal && (

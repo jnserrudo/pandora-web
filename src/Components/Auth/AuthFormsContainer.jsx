@@ -95,8 +95,17 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      
-      const data = await res.json();
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(
+          res.ok
+            ? 'El servidor respondió en un formato inesperado.'
+            : 'No se pudo completar la solicitud. Intentá de nuevo.'
+        );
+      }
       
       if (!res.ok) {
          const failMessage = formatPasswordError(

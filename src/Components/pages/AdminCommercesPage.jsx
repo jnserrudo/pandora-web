@@ -1,7 +1,7 @@
 // src/Components/pages/AdminCommercesPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   CheckCircle,
   XCircle,
@@ -50,10 +50,12 @@ function galleryList(commerce) {
 const AdminCommercesPage = () => {
   const { token, user: adminUser } = useAuth();
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [commerces, setCommerces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const openedReviewRef = useRef(null);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedCommerce, setSelectedCommerce] = useState(null);
@@ -80,6 +82,22 @@ const AdminCommercesPage = () => {
     fetchCommerces();
   }, [token]);
 
+  // Abrir modal de revisión desde ?review=ID (campana de notificaciones)
+  useEffect(() => {
+    const reviewId = searchParams.get('review');
+    if (!reviewId || loading || commerces.length === 0) return;
+    if (openedReviewRef.current === reviewId) return;
+    const found = commerces.find((c) => String(c.id) === String(reviewId));
+    if (found) {
+      openedReviewRef.current = reviewId;
+      openReviewModal(found);
+      if (found.status === 'PENDING') setPendingOnly(true);
+    } else {
+      showToast('No se encontró el comercio a revisar.', 'warning');
+      openedReviewRef.current = reviewId;
+    }
+  }, [searchParams, commerces, loading]);
+
   const openReviewModal = (commerce) => {
     setSelectedCommerce(commerce);
     setModalMode('REVIEW');
@@ -99,6 +117,11 @@ const AdminCommercesPage = () => {
     setShowModal(false);
     setSelectedCommerce(null);
     setValidationReason('');
+    if (searchParams.get('review')) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('review');
+      setSearchParams(next, { replace: true });
+    }
   };
 
   const handleProcessValidation = async (action) => {
@@ -133,6 +156,12 @@ const AdminCommercesPage = () => {
       );
 
       setShowModal(false);
+      setSelectedCommerce(null);
+      if (searchParams.get('review')) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('review');
+        setSearchParams(next, { replace: true });
+      }
       showToast(
         isApproved ? 'Comercio validado correctamente.' : 'Comercio rechazado correctamente.',
         isApproved ? 'success' : 'info'

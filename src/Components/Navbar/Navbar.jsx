@@ -13,13 +13,16 @@ import {
   Bell,
   Inbox,
   Ticket,
-  Calendar
+  Calendar,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { 
   getNotifications, 
   markNotificationAsRead,
-  markAllNotificationsAsRead 
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
 } from '../../services/NotificationService';
 import { getPublicStats } from '../../services/api'; 
 import { useToast } from '../../context/ToastContext'; 
@@ -52,7 +55,7 @@ const Navbar = () => {
 
   const fetchNotifications = async () => {
     if (isAuthenticated && token) {
-      const data = await getNotifications(token);
+      const data = await getNotifications();
       setNotifications(data);
     }
   };
@@ -72,20 +75,28 @@ const Navbar = () => {
     // Marcar como leída si no lo está
     if (!notif.isRead) {
       try {
-        await markNotificationAsRead(notif.id, token);
+        await markNotificationAsRead(notif.id);
         setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
       } catch (err) {
         console.error("Error marking as read:", err);
       }
     }
 
-    // Navegar según el tipo de notificación
+    const ref = notif.referenceId;
+
+    // Navegar según el tipo → modal de revisión cuando aplica
     switch (notif.type) {
       case 'NEW_COMMERCE_REQUEST':
-        navigate('/admin/commerces');
+        navigate(ref ? `/admin/commerces?review=${ref}` : '/admin/commerces');
+        break;
+      case 'NEW_EVENT_REQUEST':
+        navigate(ref ? `/admin/events?review=${ref}` : '/admin/events');
         break;
       case 'COMMERCE_VALIDATED':
         navigate('/my-commerces');
+        break;
+      case 'EVENT_VALIDATED':
+        navigate('/my-events');
         break;
       case 'NEW_SUBMISSION':
         navigate('/admin/submissions');
@@ -94,7 +105,7 @@ const Navbar = () => {
         navigate('/my-submissions');
         break;
       case 'NEW_COMMERCE_COMMENT':
-        navigate(`/admin/commerces/${notif.referenceId}/detail#feedback-section`);
+        navigate(ref ? `/admin/commerces/${ref}/detail#feedback-section` : '/admin/commerces');
         break;
       case 'NEW_COMMERCE_ADVISORY':
         navigate('/my-commerces');
@@ -109,11 +120,35 @@ const Navbar = () => {
   const handleMarkAllRead = async () => {
     if (!token) return;
     try {
-      await markAllNotificationsAsRead(token);
+      await markAllNotificationsAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       showToast("Notificaciones marcadas como leídas.", 'success');
     } catch (err) {
       showToast("No se pudieron marcar las notificaciones.", 'error');
+    }
+  };
+
+  const handleDeleteNotification = async (e, notifId) => {
+    e.stopPropagation();
+    if (!token) return;
+    try {
+      await deleteNotification(notifId);
+      setNotifications((prev) => prev.filter((n) => n.id !== notifId));
+      showToast('Notificación eliminada.', 'success');
+    } catch (err) {
+      showToast('No se pudo eliminar la notificación.', 'error');
+    }
+  };
+
+  const handleClearAllNotifications = async (e) => {
+    e.stopPropagation();
+    if (!token || notifications.length === 0) return;
+    try {
+      await clearAllNotifications();
+      setNotifications([]);
+      showToast('Casillero de notificaciones vacío.', 'success');
+    } catch (err) {
+      showToast('No se pudieron limpiar las notificaciones.', 'error');
     }
   };
 
@@ -199,17 +234,30 @@ const Navbar = () => {
                           <h3>Notificaciones</h3>
                           {unreadCount > 0 && <span className="unread-count">{unreadCount} nuevas</span>}
                         </div>
-                        {unreadCount > 0 && (
-                          <button 
-                            className="btn-mark-all-read"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMarkAllRead();
-                            }}
-                          >
-                            Marcar todas como leídas
-                          </button>
-                        )}
+                        <div className="notif-header-actions">
+                          {unreadCount > 0 && (
+                            <button 
+                              type="button"
+                              className="btn-mark-all-read"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMarkAllRead();
+                              }}
+                            >
+                              Marcar leídas
+                            </button>
+                          )}
+                          {notifications.length > 0 && (
+                            <button
+                              type="button"
+                              className="btn-clear-all-notifs"
+                              onClick={handleClearAllNotifications}
+                              title="Vaciar casillero"
+                            >
+                              Limpiar todo
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="notifications-list">
                         {notifications.length === 0 ? (
@@ -225,7 +273,18 @@ const Navbar = () => {
                                 <p>{n.message}</p>
                                 <span className="notif-time">{new Date(n.createdAt).toLocaleDateString()}</span>
                               </div>
-                              {!n.isRead && <div className="unread-dot"></div>}
+                              <div className="notif-item-actions">
+                                {!n.isRead && <div className="unread-dot" aria-hidden="true" />}
+                                <button
+                                  type="button"
+                                  className="btn-delete-notif"
+                                  title="Eliminar notificación"
+                                  aria-label="Eliminar notificación"
+                                  onClick={(e) => handleDeleteNotification(e, n.id)}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </div>
                           ))
                         )}

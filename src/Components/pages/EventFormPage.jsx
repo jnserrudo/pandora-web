@@ -203,8 +203,8 @@ const EventFormPage = () => {
         navigate('/admin/events');
       } else {
         const tierName = EVENT_TIERS.find(t => t.level === formData.eventTier)?.name || 'Básico';
-        showToast(`¡Solicitud de evento ${tierName} enviada! El equipo Pandora la revisará pronto.`, 'success');
-        navigate('/events');
+        showToast(`¡Solicitud de evento ${tierName} enviada! El equipo Pandora la revisará pronto. Podés verla en Mis Eventos.`, 'success');
+        navigate('/my-events');
       } 
     } catch (err) {
       console.error("Error creating event:", err);
