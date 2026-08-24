@@ -74,6 +74,19 @@ export const useImageUpload = () => {
     if (!file) return;
 
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const isHeic =
+      file.type === 'image/heic' ||
+      file.type === 'image/heif' ||
+      /\.heic$/i.test(file.name) ||
+      /\.heif$/i.test(file.name);
+
+    if (isHeic) {
+      const msg =
+        'Las fotos HEIC del iPhone no están soportadas. Guardalas como JPG o PNG e intentá de nuevo.';
+      setUploadError(msg);
+      showToast(msg, 'error');
+      return;
+    }
     if (!validTypes.includes(file.type)) {
       const msg = 'Tipo de archivo no válido. Se aceptan: JPG, PNG, GIF, WebP.';
       setUploadError(msg);

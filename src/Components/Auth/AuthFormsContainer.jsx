@@ -38,7 +38,6 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  const [requireCaptcha, setRequireCaptcha] = useState(false);
   const [requireOTP, setRequireOTP] = useState(false);
   const skipCaptcha = import.meta.env.VITE_E2E === 'true';
   const [captchaToken, setCaptchaToken] = useState(skipCaptcha ? 'test_token_for_automated_testing' : '');
@@ -74,9 +73,12 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
       return;
     }
 
-    if (!isLogin && !skipCaptcha && !captchaToken) {
-      setError('Completá el captcha para registrarte.');
-      showToast('Completá el captcha para registrarte.', 'warning');
+    if (!skipCaptcha && !captchaToken) {
+      const msg = isLogin
+        ? 'Completá el captcha para entrar.'
+        : 'Completá el captcha para registrarte.';
+      setError(msg);
+      showToast(msg, 'warning');
       return;
     }
 
@@ -106,10 +108,9 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
              resetCaptcha();
              return;
          }
-         if (res.status === 403 && data.requireCaptcha) {
-             setRequireCaptcha(true);
-             setError('Se requieren controles de seguridad extra. Completá el captcha para seguir.');
-             showToast('Completá el captcha para continuar.', 'warning');
+         if ((res.status === 403 || res.status === 400) && data.requireCaptcha) {
+             setError('Completá el captcha para entrar.');
+             showToast('Completá el captcha para entrar.', 'warning');
              resetCaptcha();
              return;
          }
@@ -120,14 +121,12 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
          }
          setError(failMessage);
          showToast(failMessage, 'error');
-         // Token de un solo uso: hay que renovar el captcha tras cualquier error
-         if (!isLogin || requireCaptcha) {
-           resetCaptcha(
-             /captcha/i.test(data.message || '')
-               ? 'Completá el captcha de nuevo antes de reintentar.'
-               : 'Por seguridad, completá el captcha otra vez antes de reintentar.'
-           );
-         }
+         // Token de un solo uso: renovar tras cualquier error
+         resetCaptcha(
+           /captcha/i.test(data.message || '')
+             ? 'Completá el captcha de nuevo antes de reintentar.'
+             : 'Por seguridad, completá el captcha otra vez antes de reintentar.'
+         );
          return;
       }
 
@@ -157,9 +156,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
         : rawMsg || 'Ocurrió un error inesperado. Intentá de nuevo.';
       setError(friendly);
       showToast(friendly, 'error');
-      if (!isLogin || requireCaptcha) {
-        resetCaptcha('Por seguridad, completá el captcha otra vez antes de reintentar.');
-      }
+      resetCaptcha('Por seguridad, completá el captcha otra vez antes de reintentar.');
     } finally {
       setLoading(false);
     }
@@ -199,7 +196,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
   }
 
   const isSubmitDisabled = loading || (isLogin 
-    ? (!identifier.trim() || !password || (requireCaptcha && !captchaToken)) 
+    ? (!identifier.trim() || !password || (!skipCaptcha && !captchaToken)) 
     : (!name.trim() || !username.trim() || !email.trim() || !password || !dni.trim() || !passwordOk || (!skipCaptcha && !captchaToken)));
 
   const checkItems = [
@@ -303,7 +300,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
           )}
         </div>
 
-        {!skipCaptcha && (!isLogin || requireCaptcha) && (
+        {!skipCaptcha && (
           <div className="captcha-wrap">
             <Turnstile
               key={captchaKey}
@@ -317,7 +314,7 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
               theme="dark"
             />
             <small className="input-hint captcha-hint">
-              Si el registro falla, el captcha se renueva solo: tenés que marcarlo otra vez (es de un solo uso).
+              Completá el captcha para {isLogin ? 'entrar' : 'registrarte'}. Si falla, se renueva solo (es de un solo uso).
             </small>
           </div>
         )}
@@ -338,7 +335,6 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
             onClick={() => {
               setIsLogin(!isLogin);
               setError('');
-              setRequireCaptcha(false);
               setCaptchaToken(skipCaptcha ? 'test_token_for_automated_testing' : '');
               setCaptchaKey((k) => k + 1);
             }} 

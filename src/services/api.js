@@ -786,7 +786,11 @@ export const uploadImage = async (file, token) => {
     return response.data;
   } catch (error) {
     console.error("Error uploading image:", error);
-    throw new Error("Error al subir imagen.");
+    const msg =
+      error.response?.data?.message ||
+      error.message ||
+      'No se pudo subir la imagen. Probá JPG o PNG de hasta 10 MB.';
+    throw new Error(msg);
   }
 };
 
