@@ -19,6 +19,7 @@ import {
 } from '../../utils/planCatalog.js';
 import './CommerceFormPage.css';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
+import { collectFormIssues, formatIssuesToast } from '../../utils/formValidation.js';
 
 const CommerceFormPage = () => {
   const { id } = useParams(); // Si existe ID, estamos editando
@@ -39,39 +40,32 @@ const CommerceFormPage = () => {
   };
 
   const validateForm = () => {
-    // Regex Patterns
     const phoneRegex = /^[\d\s+\-()]{6,20}$/;
     const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
-    if (!formData.name.trim()) return "El nombre comercial es obligatorio.";
-    if (formData.categoryIds.length === 0) return "Debes seleccionar al menos una categoría.";
-    if (!formData.shortDescription.trim()) return "La descripción breve es obligatoria (máximo 150 caracteres).";
-    if (!formData.description.trim()) return "La descripción completa es obligatoria para los usuarios.";
-    if (!formData.address.trim()) return "La dirección física es necesaria para el mapa.";
-    
-    // Validar Teléfono si está presente
-    if (formData.phone && !phoneRegex.test(formData.phone)) {
-      return "El formato del teléfono no es válido (mínimo 6 caracteres, solo números, +, -, espacios).";
-    }
-
-    // Validar Website si está presente
-    if (formData.website && !urlRegex.test(formData.website)) {
-      return "La dirección del sitio web no es válida (ej: https://tusitio.com).";
-    }
-
-    // Validar Horarios
-    if (!formData.openingHours.trim()) return "Los horarios de atención son obligatorios.";
-
-    // Validar comprobante para planes pagos
-    if (formData.planLevel > 1 && !formData.paymentProof) {
-      return `Como seleccionaste el plan ${formatPlanLevelLabel(formData.planLevel)}, debes adjuntar el comprobante de pago.`;
-    }
-
-    if (!formData.latitude || !formData.longitude) {
-      showToast("Aviso: No has marcado la ubicación exacta en el mapa.", 'warning');
-    }
-
-    return null;
+    return collectFormIssues([
+      { ok: !!formData.name.trim(), message: 'Nombre comercial' },
+      { ok: formData.categoryIds.length > 0, message: 'Al menos una categoría' },
+      {
+        ok: !!formData.shortDescription.trim(),
+        message: 'Descripción breve (máx. 150 caracteres)',
+      },
+      { ok: !!formData.description.trim(), message: 'Descripción completa' },
+      { ok: !!formData.address.trim(), message: 'Dirección física' },
+      { ok: !!formData.openingHours.trim(), message: 'Horarios de atención' },
+      {
+        ok: !formData.phone || phoneRegex.test(formData.phone),
+        message: 'Teléfono con formato válido (mín. 6 caracteres)',
+      },
+      {
+        ok: !formData.website || urlRegex.test(formData.website),
+        message: 'Sitio web con formato válido (ej: https://tusitio.com)',
+      },
+      {
+        ok: formData.planLevel <= 1 || !!formData.paymentProof,
+        message: `Comprobante de pago (obligatorio para plan ${formatPlanLevelLabel(formData.planLevel)})`,
+      },
+    ]);
   };
 
   // Estado del formulario
@@ -93,7 +87,8 @@ const CommerceFormPage = () => {
     latitude: null,
     longitude: null,
     attributes: [],
-    externalLink: ''
+    externalLink: '',
+    paymentProof: '',
   });
 
   const [initialLoading, setInitialLoading] = useState(Boolean(isEditMode));
@@ -250,13 +245,17 @@ const CommerceFormPage = () => {
     e.preventDefault();
     setError(null);
     setSubmitted(true);
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      showToast(validationError, 'error');
-      // Hacer scroll al primer error visualmente (opcional)
+    const issues = validateForm();
+    if (issues.length) {
+      const msg = formatIssuesToast(issues);
+      setError(msg);
+      showToast(msg, 'error');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
+    }
+
+    if (!formData.latitude || !formData.longitude) {
+      showToast('Aviso: no marcaste la ubicación exacta en el mapa (opcional pero recomendado).', 'warning');
     }
 
     setSubmitting(true);
@@ -315,8 +314,8 @@ const CommerceFormPage = () => {
           <p>{isEditMode ? 'Actualiza la información visible' : 'Completa los datos para enviar tu propuesta a revisión'}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="form-card">
-          {error && <div className="error-message" style={{marginBottom:'1rem', color:'#ff6b6b'}}>{error}</div>}
+        <form onSubmit={handleSubmit} className="form-card" noValidate>
+          {error && <div className="error-message" style={{marginBottom:'1rem', color:'#ff6b6b', whiteSpace:'pre-line'}}>{error}</div>}
 
           <div className="form-group">
             <label>Nombre del Comercio <span className="required-tag">(Obligatorio)</span></label>

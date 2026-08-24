@@ -13,6 +13,7 @@ import './CommerceFormPage.css';
 import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
+import { collectFormIssues, formatIssuesToast } from '../../utils/formValidation.js';
 
 // Las posiciones definen DÓNDE aparecerá la publicidad en la web
 const POSITION_INFO = {
@@ -132,8 +133,16 @@ const AdminAdvertisementFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.imageUrl) {
-      showToast('La imagen del banner es obligatoria.', 'error');
+    const issues = collectFormIssues([
+      { ok: !!formData.title.trim(), message: 'Título' },
+      { ok: !!formData.description.trim(), message: 'Descripción' },
+      { ok: !!formData.imageUrl, message: 'Imagen del banner' },
+      { ok: !!formData.link.trim(), message: 'Enlace de destino' },
+      { ok: !!formData.startDate, message: 'Fecha de inicio' },
+      { ok: !!formData.position, message: 'Posición del anuncio' },
+    ]);
+    if (issues.length) {
+      showToast(formatIssuesToast(issues), 'error');
       return;
     }
     setLoading(true);
@@ -180,7 +189,7 @@ const AdminAdvertisementFormPage = () => {
           <p>{isEditMode ? 'Modificá los datos de la campaña activa.' : 'Completá los datos para lanzar una nueva campaña.'}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="form-card">
+        <form onSubmit={handleSubmit} className="form-card" noValidate>
 
           {/* Título y Categoría */}
           <div className="form-row">

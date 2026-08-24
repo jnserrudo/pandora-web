@@ -13,6 +13,7 @@ import './AdminAdvertisementFormPage.css';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
+import { collectFormIssues, formatIssuesToast } from '../../utils/formValidation.js';
 
 const AdminArticleFormPage = () => {
   const { id } = useParams();
@@ -101,12 +102,13 @@ const AdminArticleFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.categoryId) {
-      showToast('Seleccioná una categoría.', 'warning');
-      return;
-    }
-    if (!formData.title.trim()) {
-      showToast('El título es obligatorio.', 'warning');
+    const issues = collectFormIssues([
+      { ok: !!formData.title.trim(), message: 'Título' },
+      { ok: !!formData.content.trim(), message: 'Contenido' },
+      { ok: !!formData.categoryId, message: 'Categoría' },
+    ]);
+    if (issues.length) {
+      showToast(formatIssuesToast(issues), 'warning');
       return;
     }
 
@@ -154,7 +156,7 @@ const AdminArticleFormPage = () => {
           <p>{isEditMode ? 'Modificá los datos del artículo.' : 'Completá los campos para publicar una nueva nota.'}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="form-card">
+        <form onSubmit={handleSubmit} className="form-card" noValidate>
 
           {/* Título */}
           <div className="form-group">

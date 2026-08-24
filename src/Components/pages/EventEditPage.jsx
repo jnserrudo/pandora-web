@@ -16,6 +16,13 @@ import { useImageUpload } from '../../hooks/useImageUpload';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import MapPicker from '../ui/MapPicker';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
+import {
+  collectFormIssues,
+  formatIssuesToast,
+  toDatetimeLocalValue,
+  setSpanishFieldValidity,
+  clearFieldValidity,
+} from '../../utils/formValidation.js';
 
 const EventEditPage = () => {
   const { id } = useParams();
@@ -60,9 +67,9 @@ const EventEditPage = () => {
         // Cargar evento
         const eventData = await getEventById(id);
         
-        // Convertir fechas ISO a formato datetime-local
-        const startDate = eventData.startDate ? new Date(eventData.startDate).toISOString().slice(0, 16) : '';
-        const endDate = eventData.endDate ? new Date(eventData.endDate).toISOString().slice(0, 16) : '';
+        // Convertir fechas ISO a datetime-local en zona LOCAL (no UTC)
+        const startDate = eventData.startDate ? toDatetimeLocalValue(eventData.startDate) : '';
+        const endDate = eventData.endDate ? toDatetimeLocalValue(eventData.endDate) : '';
         
         setFormData({
           name: eventData.name || '',
@@ -106,6 +113,28 @@ const EventEditPage = () => {
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const getEventEditIssues = () =>
+    collectFormIssues([
+      { ok: !!formData.name.trim(), message: 'Nombre del evento' },
+      { ok: !!formData.description.trim(), message: 'Descripción' },
+      { ok: !!formData.startDate, message: 'Fecha y hora de inicio' },
+      { ok: !!formData.endDate, message: 'Fecha y hora de fin' },
+      { ok: !!formData.address.trim(), message: 'Dirección física' },
+      {
+        ok: !!(formData.commerceId || formData.organizerName.trim()),
+        message: isAdmin
+          ? 'Comercio o nombre de organizador'
+          : 'Seleccioná el comercio del evento',
+      },
+      {
+        ok:
+          !formData.startDate ||
+          !formData.endDate ||
+          new Date(formData.endDate).getTime() > new Date(formData.startDate).getTime(),
+        message: 'La fecha de fin debe ser posterior a la de inicio',
+      },
+    ]);
+
   const isFormValid = formData.name.trim() && 
                       formData.description.trim() && 
                       formData.startDate && 
@@ -116,16 +145,10 @@ const EventEditPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.commerceId && !formData.organizerName.trim()) {
-      showToast("Debes seleccionar un comercio o ingresar un nombre de organizador.", 'warning');
-      return;
-    }
-
-    const startMs = new Date(formData.startDate).getTime();
-    const endMs = new Date(formData.endDate).getTime();
-
-    if (endMs <= startMs) {
-      showToast("La fecha de fin debe ser posterior al inicio.", 'warning');
+    const issues = getEventEditIssues();
+    if (issues.length) {
+      const msg = formatIssuesToast(issues);
+      showToast(msg, 'warning');
       return;
     }
 
@@ -163,7 +186,11 @@ const EventEditPage = () => {
     } catch (err) {
       console.error("Error updating event:", err);
       const msg = err.message || '';
-      setError(msg === 'Failed to fetch' || msg.includes('Network') ? 'Error de conexión con el servidor.' : msg || "Error al actualizar el evento.");
+      const friendly =
+        msg === 'Failed to fetch' || msg.includes('Network')
+          ? 'Error de conexión con el servidor.'
+          : msg || 'Error al actualizar el evento.';
+      showToast(friendly, 'error');
       setLoading(false);
     }
   };
@@ -199,7 +226,7 @@ const EventEditPage = () => {
           <p>Modificá los datos del evento y guardá los cambios.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="form-card">
+        <form onSubmit={handleSubmit} className="form-card" noValidate>
             {/* Organizador */}
             <div className="form-group">
               <label>Organizador</label>
@@ -379,7 +406,15 @@ const EventEditPage = () => {
                   type="datetime-local" 
                   name="startDate" 
                   value={formData.startDate} 
-                  onChange={handleChange} 
+                  onChange={(e) => {
+                    clearFieldValidity(e);
+                    handleChange(e);
+                  }}
+                  onInvalid={(e) =>
+                    setSpanishFieldValidity(e, {
+                      requiredMessage: 'Indicá la fecha y hora de inicio del evento.',
+                    })
+                  }
                   className="form-control" 
                   required
                 />
@@ -390,7 +425,16 @@ const EventEditPage = () => {
                   type="datetime-local" 
                   name="endDate" 
                   value={formData.endDate} 
-                  onChange={handleChange} 
+                  onChange={(e) => {
+                    clearFieldValidity(e);
+                    handleChange(e);
+                  }}
+                  onInvalid={(e) =>
+                    setSpanishFieldValidity(e, {
+                      requiredMessage: 'Indicá la fecha y hora de fin del evento.',
+                      rangeUnderflowMessage: 'La fecha de fin debe ser posterior a la de inicio.',
+                    })
+                  }
                   className="form-control" 
                   required
                   min={formData.startDate}

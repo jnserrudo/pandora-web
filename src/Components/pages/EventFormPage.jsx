@@ -15,6 +15,14 @@ import { useImageUpload } from '../../hooks/useImageUpload';
 import MapPicker from '../ui/MapPicker';
 import { getCategoryDisplayName } from '../../utils/categoryUtils.js';
 import ImageOverlayPreview from '../ui/ImageOverlayPreview';
+import {
+  collectFormIssues,
+  formatDateTimeEs,
+  formatIssuesToast,
+  toDatetimeLocalValue,
+  setSpanishFieldValidity,
+  clearFieldValidity,
+} from '../../utils/formValidation.js';
 
 const EVENT_TIERS = [
   {
@@ -111,8 +119,40 @@ const EventFormPage = () => {
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  // Fecha mínima: 72 horas desde ahora
-  const minStartDate = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString().slice(0, 16);
+  // Fecha mínima: 72 horas desde ahora (hora LOCAL, no UTC)
+  const minStartMs = Date.now() + 72 * 60 * 60 * 1000;
+  const minStartDate = toDatetimeLocalValue(new Date(minStartMs));
+  const minStartLabel = formatDateTimeEs(new Date(minStartMs));
+
+  const getEventFormIssues = () =>
+    collectFormIssues([
+      { ok: !!formData.name.trim(), message: 'Nombre del evento' },
+      { ok: !!formData.description.trim(), message: 'Descripción' },
+      { ok: !!formData.startDate, message: 'Fecha y hora de inicio' },
+      { ok: !!formData.endDate, message: 'Fecha y hora de fin' },
+      { ok: !!formData.address.trim(), message: 'Dirección física' },
+      {
+        ok: !!(formData.commerceId || formData.organizerName.trim()),
+        message: isAdmin
+          ? 'Comercio o nombre de organizador'
+          : 'Seleccioná el comercio del evento',
+      },
+      {
+        ok: !formData.startDate || new Date(formData.startDate).getTime() >= minStartMs,
+        message: `La fecha de inicio debe ser al menos 3 días (72 h) después de ahora. La más temprana permitida es ${minStartLabel}.`,
+      },
+      {
+        ok:
+          !formData.startDate ||
+          !formData.endDate ||
+          new Date(formData.endDate).getTime() > new Date(formData.startDate).getTime(),
+        message: 'La fecha de fin debe ser posterior a la de inicio',
+      },
+      {
+        ok: formData.eventTier <= 1 || !!formData.paymentProof,
+        message: 'Comprobante de pago (obligatorio para Plus y Premium)',
+      },
+    ]);
 
   // Validación en tiempo de ejecución para el botón
   const isFormValid = formData.name.trim() && 
@@ -125,27 +165,11 @@ const EventFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.commerceId && !formData.organizerName.trim()) {
-      showToast("Debes seleccionar un comercio o ingresar un nombre de organizador.", 'warning');
-      return;
-    }
-
-    // Validación fechas
-    const startMs = new Date(formData.startDate).getTime();
-    const endMs = new Date(formData.endDate).getTime();
-    const minMs = Date.now() + 72 * 60 * 60 * 1000;
-
-    if (startMs < minMs) {
-      showToast("La fecha de inicio debe ser al menos 72 horas desde ahora.", 'warning');
-      return;
-    }
-    if (endMs <= startMs) {
-      showToast("La fecha de fin debe ser posterior al inicio.", 'warning');
-      return;
-    }
-
-    if (formData.eventTier > 1 && !formData.paymentProof) {
-      showToast("Para planes Plus y Premium debés adjuntar el comprobante de pago.", 'warning');
+    const issues = getEventFormIssues();
+    if (issues.length) {
+      const msg = formatIssuesToast(issues);
+      setError(msg);
+      showToast(msg, 'warning');
       return;
     }
 
@@ -206,8 +230,8 @@ const EventFormPage = () => {
           <p>{isAdmin ? 'Completá el formulario para publicar el evento directamente.' : 'Completá el formulario y el equipo Pandora revisará tu solicitud antes de publicarla.'}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="form-card">
-            {error && <div className="error-message" style={{marginBottom:'1rem', color:'#ff6b6b'}}>{error}</div>}
+        <form onSubmit={handleSubmit} className="form-card" noValidate>
+            {error && <div className="error-message" style={{marginBottom:'1rem', color:'#ff6b6b', whiteSpace:'pre-line'}}>{error}</div>}
 
             {/* Organizador: comercio propio o nombre libre */}
             <div className="form-group">
@@ -385,16 +409,32 @@ const EventFormPage = () => {
 
             <div className="date-inputs-row">
               <div className="form-group">
-                <label>Fecha y Hora Inicio <span className="required-tag">(mín. 72hs desde hoy)</span></label>
+                <label>
+                  Fecha y Hora Inicio{' '}
+                  <span className="required-tag">(mín. 3 días / 72 h desde ahora)</span>
+                </label>
                 <input 
                   type="datetime-local" 
                   name="startDate" 
                   value={formData.startDate} 
-                  onChange={handleChange} 
+                  onChange={(e) => {
+                    clearFieldValidity(e);
+                    handleChange(e);
+                  }}
+                  onInvalid={(e) =>
+                    setSpanishFieldValidity(e, {
+                      requiredMessage: 'Indicá la fecha y hora de inicio del evento.',
+                      rangeUnderflowMessage: `La fecha de inicio debe ser al menos 3 días (72 h) después de ahora. La más temprana permitida es ${minStartLabel}.`,
+                    })
+                  }
                   className="form-control" 
                   required
                   min={minStartDate}
                 />
+                <small className="field-hint">
+                  Pedimos 72 horas de anticipación para revisar y publicar. Más temprana permitida:{' '}
+                  <strong>{minStartLabel}</strong>.
+                </small>
               </div>
               <div className="form-group">
                 <label>Fecha y Hora Fin <span className="required-tag">(Obligatorio)</span></label>
@@ -402,7 +442,16 @@ const EventFormPage = () => {
                   type="datetime-local" 
                   name="endDate" 
                   value={formData.endDate} 
-                  onChange={handleChange} 
+                  onChange={(e) => {
+                    clearFieldValidity(e);
+                    handleChange(e);
+                  }}
+                  onInvalid={(e) =>
+                    setSpanishFieldValidity(e, {
+                      requiredMessage: 'Indicá la fecha y hora de fin del evento.',
+                      rangeUnderflowMessage: 'La fecha de fin debe ser posterior a la de inicio.',
+                    })
+                  }
                   className="form-control" 
                   required
                   min={formData.startDate || minStartDate}
