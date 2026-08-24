@@ -92,7 +92,10 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
 
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Client-Platform': 'web',
+        },
         body: JSON.stringify(payload)
       });
 
@@ -175,7 +178,10 @@ const AuthFormsContainer = ({ defaultIsLogin = true }) => {
       try {
           const res = await fetch(`${API_URL}/auth/verify-otp`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Client-Platform': 'web',
+              },
               body: JSON.stringify({ email: registeredEmail, otp: otpCode })
           });
           const data = await res.json();

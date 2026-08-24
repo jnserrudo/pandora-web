@@ -9,6 +9,7 @@ import {
   Eye, 
   Clock, 
   History,
+  Monitor,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getAuditLogs } from '../../services/api';
@@ -116,13 +117,14 @@ const AdminAuditPage = () => {
                                             <th className="col-main">USUARIO</th>
                                             <th className="col-status">ACCIÓN</th>
                                             <th className="hide-tablet col-meta">ENTIDAD</th>
+                                            <th className="hide-mobile col-meta">ORIGEN</th>
                                             <th className="col-actions text-right">DETALLES</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {filteredLogs.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5}>No hay registros con este filtro.</td>
+                                                <td colSpan={6}>No hay registros con este filtro.</td>
                                             </tr>
                                         ) : filteredLogs.map((log) => (
                                             <tr key={log.id}>
@@ -145,6 +147,24 @@ const AdminAuditPage = () => {
                                                         <Database size={14} />
                                                         <span>{formatEnumLabel(log.resourceType)}: {log.resourceId}</span>
                                                     </div>
+                                                </td>
+                                                <td className="hide-mobile col-meta">
+                                                    <span
+                                                      className={`badge-premium ${
+                                                        log.clientSource === 'MOBILE'
+                                                          ? 'draft'
+                                                          : log.clientSource === 'WEB'
+                                                            ? 'active'
+                                                            : 'inactive'
+                                                      }`}
+                                                      title={log.clientSource || 'UNKNOWN'}
+                                                    >
+                                                      {log.clientSource === 'MOBILE'
+                                                        ? 'App'
+                                                        : log.clientSource === 'WEB'
+                                                          ? 'Web'
+                                                          : '—'}
+                                                    </span>
                                                 </td>
                                                 <td className="col-actions text-right">
                                                     <AdminRowActionsMenu
@@ -269,6 +289,19 @@ const AdminAuditPage = () => {
                                                 <div className="meta-content">
                                                     <label>Dirección IP</label>
                                                     <span>{selectedLog.ipAddress || '127.0.0.1'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="meta-item">
+                                                <div className="meta-icon"><Monitor size={16} /></div>
+                                                <div className="meta-content">
+                                                    <label>Origen</label>
+                                                    <span>
+                                                      {selectedLog.clientSource === 'MOBILE'
+                                                        ? 'App móvil'
+                                                        : selectedLog.clientSource === 'WEB'
+                                                          ? 'Web'
+                                                          : selectedLog.clientSource || 'Desconocido'}
+                                                    </span>
                                                 </div>
                                             </div>
                                             <div className="meta-item">
